@@ -13,7 +13,7 @@ interface User {
 }
 
 const users: User[] = [
-  { id: 1, name: "Super Admin", role: "super_admin", password: "admin123" },
+  { id: 1, name: "User Master", role: "super_admin", password: "admin123" },
   { id: 2, name: "Agung", role: "pic", picName: "Agung", password: "agung123" },
   {
     id: 3,
@@ -95,8 +95,7 @@ export default function LoginPage() {
               <option value="">-- Pilih User --</option>
               {users.map((user) => (
                 <option key={user.id} value={user.name}>
-                  {user.name} (
-                  {user.role === "super_admin" ? "Super Admin" : "PIC"})
+                  {user.name}
                 </option>
               ))}
             </select>

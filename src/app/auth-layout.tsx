@@ -12,17 +12,14 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
+  const isAuthenticated = !!getCurrentUser();
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (!user) {
+    if (!isAuthenticated) {
       router.push("/login");
-    } else {
-      setIsAuthenticated(true);
     }
-  }, [router]);
+  }, [router, isAuthenticated]);
 
   if (!isAuthenticated) {
     return (

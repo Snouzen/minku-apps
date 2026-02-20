@@ -43,7 +43,7 @@ export default function Navbar({ onToggle }: { onToggle: () => void }) {
               {currentUser?.name}
             </span>
             <span className="text-xs text-gray-500">
-              ({currentUser?.role === "super_admin" ? "Super Admin" : "PIC"})
+              ({currentUser?.role === "super_admin" ? "User Master" : "PIC"})
             </span>
           </div>
 

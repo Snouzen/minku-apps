@@ -317,7 +317,9 @@ export default function ActivePOTable() {
               <tr>
                 <th className="px-6 py-5 w-16 text-center">No</th>
                 <th className="px-6 py-5">Input Date</th>
-                <th className="px-6 py-5">Task Description</th>
+                <th className="px-6 py-5 min-w-32 max-w-xs">
+                  Task Description
+                </th>
                 <th className="px-6 py-5">Due Date</th>
                 <th className="px-6 py-5">PIC Assign</th>
                 <th className="px-6 py-5">Status</th>
@@ -336,8 +338,10 @@ export default function ActivePOTable() {
                   <td className="px-6 py-5 text-gray-500 text-xs">
                     {format(parseISO(item.inputDate), "dd/MM/yyyy")}
                   </td>
-                  <td className="px-6 py-5 font-bold text-gray-700">
-                    {item.task}
+                  <td className="px-6 py-5 font-bold text-gray-700 max-w-xs">
+                    <div className="wrap-break-word overflow-wrap">
+                      {item.task}
+                    </div>
                   </td>
                   <td className="px-6 py-5 text-gray-600 font-medium text-xs">
                     {format(parseISO(item.dueDate), "dd MMM yyyy")}
@@ -498,7 +502,7 @@ export default function ActivePOTable() {
                   Remarks Log
                 </label>
                 <div className="mt-2 p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner">
-                  <div className="max-h-[180px] overflow-y-auto text-sm text-gray-600 italic leading-relaxed whitespace-pre-wrap pr-2">
+                  <div className="max-h-60 overflow-y-auto text-sm text-gray-600 italic leading-relaxed whitespace-pre-wrap pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                     {viewingTask.remarks || "No additional remarks recorded."}
                   </div>
                 </div>
@@ -539,18 +543,20 @@ export default function ActivePOTable() {
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
                   Task Description
                 </label>
-                <input
-                  required
-                  type="text"
-                  placeholder="Enter task name..."
-                  className={`w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-sm font-medium ${currentUser?.role === "pic" ? "bg-gray-100 text-gray-500" : ""}`}
-                  value={formData.task}
-                  onChange={(e) =>
-                    currentUser?.role === "super_admin" &&
-                    setFormData({ ...formData, task: e.target.value })
-                  }
-                  disabled={currentUser?.role === "pic"}
-                />
+                <div className="w-full overflow-x-auto whitespace-nowrap scrollbar-hide">
+                  <input
+                    required
+                    type="text"
+                    placeholder="Enter task name..."
+                    className={`min-w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-black text-sm font-medium ${currentUser?.role === "pic" ? "bg-gray-100 text-gray-500" : ""}`}
+                    value={formData.task}
+                    onChange={(e) =>
+                      currentUser?.role === "super_admin" &&
+                      setFormData({ ...formData, task: e.target.value })
+                    }
+                    disabled={currentUser?.role === "pic"}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
@@ -632,8 +638,8 @@ export default function ActivePOTable() {
                 </label>
                 <textarea
                   placeholder="Write remarks here..."
-                  className="w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-sm font-medium"
-                  rows={3}
+                  className="w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-sm font-medium resize-y"
+                  rows={4}
                   value={formData.remarks}
                   onChange={(e) =>
                     setFormData({ ...formData, remarks: e.target.value })
