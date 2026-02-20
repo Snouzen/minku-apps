@@ -6,12 +6,6 @@ import { DatabaseService, TaskPO } from "../lib/database";
 
 type StatusType = "Open" | "Done" | "In Progress" | "Almost Expired";
 
-interface TaskPO {
-  id: number;
-  pic: string[];
-  status: StatusType;
-}
-
 interface DashboardStatsProps {
   userPicName?: string;
 }
