@@ -1,52 +1,51 @@
 import { prisma } from './prisma';
-import { Status, Role } from '@prisma/client';
 
 const users = [
   {
     id: 1,
     name: "Super Admin",
-    role: Role.SUPER_ADMIN,
+    role: "SUPER_ADMIN",
     password: "admin123",
   },
   {
     id: 2,
     name: "Agung",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Agung",
     password: "agung123",
   },
   {
     id: 3,
     name: "Latifah",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Latifah",
     password: "latifah123",
   },
   {
     id: 4,
     name: "Pepy",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Pepy",
     password: "pepy123",
   },
   {
     id: 5,
     name: "Pandu",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Pandu",
     password: "pandu123",
   },
   {
     id: 6,
     name: "Fifi",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Fifi",
     password: "fifi123",
   },
   {
     id: 7,
     name: "Rama",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Rama",
     password: "rama123",
   },
