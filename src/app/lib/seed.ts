@@ -1,61 +1,60 @@
 import "dotenv/config";
 import { prisma } from "./prisma";
-import { Role } from "@prisma/client";
 import { createClient } from "@supabase/supabase-js";
 
 export const users = [
   {
     id: 1,
     name: "Super Admin",
-    role: Role.SUPER_ADMIN,
+    role: "SUPER_ADMIN",
     password: "admin123",
   },
   {
     id: 2,
     name: "Agung",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Agung",
     password: "agung123",
   },
   {
     id: 3,
     name: "Latifah",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Latifah",
     password: "latifah123",
   },
   {
     id: 4,
     name: "Pepy",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Pepy",
     password: "pepy123",
   },
   {
     id: 5,
     name: "Pandu",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Pandu",
     password: "pandu123",
   },
   {
     id: 6,
     name: "Vivi",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Vivi",
     password: "vivi123",
   },
   {
     id: 7,
     name: "Rama",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Rama",
     password: "rama123",
   },
   {
     id: 8,
     name: "Raysha",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Raysha",
     password: "raysha123",
   },
@@ -66,9 +65,20 @@ export async function seedDatabase() {
     for (const user of users) {
       await prisma.user.upsert({
         where: { id: user.id },
-        update: user,
-        create: user,
-      });
+        update: {
+          name: user.name,
+          role: user.role as any,
+          picName: user.picName ?? null,
+          password: user.password,
+        },
+        create: {
+          id: user.id,
+          name: user.name,
+          role: user.role as any,
+          picName: user.picName ?? null,
+          password: user.password,
+        },
+      } as any);
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
