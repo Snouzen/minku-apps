@@ -35,7 +35,7 @@ export default function DashboardStats() {
   // PIC: Lihat hanya dirinya sendiri
   const pics =
     currentUser?.role === "super_admin"
-      ? ["Agung", "Latifah", "Pepy", "Pandu", "Fifi", "Rama"]
+      ? ["Agung", "Latifah", "Pepy", "Pandu", "Vivi", "Rama", "Raysha"]
       : [currentUser?.picName].filter(Boolean);
 
   if (currentUser?.role === "super_admin") {

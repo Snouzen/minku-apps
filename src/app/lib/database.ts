@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { format } from "date-fns";
 
 // Database interface untuk fallback ke localStorage jika Supabase tidak bisa connect
 export interface TaskPO {
@@ -21,6 +22,7 @@ interface TaskRow {
   remarks?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 // Helper functions untuk convert status ke/ dari enum di database Supabase
@@ -106,14 +108,15 @@ export class DatabaseService {
         const { data, error } = await supabase
           .from("tasks")
           .select("*")
-          .order("id", { ascending: false });
+          .is("deletedAt", null)
+          .order("id", { ascending: true });
         if (error) throw error;
         this.isConnected = true;
         return (data || []).map((task: TaskRow) => ({
           id: task.id,
-          inputDate: new Date(task.inputDate).toISOString().split("T")[0],
+          inputDate: format(new Date(task.inputDate), "yyyy-MM-dd"),
           task: task.task,
-          dueDate: new Date(task.dueDate).toISOString().split("T")[0],
+          dueDate: format(new Date(task.dueDate), "yyyy-MM-dd"),
           pic: task.pic || [],
           status: statusFromDb(task.status),
           remarks: task.remarks || "",
@@ -137,8 +140,9 @@ export class DatabaseService {
           .from("tasks")
           .insert({
             task: taskData.task,
-            inputDate: new Date().toISOString(),
-            dueDate: new Date(taskData.dueDate).toISOString(),
+            // Simpan tanpa timezone agar tidak geser hari
+            inputDate: format(new Date(), "yyyy-MM-dd"),
+            dueDate: taskData.dueDate,
             pic: taskData.pic,
             status: statusToDb(taskData.status),
             remarks: taskData.remarks,
@@ -151,13 +155,12 @@ export class DatabaseService {
         this.isConnected = true;
         return {
           id: (data as TaskRow).id,
-          inputDate: new Date((data as TaskRow).inputDate)
-            .toISOString()
-            .split("T")[0],
+          inputDate: format(
+            new Date((data as TaskRow).inputDate),
+            "yyyy-MM-dd",
+          ),
           task: (data as TaskRow).task,
-          dueDate: new Date((data as TaskRow).dueDate)
-            .toISOString()
-            .split("T")[0],
+          dueDate: format(new Date((data as TaskRow).dueDate), "yyyy-MM-dd"),
           pic: (data as TaskRow).pic || [],
           status: statusFromDb((data as TaskRow).status),
           remarks: (data as TaskRow).remarks || "",
@@ -198,8 +201,7 @@ export class DatabaseService {
           updatedAt: string;
         }> = {};
         if (updates.task !== undefined) payload.task = updates.task;
-        if (updates.dueDate !== undefined)
-          payload.dueDate = new Date(updates.dueDate).toISOString();
+        if (updates.dueDate !== undefined) payload.dueDate = updates.dueDate;
         if (updates.pic !== undefined) payload.pic = updates.pic;
         if (updates.status !== undefined)
           payload.status = statusToDb(updates.status);
@@ -250,7 +252,13 @@ export class DatabaseService {
     const isLocalId = id > 2147483647;
     if (supabase && !isLocalId) {
       try {
-        const { error } = await supabase.from("tasks").delete().eq("id", id);
+        const { error } = await supabase
+          .from("tasks")
+          .update({
+            deletedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })
+          .eq("id", id);
         if (error) throw error;
         this.isConnected = true;
         return true;
@@ -265,8 +273,20 @@ export class DatabaseService {
 
     // Fallback to localStorage
     const tasks = getTasksFromStorage();
-    const filteredTasks = tasks.filter((t) => t.id !== id);
-    saveTasksToStorage(filteredTasks);
+    const idx = tasks.findIndex((t) => t.id === id);
+    if (idx !== -1) {
+      const [removed] = tasks.splice(idx, 1);
+      const logsRaw =
+        (typeof window !== "undefined" &&
+          localStorage.getItem("bulog_tasks_deleted")) ||
+        "[]";
+      const logs = JSON.parse(logsRaw);
+      logs.push({ ...removed, deletedAt: new Date().toISOString() });
+      if (typeof window !== "undefined") {
+        localStorage.setItem("bulog_tasks_deleted", JSON.stringify(logs));
+      }
+      saveTasksToStorage(tasks);
+    }
     return true;
   }
 }

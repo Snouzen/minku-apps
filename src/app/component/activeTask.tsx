@@ -46,7 +46,15 @@ export default function ActivePOTable() {
     remarks: "",
   });
 
-  const picList = ["Agung", "Latifah", "Pepy", "Pandu", "Fifi", "Rama"];
+  const picList = [
+    "Agung",
+    "Latifah",
+    "Pepy",
+    "Pandu",
+    "Vivi",
+    "Rama",
+    "Raysha",
+  ];
   const months = [
     "January",
     "February",
@@ -162,7 +170,7 @@ export default function ActivePOTable() {
           return Swal.fire("Error", "Pilih minimal 1 PIC", "error");
 
         const newTaskData: Omit<TaskPO, "id"> = {
-          inputDate: new Date().toISOString().split("T")[0],
+          inputDate: format(new Date(), "yyyy-MM-dd"),
           ...formData,
           status: "Open",
         };

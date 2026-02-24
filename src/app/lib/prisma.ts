@@ -1,24 +1,27 @@
+import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 declare global {
-  var prisma: any | undefined;
+  var prisma: PrismaClient | undefined;
   var prismaPool: Pool | undefined;
 }
 
-export function getPrisma(): any {
+export function getPrisma(): PrismaClient {
   if (globalThis.prisma) return globalThis.prisma;
 
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error("Missing DATABASE_URL for Prisma connection");
   }
 
-  const pool = globalThis.prismaPool ?? new Pool({ connectionString });
+  const pool =
+    globalThis.prismaPool ??
+    new Pool({
+      connectionString,
+      ssl: { rejectUnauthorized: false },
+    });
   const adapter = new PrismaPg(pool);
-  // Defer loading PrismaClient to runtime to avoid TypeScript errors when client is not generated yet
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { PrismaClient } = require("@prisma/client");
   const client = new PrismaClient({ adapter });
 
   if (process.env.NODE_ENV !== "production") {

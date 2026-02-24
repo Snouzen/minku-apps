@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getCurrentUser } from "../lib/auth";
 
 export default function Sidebar({
   isOpen,
@@ -17,13 +18,29 @@ export default function Sidebar({
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
 }) {
+  const user = getCurrentUser();
   const menus = [
-    { name: "Dashboard", icon: <LayoutDashboard size={20} />, active: true },
+    {
+      name: "Dashboard",
+      href: "/",
+      icon: <LayoutDashboard size={20} />,
+      active: true,
+    },
+    ...(user?.role === "super_admin"
+      ? [
+          {
+            name: "Logs",
+            href: "/logs",
+            icon: <Database size={20} />,
+            active: false,
+          } as const,
+        ]
+      : []),
   ];
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-60 bg-white border-r flex flex-col transition-all duration-300 ease-in-out shadow-xl lg:relative lg:translate-x-0 ${isOpen ? "w-72 translate-x-0" : "w-0 -translate-x-full lg:w-20"}`}
+      className={`fixed inset-y-0 left-0 z-60 bg-white border-r flex flex-col transition-all duration-300 ease-in-out shadow-xl lg:relative lg:translate-x-0 ${isOpen ? "w-72 translate-x-0 pointer-events-auto" : "w-0 -translate-x-full lg:w-20 pointer-events-none lg:pointer-events-auto"}`}
     >
       {/* Logo Section */}
       <div className="h-20 flex items-center px-6 mb-4">
@@ -49,7 +66,7 @@ export default function Sidebar({
         {menus.map((menu) => (
           <Link
             key={menu.name}
-            href="#"
+            href={menu.href}
             className={`flex items-center p-3 rounded-xl transition-all ${menu.active ? "bg-orange-50 text-orange-500 font-bold" : "text-gray-400 hover:bg-gray-50 hover:text-gray-600"}`}
           >
             <div className="flex items-center gap-4 min-w-50">

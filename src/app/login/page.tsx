@@ -24,8 +24,15 @@ const users: User[] = [
   },
   { id: 4, name: "Pepy", role: "pic", picName: "Pepy", password: "pepy123" },
   { id: 5, name: "Pandu", role: "pic", picName: "Pandu", password: "pandu123" },
-  { id: 6, name: "Fifi", role: "pic", picName: "Fifi", password: "fifi123" },
+  { id: 6, name: "Vivi", role: "pic", picName: "Vivi", password: "vivi123" },
   { id: 7, name: "Rama", role: "pic", picName: "Rama", password: "rama123" },
+  {
+    id: 8,
+    name: "Raysha",
+    role: "pic",
+    picName: "Raysha",
+    password: "raysha123",
+  },
 ];
 
 export default function LoginPage() {
