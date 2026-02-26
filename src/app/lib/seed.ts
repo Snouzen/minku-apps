@@ -1,62 +1,78 @@
 import "dotenv/config";
 import { prisma } from "./prisma";
 import { createClient } from "@supabase/supabase-js";
+import { Role } from "@prisma/client";
 
-export const users = [
+type SeedUser = {
+  id: number;
+  name: string;
+  role: Role;
+  picName?: string;
+  password: string;
+};
+
+export const users: SeedUser[] = [
   {
     id: 1,
     name: "Super Admin",
-    role: "SUPER_ADMIN",
+    role: Role.SUPER_ADMIN,
     password: "admin123",
   },
   {
     id: 2,
     name: "Agung",
-    role: "PIC",
+    role: Role.PIC,
     picName: "Agung",
     password: "agung123",
   },
   {
     id: 3,
     name: "Latifah",
-    role: "PIC",
+    role: Role.PIC,
     picName: "Latifah",
     password: "latifah123",
   },
   {
     id: 4,
     name: "Pepy",
-    role: "PIC",
+    role: Role.PIC,
     picName: "Pepy",
     password: "pepy123",
   },
   {
     id: 5,
     name: "Pandu",
-    role: "PIC",
+    role: Role.PIC,
     picName: "Pandu",
     password: "pandu123",
   },
   {
     id: 6,
     name: "Vivi",
-    role: "PIC",
+    role: Role.PIC,
     picName: "Vivi",
     password: "vivi123",
   },
   {
     id: 7,
     name: "Rama",
-    role: "PIC",
+    role: Role.PIC,
     picName: "Rama",
     password: "rama123",
   },
   {
     id: 8,
     name: "Raysha",
-    role: "PIC",
+    role: Role.PIC,
     picName: "Raysha",
     password: "raysha123",
+  },
+  {
+    id: 9,
+    name: "Ajo",
+    role: Role.PIC,
+    picName: "Ajo",
+    password: "ajo123",
   },
 ];
 
@@ -67,18 +83,18 @@ export async function seedDatabase() {
         where: { id: user.id },
         update: {
           name: user.name,
-          role: user.role as any,
+          role: user.role,
           picName: user.picName ?? null,
           password: user.password,
         },
         create: {
           id: user.id,
           name: user.name,
-          role: user.role as any,
+          role: user.role,
           picName: user.picName ?? null,
           password: user.password,
         },
-      } as any);
+      });
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";

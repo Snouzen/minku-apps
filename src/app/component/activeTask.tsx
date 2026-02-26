@@ -54,6 +54,7 @@ export default function ActivePOTable() {
     "Vivi",
     "Rama",
     "Raysha",
+    "Ajo",
   ];
   const months = [
     "January",
@@ -341,7 +342,7 @@ export default function ActivePOTable() {
                   className="hover:bg-gray-50/30 group transition-colors text-black"
                 >
                   <td className="px-6 py-5 text-gray-400 text-center font-medium">
-                    {index + 1}
+                    {(currentPage - 1) * pageSize + index + 1}
                   </td>
                   <td className="px-6 py-5 text-gray-500 text-xs">
                     {format(parseISO(item.inputDate), "dd/MM/yyyy")}

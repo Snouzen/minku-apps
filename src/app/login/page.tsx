@@ -33,6 +33,7 @@ const users: User[] = [
     picName: "Raysha",
     password: "raysha123",
   },
+  { id: 9, name: "Ajo", role: "pic", picName: "Ajo", password: "ajo123" },
 ];
 
 export default function LoginPage() {

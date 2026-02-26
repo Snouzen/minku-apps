@@ -1,12 +1,15 @@
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "@prisma/client";
 
 declare global {
-  var prisma: any | undefined;
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+  // eslint-disable-next-line no-var
   var prismaPool: Pool | undefined;
 }
 
-export function getPrisma(): any {
+export function getPrisma(): PrismaClient {
   if (globalThis.prisma) return globalThis.prisma;
 
   const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -21,8 +24,6 @@ export function getPrisma(): any {
       ssl: { rejectUnauthorized: false },
     });
   const adapter = new PrismaPg(pool);
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { PrismaClient } = require("@prisma/client");
   const client = new PrismaClient({ adapter });
 
   if (process.env.NODE_ENV !== "production") {
