@@ -1,12 +1,11 @@
 import "dotenv/config";
 import { prisma } from "./prisma";
 import { createClient } from "@supabase/supabase-js";
-import { Role } from "@prisma/client";
 
 type SeedUser = {
   id: number;
   name: string;
-  role: Role;
+  role: "SUPER_ADMIN" | "PIC";
   picName?: string;
   password: string;
 };
@@ -15,62 +14,62 @@ export const users: SeedUser[] = [
   {
     id: 1,
     name: "Super Admin",
-    role: Role.SUPER_ADMIN,
+    role: "SUPER_ADMIN",
     password: "admin123",
   },
   {
     id: 2,
     name: "Agung",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Agung",
     password: "agung123",
   },
   {
     id: 3,
     name: "Latifah",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Latifah",
     password: "latifah123",
   },
   {
     id: 4,
     name: "Pepy",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Pepy",
     password: "pepy123",
   },
   {
     id: 5,
     name: "Pandu",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Pandu",
     password: "pandu123",
   },
   {
     id: 6,
     name: "Vivi",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Vivi",
     password: "vivi123",
   },
   {
     id: 7,
     name: "Rama",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Rama",
     password: "rama123",
   },
   {
     id: 8,
     name: "Raysha",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Raysha",
     password: "raysha123",
   },
   {
     id: 9,
     name: "Ajo",
-    role: Role.PIC,
+    role: "PIC",
     picName: "Ajo",
     password: "ajo123",
   },
@@ -83,14 +82,14 @@ export async function seedDatabase() {
         where: { id: user.id },
         update: {
           name: user.name,
-          role: user.role,
+          role: user.role as any,
           picName: user.picName ?? null,
           password: user.password,
         },
         create: {
           id: user.id,
           name: user.name,
-          role: user.role,
+          role: user.role as any,
           picName: user.picName ?? null,
           password: user.password,
         },
