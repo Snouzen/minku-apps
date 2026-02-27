@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 import { getCurrentUser } from "../lib/auth";
 import { DatabaseService } from "../lib/database";
 
-type StatusType = "Open" | "Done" | "In Progress" | "Almost Expired";
+type StatusType = "Open" | "Done" | "In Progress";
 
 interface TaskPO {
   id: number;
@@ -84,8 +84,6 @@ export default function TaskTableRole({ userPicName }: TaskTableRoleProps) {
         return "bg-yellow-100 text-yellow-800";
       case "Done":
         return "bg-green-100 text-green-800";
-      case "Almost Expired":
-        return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -162,7 +160,6 @@ export default function TaskTableRole({ userPicName }: TaskTableRoleProps) {
                 <option value="Open">Open</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Done">Done</option>
-                <option value="Almost Expired">Almost Expired</option>
               </select>
             </div>
           </div>
@@ -305,7 +302,6 @@ export default function TaskTableRole({ userPicName }: TaskTableRoleProps) {
                   <option value="Open">Open</option>
                   <option value="In Progress">In Progress</option>
                   <option value="Done">Done</option>
-                  <option value="Almost Expired">Almost Expired</option>
                 </select>
               </div>
               

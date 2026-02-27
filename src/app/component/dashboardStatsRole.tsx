@@ -3,8 +3,9 @@ import React, { useState, useEffect } from "react";
 import { CheckCircle2, AlertCircle, Clock, User2 } from "lucide-react";
 import { getCurrentUser } from "../lib/auth";
 import { DatabaseService, TaskPO } from "../lib/database";
+import { computeSLA } from "../lib/sla";
 
-type StatusType = "Open" | "Done" | "In Progress" | "Almost Expired";
+type StatusType = "Open" | "Done" | "In Progress";
 
 interface DashboardStatsProps {
   userPicName?: string;
@@ -49,7 +50,7 @@ export default function DashboardStatsRole({
     (t) => t.status === "Done",
   ).length;
   const almostExpiredTasks = filteredTasks.filter(
-    (t) => t.status === "Almost Expired",
+    (t) => computeSLA(t.dueDate, t.status).flag === "due_soon",
   ).length;
 
   const stats = [

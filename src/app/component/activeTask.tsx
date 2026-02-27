@@ -24,8 +24,9 @@ import {
 import Swal from "sweetalert2";
 import { getCurrentUser } from "../lib/auth";
 import { DatabaseService, TaskPO } from "../lib/database";
+import { computeSLA, slaBadgeColor } from "../lib/sla";
 
-type StatusType = "Open" | "Done" | "In Progress" | "Almost Expired";
+type StatusType = "Open" | "Done" | "In Progress";
 
 export default function ActivePOTable() {
   const [tasks, setTasks] = useState<TaskPO[]>([]);
@@ -36,6 +37,7 @@ export default function ActivePOTable() {
   const [filterText, setFilterText] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterMonth, setFilterMonth] = useState("All"); // New State Month
+  const [filterSLA, setFilterSLA] = useState<"" | "due_soon" | "overdue">("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -84,35 +86,8 @@ export default function ActivePOTable() {
     loadTasks();
   }, []);
 
-  useEffect(() => {
-    const updateExpiredTasks = async () => {
-      const today = new Date();
-      const updatedTasks = tasks.map((t) => {
-        const due = parseISO(t.dueDate);
-        const hMinus1 = subDays(due, 1);
-        if (
-          (isSameDay(today, hMinus1) || isBefore(due, today)) &&
-          t.status !== "Done"
-        ) {
-          return { ...t, status: "Almost Expired" as StatusType };
-        }
-        return t;
-      });
-
-      // Update expired tasks in database
-      for (const task of updatedTasks) {
-        if (task.status === "Almost Expired") {
-          await DatabaseService.updateTask(task.id, { status: task.status });
-        }
-      }
-
-      if (JSON.stringify(updatedTasks) !== JSON.stringify(tasks)) {
-        setTasks(updatedTasks);
-      }
-    };
-
-    updateExpiredTasks();
-  }, [tasks]);
+  // NOTE: SLA (due soon/overdue) is now a UI indicator, not a status mutation.
+  // We deliberately avoid mutating status to "Almost Expired" here.
 
   const handleSelectPIC = (name: string) => {
     setFormData((prev) => {
@@ -251,11 +226,20 @@ export default function ActivePOTable() {
     const taskMonth = getMonth(parseISO(t.inputDate)).toString();
     const matchesMonth = filterMonth === "All" || taskMonth === filterMonth;
 
-    return matchesRole && matchesText && matchesStatus && matchesMonth;
+    // SLA filter
+    const sla = computeSLA(t.dueDate, t.status);
+    const matchesSLA =
+      !filterSLA ||
+      (filterSLA === "due_soon" && sla.flag === "due_soon") ||
+      (filterSLA === "overdue" && sla.flag === "overdue");
+
+    return (
+      matchesRole && matchesText && matchesStatus && matchesMonth && matchesSLA
+    );
   });
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterText, filterStatus, filterMonth, tasks]);
+  }, [filterText, filterStatus, filterMonth, filterSLA, tasks]);
   const totalPages = Math.max(1, Math.ceil(filteredTasks.length / pageSize));
   const pageTasks = filteredTasks.slice(
     (currentPage - 1) * pageSize,
@@ -301,8 +285,38 @@ export default function ActivePOTable() {
             <option value="Open">Open</option>
             <option value="In Progress">In Progress</option>
             <option value="Done">Done</option>
-            <option value="Almost Expired">Almost Expired</option>
           </select>
+          {/* SLA quick filter */}
+          <div className="flex items-center gap-2 ml-2">
+            <button
+              type="button"
+              onClick={() =>
+                setFilterSLA(filterSLA === "due_soon" ? "" : "due_soon")
+              }
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${
+                filterSLA === "due_soon"
+                  ? "bg-amber-600 text-white"
+                  : "bg-amber-50 text-amber-700"
+              }`}
+              title="Filter Almost Expired (H-1)"
+            >
+              Almost Expired
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setFilterSLA(filterSLA === "overdue" ? "" : "overdue")
+              }
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${
+                filterSLA === "overdue"
+                  ? "bg-rose-600 text-white"
+                  : "bg-rose-50 text-rose-700"
+              }`}
+              title="Filter Overdue (H+)"
+            >
+              Overdue
+            </button>
+          </div>
         </div>
         {currentUser?.role === "super_admin" && (
           <button
@@ -368,11 +382,39 @@ export default function ActivePOTable() {
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <span
-                      className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${item.status === "Done" ? "bg-green-100 text-green-600" : item.status === "Almost Expired" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"}`}
-                    >
-                      {item.status}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                          item.status === "Done"
+                            ? "bg-green-100 text-green-600"
+                            : item.status === "In Progress"
+                              ? "bg-orange-100 text-orange-600"
+                              : "bg-blue-100 text-blue-600"
+                        }`}
+                      >
+                        {item.status}
+                      </span>
+                      {(() => {
+                        const sla = computeSLA(item.dueDate, item.status);
+                        return sla.flag === "due_soon" ||
+                          sla.flag === "overdue" ? (
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${slaBadgeColor(
+                              sla.flag,
+                            )}`}
+                            title={
+                              sla.flag === "overdue"
+                                ? `Lewat ${sla.daysOver} hari`
+                                : sla.flag === "due_soon"
+                                  ? `Sisa ${sla.hoursLeft} jam`
+                                  : undefined
+                            }
+                          >
+                            {sla.label}
+                          </span>
+                        ) : null;
+                      })()}
+                    </div>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex justify-start gap-1  group-hover:opacity-100 transition-all">
@@ -500,7 +542,13 @@ export default function ActivePOTable() {
                 </label>
                 <div className="mt-2">
                   <span
-                    className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${viewingTask.status === "Done" ? "bg-green-100 text-green-600" : viewingTask.status === "Almost Expired" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"}`}
+                    className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                      viewingTask.status === "Done"
+                        ? "bg-green-100 text-green-600"
+                        : viewingTask.status === "In Progress"
+                          ? "bg-orange-100 text-orange-600"
+                          : "bg-blue-100 text-blue-600"
+                    }`}
                   >
                     {viewingTask.status}
                   </span>

@@ -11,6 +11,7 @@ import { DatabaseService } from "../lib/database";
 import { getCurrentUser } from "../lib/auth";
 
 import { TaskPO } from "../lib/database";
+import { computeSLA } from "../lib/sla";
 
 export default function DashboardStats() {
   const [tasks, setTasks] = useState<TaskPO[]>([]);
@@ -46,24 +47,21 @@ export default function DashboardStats() {
           .filter((pic): pic is string => Boolean(pic))
           .map((name) => {
             // Logic hitung: Cek apakah nama PIC ada di dalam array pic[]
-            const activeTasks = tasks.filter(
-              (t) =>
-                t.pic.includes(name) &&
-                (t.status === "Open" ||
-                  t.status === "In Progress" ||
-                  t.status === "Almost Expired"),
-            ).length;
+            const activeTasks = tasks.filter((t) => {
+              if (!t.pic.includes(name)) return false;
+              return t.status === "Open" || t.status === "In Progress";
+            }).length;
 
             const completedTasks = tasks.filter(
               (t) => t.pic.includes(name) && t.status === "Done",
             ).length;
 
-            const hasWarning = tasks.some(
-              (t) => t.pic.includes(name) && t.status === "Almost Expired",
-            );
-            const almostExpiredCount = tasks.filter(
-              (t) => t.pic.includes(name) && t.status === "Almost Expired",
-            ).length;
+            const slaWarnCount = tasks.filter((t) => {
+              if (!t.pic.includes(name)) return false;
+              const f = computeSLA(t.dueDate, t.status).flag;
+              return f === "due_soon" || f === "overdue";
+            }).length;
+            const hasWarning = slaWarnCount > 0;
 
             return (
               <div
@@ -90,7 +88,7 @@ export default function DashboardStats() {
                           className="text-red-500 animate-pulse"
                         />
                         <span className="px-2 py-0.5 rounded-full text-2xs font-black bg-red-100 text-red-600">
-                          {almostExpiredCount}
+                          {slaWarnCount}
                         </span>
                       </div>
                     )}
@@ -141,7 +139,7 @@ export default function DashboardStats() {
   ).length;
   const completedCount = picTasks.filter((t) => t.status === "Done").length;
   const almostExpiredCount = picTasks.filter(
-    (t) => t.status === "Almost Expired",
+    (t) => computeSLA(t.dueDate, t.status).flag === "due_soon",
   ).length;
 
   const getStatusCard = (

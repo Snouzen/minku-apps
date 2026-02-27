@@ -8,7 +8,7 @@ export interface TaskPO {
   task: string;
   dueDate: string;
   pic: string[];
-  status: "Open" | "Done" | "In Progress" | "Almost Expired";
+  status: "Open" | "Done" | "In Progress";
   remarks: string;
 }
 
@@ -34,8 +34,6 @@ const statusToDb = (status: TaskPO["status"]): string => {
       return "IN_PROGRESS";
     case "Done":
       return "DONE";
-    case "Almost Expired":
-      return "ALMOST_EXPIRED";
     default:
       return "OPEN";
   }
@@ -50,7 +48,8 @@ const statusFromDb = (status: string): TaskPO["status"] => {
     case "DONE":
       return "Done";
     case "ALMOST_EXPIRED":
-      return "Almost Expired";
+      // Map legacy status to a workflow status; SLA will show alert separately
+      return "In Progress";
     default:
       return "Open";
   }
