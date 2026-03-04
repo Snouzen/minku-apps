@@ -40,23 +40,33 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-60 bg-white border-r flex flex-col transition-all duration-300 ease-in-out shadow-xl lg:relative lg:translate-x-0 ${isOpen ? "w-72 translate-x-0 pointer-events-auto" : "w-0 -translate-x-full lg:w-20 pointer-events-none lg:pointer-events-auto"}`}
+      className={`fixed inset-y-0 left-0 z-60 bg-white border-r flex flex-col transition-all duration-300 ease-in-out shadow-xl overflow-hidden lg:relative lg:translate-x-0 ${isOpen ? "w-72 translate-x-0 pointer-events-auto" : "w-0 -translate-x-full lg:w-24 pointer-events-none lg:pointer-events-auto"}`}
     >
       {/* Logo Section */}
-      <div className="h-20 flex items-center px-6 mb-4">
+      <div className="h-24 flex items-center px-4 mb-4">
         {isOpen ? (
-          <div className="relative w-full h-10 transition-all duration-300">
+          <div className="relative w-full h-12 transition-all duration-300">
             <Image
               src="/logo-bulog.png"
               alt="Bulog Logo"
               fill
               priority
-              className="object-contain object-left"
+              sizes="(max-width: 1024px) 0px, 288px"
+              className="object-contain object-center"
             />
           </div>
         ) : (
-          <div className="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center overflow-hidden shrink-0 mx-auto transition-all duration-300">
-            <span className="text-white font-black text-xl italic">B</span>
+          <div className="hidden lg:flex items-center justify-center w-full">
+            <div className="relative w-24 h-24 rounded-2xl overflow-hidden shrink-0 mx-auto mt-1 transition-all duration-300">
+              <Image
+                src="/logo-sikd-3.png"
+                alt="SIKD Logo"
+                fill
+                priority
+                sizes="(max-width: 1024px) 0px, 96px"
+                className="object-contain object-center"
+              />
+            </div>
           </div>
         )}
       </div>
