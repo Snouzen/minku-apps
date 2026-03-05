@@ -5,7 +5,7 @@ import { format, parseISO } from "date-fns";
 import { getCurrentUser } from "../lib/auth";
 import { supabase } from "../lib/supabase";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 
 interface DeletedTask {
   id: number;
@@ -22,6 +22,7 @@ export default function LogsPage() {
   const currentUser = getCurrentUser();
   const [items, setItems] = useState<DeletedTask[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -86,13 +87,28 @@ export default function LogsPage() {
           <h2 className="text-xl font-bold text-gray-800">
             Logs - Deleted Tasks
           </h2>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-          >
-            <ArrowLeft size={16} />
-            Back to Home
-          </Link>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Cari task..."
+                className="w-64 pl-9 pr-3 py-2 rounded-lg border border-gray-300 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              <ArrowLeft size={16} />
+              Back to Home
+            </Link>
+          </div>
         </div>
         {loading ? (
           <div className="text-gray-500 text-sm">Loading...</div>
@@ -114,7 +130,20 @@ export default function LogsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 text-sm">
-                {items.map((t) => (
+                {(query
+                  ? items.filter((t) => {
+                      const q = query.toLowerCase();
+                      const fields = [
+                        String(t.id),
+                        t.task,
+                        t.status,
+                        t.remarks || "",
+                        ...t.pic,
+                      ];
+                      return fields.some((f) => f.toLowerCase().includes(q));
+                    })
+                  : items
+                ).map((t) => (
                   <tr key={t.id} className="text-black">
                     <td className="px-4 py-3">{t.id}</td>
                     <td className="px-4 py-3">
