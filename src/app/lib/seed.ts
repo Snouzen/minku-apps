@@ -1,11 +1,12 @@
 import "dotenv/config";
 import { prisma } from "./prisma";
 import { createClient } from "@supabase/supabase-js";
+import { Role } from "@prisma/client";
 
 type SeedUser = {
   id: number;
   name: string;
-  role: "SUPER_ADMIN" | "PIC";
+  role: Role;
   picName?: string;
   password: string;
 };
@@ -82,14 +83,14 @@ export async function seedDatabase() {
         where: { id: user.id },
         update: {
           name: user.name,
-          role: user.role as any,
+          role: user.role,
           picName: user.picName ?? null,
           password: user.password,
         },
         create: {
           id: user.id,
           name: user.name,
-          role: user.role as any,
+          role: user.role,
           picName: user.picName ?? null,
           password: user.password,
         },

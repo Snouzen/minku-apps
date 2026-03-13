@@ -5,7 +5,8 @@ import { format, parseISO } from "date-fns";
 import { getCurrentUser } from "../lib/auth";
 import { supabase } from "../lib/supabase";
 import Link from "next/link";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, RotateCcw, Search } from "lucide-react";
+import Swal from "sweetalert2";
 
 interface DeletedTask {
   id: number;
@@ -23,6 +24,16 @@ export default function LogsPage() {
   const [items, setItems] = useState<DeletedTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [restoringId, setRestoringId] = useState<number | null>(null);
+
+  const safeParseArray = (raw: string): unknown[] => {
+    try {
+      const v: unknown = JSON.parse(raw);
+      return Array.isArray(v) ? v : [];
+    } catch {
+      return [];
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -80,6 +91,76 @@ export default function LogsPage() {
     );
   }
 
+  const handleRestore = async (t: DeletedTask) => {
+    const res = await Swal.fire({
+      title: "Restore task?",
+      text: `Task "${t.task}" akan dikembalikan ke list aktif.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Restore",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#16a34a",
+    });
+    if (!res.isConfirmed) return;
+
+    setRestoringId(t.id);
+    try {
+      if (supabase) {
+        const { error } = await supabase
+          .from("tasks")
+          .update({ deletedAt: null, updatedAt: new Date().toISOString() })
+          .eq("id", t.id);
+        if (error) throw error;
+        setItems((prev) => prev.filter((x) => x.id !== t.id));
+      } else {
+        const logsRaw = localStorage.getItem("bulog_tasks_deleted") || "[]";
+        const activeRaw = localStorage.getItem("bulog_tasks") || "[]";
+        const logs = safeParseArray(logsRaw);
+        const active = safeParseArray(activeRaw);
+
+        const idx = logs.findIndex((x) => {
+          if (!x || typeof x !== "object") return false;
+          const id = (x as { id?: unknown }).id;
+          return Number(id) === t.id;
+        });
+        if (idx === -1) {
+          setItems((prev) => prev.filter((x) => x.id !== t.id));
+          return;
+        }
+        const restored = logs.splice(idx, 1)[0];
+        const normalized =
+          restored && typeof restored === "object"
+            ? { ...(restored as Record<string, unknown>) }
+            : {};
+        delete (normalized as Record<string, unknown>).deletedAt;
+        const exists = active.some((x) => {
+          if (!x || typeof x !== "object") return false;
+          const id = (x as { id?: unknown }).id;
+          return Number(id) === t.id;
+        });
+        if (!exists) {
+          active.push(normalized);
+        }
+        localStorage.setItem("bulog_tasks_deleted", JSON.stringify(logs));
+        localStorage.setItem("bulog_tasks", JSON.stringify(active));
+        setItems((prev) => prev.filter((x) => x.id !== t.id));
+      }
+
+      await Swal.fire({
+        title: "Berhasil",
+        text: "Task berhasil direstore.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Gagal restore task";
+      await Swal.fire({ title: "Gagal", text: msg, icon: "error" });
+    } finally {
+      setRestoringId(null);
+    }
+  };
+
   return (
     <div className="p-4 md:p-8">
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
@@ -127,6 +208,7 @@ export default function LogsPage() {
                   <th className="px-4 py-3">PIC</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Remarks</th>
+                  <th className="px-4 py-3">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 text-sm">
@@ -170,6 +252,16 @@ export default function LogsPage() {
                     </td>
                     <td className="px-4 py-3">{t.status}</td>
                     <td className="px-4 py-3">{t.remarks || "-"}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleRestore(t)}
+                        disabled={restoringId === t.id}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-green-200 bg-green-50 text-green-700 text-xs font-bold hover:bg-green-100 disabled:opacity-50"
+                      >
+                        <RotateCcw size={14} />
+                        {restoringId === t.id ? "Restoring..." : "Restore"}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
