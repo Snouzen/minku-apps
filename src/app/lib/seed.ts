@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { prisma } from "./prisma";
 import { createClient } from "@supabase/supabase-js";
-import { Role } from "@prisma/client";
+
+type Role = "SUPER_ADMIN" | "PIC";
 
 type SeedUser = {
   id: number;
