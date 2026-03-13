@@ -108,7 +108,8 @@ export class DatabaseService {
           .from("tasks")
           .select("*")
           .is("deletedAt", null)
-          .order("id", { ascending: true });
+          .order("createdAt", { ascending: false })
+          .order("id", { ascending: false });
         if (error) throw error;
         this.isConnected = true;
         return (data || []).map((task: TaskRow) => ({
@@ -129,7 +130,7 @@ export class DatabaseService {
       }
     }
 
-    return getTasksFromStorage();
+    return [...getTasksFromStorage()].reverse();
   }
 
   static async createTask(taskData: Omit<TaskPO, "id">): Promise<TaskPO> {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Trash2,
   Plus,
@@ -211,32 +211,42 @@ export default function ActivePOTable() {
 
   const currentUser = getCurrentUser();
 
-  const filteredTasks = tasks.filter((t) => {
-    // Role-based filter: PIC hanya lihat task mereka
-    const matchesRole =
-      currentUser?.role === "super_admin" ||
-      t.pic.includes(currentUser?.picName || "");
+  const filteredTasks = useMemo(() => {
+    const out = tasks.filter((t) => {
+      const matchesRole =
+        currentUser?.role === "super_admin" ||
+        t.pic.includes(currentUser?.picName || "");
 
-    const matchesText =
-      t.task.toLowerCase().includes(filterText.toLowerCase()) ||
-      t.pic.some((p) => p.toLowerCase().includes(filterText.toLowerCase()));
-    const matchesStatus = filterStatus === "All" || t.status === filterStatus;
+      const matchesText =
+        t.task.toLowerCase().includes(filterText.toLowerCase()) ||
+        t.pic.some((p) => p.toLowerCase().includes(filterText.toLowerCase()));
+      const matchesStatus = filterStatus === "All" || t.status === filterStatus;
 
-    // Filter Month Logic based on inputDate
-    const taskMonth = getMonth(parseISO(t.inputDate)).toString();
-    const matchesMonth = filterMonth === "All" || taskMonth === filterMonth;
+      const taskMonth = getMonth(parseISO(t.inputDate)).toString();
+      const matchesMonth = filterMonth === "All" || taskMonth === filterMonth;
 
-    // SLA filter
-    const sla = computeSLA(t.dueDate, t.status);
-    const matchesSLA =
-      !filterSLA ||
-      (filterSLA === "due_soon" && sla.flag === "due_soon") ||
-      (filterSLA === "overdue" && sla.flag === "overdue");
+      const sla = computeSLA(t.dueDate, t.status);
+      const matchesSLA =
+        !filterSLA ||
+        (filterSLA === "due_soon" && sla.flag === "due_soon") ||
+        (filterSLA === "overdue" && sla.flag === "overdue");
 
-    return (
-      matchesRole && matchesText && matchesStatus && matchesMonth && matchesSLA
-    );
-  });
+      return (
+        matchesRole &&
+        matchesText &&
+        matchesStatus &&
+        matchesMonth &&
+        matchesSLA
+      );
+    });
+
+    return [...out].sort((a, b) => {
+      const da = parseISO(a.inputDate).getTime();
+      const db = parseISO(b.inputDate).getTime();
+      if (da !== db) return db - da;
+      return b.id - a.id;
+    });
+  }, [tasks, currentUser?.role, currentUser?.picName, filterText, filterStatus, filterMonth, filterSLA]);
   useEffect(() => {
     setCurrentPage(1);
   }, [filterText, filterStatus, filterMonth, filterSLA, tasks]);
