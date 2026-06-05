@@ -58,6 +58,7 @@ export default function AuthLayout({
       </div>
 
       {/* Issue Label Fixed */}
+      {/* Issue Label Fixed */}
     </div>
   );
 }
