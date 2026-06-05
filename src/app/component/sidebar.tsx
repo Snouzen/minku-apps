@@ -6,9 +6,11 @@ import {
   Database,
   ChevronRight,
   X,
+  MapPin,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { getCurrentUser } from "../lib/auth";
 
 export default function Sidebar({
@@ -18,21 +20,34 @@ export default function Sidebar({
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
 }) {
+  const pathname = usePathname();
   const user = getCurrentUser();
   const menus = [
     {
       name: "Dashboard",
       href: "/",
       icon: <LayoutDashboard size={20} />,
-      active: true,
+      active: pathname === "/",
     },
-    ...(user?.role === "super_admin"
+    {
+      name: "UBI Maintenance",
+      href: "/ubi-maintenance",
+      icon: <Building2 size={20} />,
+      active: pathname === "/ubi-maintenance",
+    },
+    {
+      name: "Unit Produksi",
+      href: "/unit-produksi",
+      icon: <MapPin size={20} />,
+      active: pathname === "/unit-produksi",
+    },
+    ...(user?.role === "SUPER_ADMIN"
       ? [
           {
             name: "Logs",
             href: "/logs",
             icon: <Database size={20} />,
-            active: false,
+            active: pathname === "/logs",
           } as const,
         ]
       : []),

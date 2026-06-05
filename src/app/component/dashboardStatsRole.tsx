@@ -32,7 +32,7 @@ export default function DashboardStatsRole({
   }, []);
 
   const getFilteredTasks = () => {
-    if (currentUser?.role === "super_admin") {
+    if (currentUser?.role === "SUPER_ADMIN") {
       return tasks;
     }
     return tasks.filter((task) =>

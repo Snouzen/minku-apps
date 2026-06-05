@@ -1,13 +1,12 @@
 import "dotenv/config";
 import { prisma } from "./prisma";
+import bcrypt from "bcryptjs";
 import { createClient } from "@supabase/supabase-js";
-
-type Role = "SUPER_ADMIN" | "PIC";
 
 type SeedUser = {
   id: number;
   name: string;
-  role: Role;
+  role: "SUPER_ADMIN" | "PIC";
   picName?: string;
   password: string;
 };
@@ -21,9 +20,9 @@ export const users: SeedUser[] = [
   },
   {
     id: 2,
-    name: "Agung",
+    name: "Rakha",
     role: "PIC",
-    picName: "Agung",
+    picName: "Rakha",
     password: "agung123",
   },
   {
@@ -79,21 +78,34 @@ export const users: SeedUser[] = [
 
 export async function seedDatabase() {
   try {
-    for (const user of users) {
+    const hashedUsers = await Promise.all(
+      users.map(async (u) => {
+        const hashedPassword = await bcrypt.hash(u.password, 10);
+        return {
+          id: u.id,
+          name: u.name,
+          role: u.role as any,
+          picName: u.picName,
+          password: hashedPassword,
+        };
+      })
+    );
+
+    for (const u of hashedUsers) {
       await prisma.user.upsert({
-        where: { id: user.id },
+        where: { id: u.id },
         update: {
-          name: user.name,
-          role: user.role,
-          picName: user.picName ?? null,
-          password: user.password,
+          name: u.name,
+          role: u.role,
+          picName: u.picName ?? null,
+          password: u.password,
         },
         create: {
-          id: user.id,
-          name: user.name,
-          role: user.role,
-          picName: user.picName ?? null,
-          password: user.password,
+          id: u.id,
+          name: u.name,
+          role: u.role,
+          picName: u.picName ?? null,
+          password: u.password,
         },
       });
     }

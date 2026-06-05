@@ -28,18 +28,18 @@ export default function DashboardStats() {
     };
 
     loadData();
-    const interval = setInterval(loadData, 5000); // Update every 5 seconds
+    const interval = setInterval(loadData, 60000); // Update every 60 seconds
     return () => clearInterval(interval);
   }, []);
 
   // Super Admin: Lihat semua PIC
   // PIC: Lihat hanya dirinya sendiri
   const pics =
-    currentUser?.role === "super_admin"
-      ? ["Agung", "Latifah", "Pepy", "Pandu", "Vivi", "Rama", "Raysha", "Ajo"]
+    currentUser?.role === "SUPER_ADMIN"
+      ? ["Rakha", "Latifah", "Pepy", "Pandu", "Vivi", "Rama", "Raysha", "Ajo"]
       : [currentUser?.picName].filter(Boolean);
 
-  if (currentUser?.role === "super_admin") {
+  if (currentUser?.role === "SUPER_ADMIN") {
     // Super Admin view: Card per PIC seperti sebelumnya
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">

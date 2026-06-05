@@ -1,19 +1,12 @@
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-import * as prismaClientPkg from "@prisma/client";
-
-type PrismaClientLike = {
-  user: {
-    upsert: (args: unknown) => Promise<unknown>;
-  };
-};
 
 declare global {
-  var prisma: PrismaClientLike | undefined;
+  var prisma: any | undefined;
   var prismaPool: Pool | undefined;
 }
 
-export function getPrisma(): PrismaClientLike {
+export function getPrisma(): any {
   if (globalThis.prisma) return globalThis.prisma;
 
   const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -28,21 +21,9 @@ export function getPrisma(): PrismaClientLike {
       ssl: { rejectUnauthorized: false },
     });
   const adapter = new PrismaPg(pool);
-  const PrismaClientCtor =
-    (
-      prismaClientPkg as unknown as {
-        PrismaClient?: new (args: unknown) => PrismaClientLike;
-      }
-    ).PrismaClient ??
-    (
-      prismaClientPkg as unknown as {
-        default?: { PrismaClient?: new (args: unknown) => PrismaClientLike };
-      }
-    ).default?.PrismaClient;
-  if (!PrismaClientCtor) {
-    throw new Error("PrismaClient is not available. Run prisma generate.");
-  }
-  const client = new PrismaClientCtor({ adapter });
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { PrismaClient } = require("@prisma/client");
+  const client = new PrismaClient({ adapter });
 
   if (process.env.NODE_ENV !== "production") {
     globalThis.prisma = client;

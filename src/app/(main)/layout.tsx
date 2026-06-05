@@ -1,27 +1,32 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getCurrentUser } from "./lib/auth";
+import { getCurrentUser } from "../lib/auth";
 
-import Sidebar from "./component/sidebar";
-import Navbar from "./component/navbar";
+import Sidebar from "../component/sidebar";
+import Navbar from "../component/navbar";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
-  const isAuthenticated = !!getCurrentUser();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    setIsMounted(true);
+    const user = getCurrentUser();
+    if (!user) {
       router.push("/login");
+    } else {
+      setIsAuthenticated(true);
     }
-  }, [router, isAuthenticated]);
+  }, [router]);
 
-  if (!isAuthenticated) {
+  if (!isMounted || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

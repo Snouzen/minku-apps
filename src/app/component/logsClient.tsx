@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { getCurrentUser } from "../lib/auth";
-import { supabase } from "../lib/supabase";
+import { getDeletedTasksAction } from "../actions/logs";
 import Link from "next/link";
-import { ArrowLeft, RotateCcw, Search } from "lucide-react";
-import Swal from "sweetalert2";
+import { ArrowLeft, Search } from "lucide-react";
 
 interface DeletedTask {
   id: number;
@@ -19,59 +18,31 @@ interface DeletedTask {
   deletedAt: string;
 }
 
-export default function LogsPage() {
+export default function LogsClient() {
   const currentUser = getCurrentUser();
   const [items, setItems] = useState<DeletedTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [restoringId, setRestoringId] = useState<number | null>(null);
-
-  const safeParseArray = (raw: string): unknown[] => {
-    try {
-      const v: unknown = JSON.parse(raw);
-      return Array.isArray(v) ? v : [];
-    } catch {
-      return [];
-    }
-  };
 
   useEffect(() => {
     const load = async () => {
       try {
-        if (supabase) {
-          const { data, error } = await supabase
-            .from("tasks")
-            .select("*")
-            .not("deletedAt", "is", null)
-            .order("deletedAt", { ascending: false });
-          if (error) throw error;
-          const rows = data as Array<{
-            id: number;
-            inputDate: string;
-            task: string;
-            dueDate: string;
-            pic: string[] | null;
-            status: string;
-            remarks: string | null;
-            deletedAt: string;
-          }>;
-          setItems(
-            rows.map((t) => ({
-              id: t.id,
-              inputDate: t.inputDate,
-              task: t.task,
-              dueDate: t.dueDate,
-              pic: t.pic || [],
-              status: t.status,
-              remarks: t.remarks || "",
-              deletedAt: t.deletedAt,
-            })),
-          );
+        const res = await getDeletedTasksAction();
+        if (res.success && res.tasks) {
+          const rows = res.tasks.map((t: any) => ({
+            id: t.id,
+            inputDate: t.inputDate ? t.inputDate.toISOString() : new Date().toISOString(),
+            task: t.task,
+            dueDate: t.dueDate ? t.dueDate.toISOString() : new Date().toISOString(),
+            pic: t.pic || [],
+            status: t.status,
+            remarks: t.remarks || "",
+            deletedAt: t.deletedAt ? t.deletedAt.toISOString() : new Date().toISOString(),
+          }));
+          setItems(rows);
         } else {
-          const raw =
-            typeof window !== "undefined"
-              ? localStorage.getItem("bulog_tasks_deleted")
-              : null;
+          // Fallback
+          const raw = typeof window !== "undefined" ? localStorage.getItem("bulog_tasks_deleted") : null;
           setItems(raw ? JSON.parse(raw) : []);
         }
       } catch (e) {
@@ -83,83 +54,13 @@ export default function LogsPage() {
     load();
   }, []);
 
-  if (!currentUser || currentUser.role !== "super_admin") {
+  if (!currentUser || currentUser.role !== "SUPER_ADMIN") {
     return (
       <div className="p-6">
         <h1 className="text-lg font-bold text-gray-800">Unauthorized</h1>
       </div>
     );
   }
-
-  const handleRestore = async (t: DeletedTask) => {
-    const res = await Swal.fire({
-      title: "Restore task?",
-      text: `Task "${t.task}" akan dikembalikan ke list aktif.`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Restore",
-      cancelButtonText: "Batal",
-      confirmButtonColor: "#16a34a",
-    });
-    if (!res.isConfirmed) return;
-
-    setRestoringId(t.id);
-    try {
-      if (supabase) {
-        const { error } = await supabase
-          .from("tasks")
-          .update({ deletedAt: null, updatedAt: new Date().toISOString() })
-          .eq("id", t.id);
-        if (error) throw error;
-        setItems((prev) => prev.filter((x) => x.id !== t.id));
-      } else {
-        const logsRaw = localStorage.getItem("bulog_tasks_deleted") || "[]";
-        const activeRaw = localStorage.getItem("bulog_tasks") || "[]";
-        const logs = safeParseArray(logsRaw);
-        const active = safeParseArray(activeRaw);
-
-        const idx = logs.findIndex((x) => {
-          if (!x || typeof x !== "object") return false;
-          const id = (x as { id?: unknown }).id;
-          return Number(id) === t.id;
-        });
-        if (idx === -1) {
-          setItems((prev) => prev.filter((x) => x.id !== t.id));
-          return;
-        }
-        const restored = logs.splice(idx, 1)[0];
-        const normalized =
-          restored && typeof restored === "object"
-            ? { ...(restored as Record<string, unknown>) }
-            : {};
-        delete (normalized as Record<string, unknown>).deletedAt;
-        const exists = active.some((x) => {
-          if (!x || typeof x !== "object") return false;
-          const id = (x as { id?: unknown }).id;
-          return Number(id) === t.id;
-        });
-        if (!exists) {
-          active.push(normalized);
-        }
-        localStorage.setItem("bulog_tasks_deleted", JSON.stringify(logs));
-        localStorage.setItem("bulog_tasks", JSON.stringify(active));
-        setItems((prev) => prev.filter((x) => x.id !== t.id));
-      }
-
-      await Swal.fire({
-        title: "Berhasil",
-        text: "Task berhasil direstore.",
-        icon: "success",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Gagal restore task";
-      await Swal.fire({ title: "Gagal", text: msg, icon: "error" });
-    } finally {
-      setRestoringId(null);
-    }
-  };
 
   return (
     <div className="p-4 md:p-8">
@@ -208,7 +109,6 @@ export default function LogsPage() {
                   <th className="px-4 py-3">PIC</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Remarks</th>
-                  <th className="px-4 py-3">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 text-sm">
@@ -252,16 +152,6 @@ export default function LogsPage() {
                     </td>
                     <td className="px-4 py-3">{t.status}</td>
                     <td className="px-4 py-3">{t.remarks || "-"}</td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleRestore(t)}
-                        disabled={restoringId === t.id}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-green-200 bg-green-50 text-green-700 text-xs font-bold hover:bg-green-100 disabled:opacity-50"
-                      >
-                        <RotateCcw size={14} />
-                        {restoringId === t.id ? "Restoring..." : "Restore"}
-                      </button>
-                    </td>
                   </tr>
                 ))}
               </tbody>

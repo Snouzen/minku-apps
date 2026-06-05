@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Trash2,
   Plus,
@@ -25,6 +25,8 @@ import Swal from "sweetalert2";
 import { getCurrentUser } from "../lib/auth";
 import { DatabaseService, TaskPO } from "../lib/database";
 import { computeSLA, slaBadgeColor } from "../lib/sla";
+import SmoothDropdown from "./smoothDropdown";
+import SmoothDatePicker from "./smoothDatePicker";
 
 type StatusType = "Open" | "Done" | "In Progress";
 
@@ -49,7 +51,7 @@ export default function ActivePOTable() {
   });
 
   const picList = [
-    "Agung",
+    "Rakha",
     "Latifah",
     "Pepy",
     "Pandu",
@@ -112,13 +114,13 @@ export default function ActivePOTable() {
         const updates: Partial<TaskPO> = {
           remarks: formData.remarks,
           // Super admin bisa update semua field, PIC hanya status & remarks
-          ...(currentUser?.role === "super_admin" && {
+          ...(currentUser?.role === "SUPER_ADMIN" && {
             task: formData.task,
             dueDate: formData.dueDate,
             pic: formData.pic,
           }),
           // PIC bisa update status
-          ...(currentUser?.role === "pic" && {
+          ...(currentUser?.role === "PIC" && {
             status: editingTask.status, // Gunakan status dari editingTask yang sudah diupdate
           }),
         };
@@ -134,7 +136,7 @@ export default function ActivePOTable() {
         }
       } else {
         // Add new task - hanya super admin yang bisa
-        if (currentUser?.role !== "super_admin") {
+        if (currentUser?.role !== "SUPER_ADMIN") {
           Swal.fire(
             "Error",
             "Hanya Super Admin yang bisa menambah task",
@@ -211,42 +213,32 @@ export default function ActivePOTable() {
 
   const currentUser = getCurrentUser();
 
-  const filteredTasks = useMemo(() => {
-    const out = tasks.filter((t) => {
-      const matchesRole =
-        currentUser?.role === "super_admin" ||
-        t.pic.includes(currentUser?.picName || "");
+  const filteredTasks = tasks.filter((t) => {
+    // Role-based filter: PIC hanya lihat task mereka
+    const matchesRole =
+      currentUser?.role === "SUPER_ADMIN" ||
+      t.pic.includes(currentUser?.picName || "");
 
-      const matchesText =
-        t.task.toLowerCase().includes(filterText.toLowerCase()) ||
-        t.pic.some((p) => p.toLowerCase().includes(filterText.toLowerCase()));
-      const matchesStatus = filterStatus === "All" || t.status === filterStatus;
+    const matchesText =
+      t.task.toLowerCase().includes(filterText.toLowerCase()) ||
+      t.pic.some((p) => p.toLowerCase().includes(filterText.toLowerCase()));
+    const matchesStatus = filterStatus === "All" || t.status === filterStatus;
 
-      const taskMonth = getMonth(parseISO(t.inputDate)).toString();
-      const matchesMonth = filterMonth === "All" || taskMonth === filterMonth;
+    // Filter Month Logic based on inputDate
+    const taskMonth = getMonth(parseISO(t.inputDate)).toString();
+    const matchesMonth = filterMonth === "All" || taskMonth === filterMonth;
 
-      const sla = computeSLA(t.dueDate, t.status);
-      const matchesSLA =
-        !filterSLA ||
-        (filterSLA === "due_soon" && sla.flag === "due_soon") ||
-        (filterSLA === "overdue" && sla.flag === "overdue");
+    // SLA filter
+    const sla = computeSLA(t.dueDate, t.status);
+    const matchesSLA =
+      !filterSLA ||
+      (filterSLA === "due_soon" && sla.flag === "due_soon") ||
+      (filterSLA === "overdue" && sla.flag === "overdue");
 
-      return (
-        matchesRole &&
-        matchesText &&
-        matchesStatus &&
-        matchesMonth &&
-        matchesSLA
-      );
-    });
-
-    return [...out].sort((a, b) => {
-      const da = parseISO(a.inputDate).getTime();
-      const db = parseISO(b.inputDate).getTime();
-      if (da !== db) return db - da;
-      return b.id - a.id;
-    });
-  }, [tasks, currentUser?.role, currentUser?.picName, filterText, filterStatus, filterMonth, filterSLA]);
+    return (
+      matchesRole && matchesText && matchesStatus && matchesMonth && matchesSLA
+    );
+  });
   useEffect(() => {
     setCurrentPage(1);
   }, [filterText, filterStatus, filterMonth, filterSLA, tasks]);
@@ -275,27 +267,31 @@ export default function ActivePOTable() {
           </div>
 
           {/* FILTER MONTH (NEW) */}
-          <select
-            className="bg-gray-50 px-4 py-2 rounded-xl text-sm outline-none border-none cursor-pointer text-black min-w-[120px]"
-            onChange={(e) => setFilterMonth(e.target.value)}
-          >
-            <option value="All">All Months</option>
-            {months.map((m, idx) => (
-              <option key={m} value={idx.toString()}>
-                {m}
-              </option>
-            ))}
-          </select>
+          <div className="min-w-[140px]">
+            <SmoothDropdown
+              value={filterMonth}
+              onChange={(val) => setFilterMonth(val)}
+              options={[
+                { value: "All", label: "All Months" },
+                ...months.map((m, idx) => ({ value: idx.toString(), label: m })),
+              ]}
+              buttonClassName="bg-gray-50 px-4 py-2 rounded-xl text-sm outline-none border-none text-black w-full"
+            />
+          </div>
 
-          <select
-            className="bg-gray-50 px-4 py-2 rounded-xl text-sm outline-none border-none cursor-pointer text-black"
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="All">All Status</option>
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Done">Done</option>
-          </select>
+          <div className="min-w-[140px]">
+            <SmoothDropdown
+              value={filterStatus}
+              onChange={(val) => setFilterStatus(val)}
+              options={[
+                { value: "All", label: "All Status" },
+                { value: "Open", label: "Open" },
+                { value: "In Progress", label: "In Progress" },
+                { value: "Done", label: "Done" },
+              ]}
+              buttonClassName="bg-gray-50 px-4 py-2 rounded-xl text-sm outline-none border-none text-black w-full"
+            />
+          </div>
           {/* SLA quick filter */}
           <div className="flex items-center gap-2 ml-2">
             <button
@@ -328,7 +324,7 @@ export default function ActivePOTable() {
             </button>
           </div>
         </div>
-        {currentUser?.role === "super_admin" && (
+        {currentUser?.role === "SUPER_ADMIN" && (
           <button
             onClick={() => {
               setEditingTask(null);
@@ -449,7 +445,7 @@ export default function ActivePOTable() {
                       >
                         <Pencil size={16} />
                       </button>
-                      {currentUser?.role === "super_admin" && (
+                      {currentUser?.role === "SUPER_ADMIN" && (
                         <button
                           onClick={() => handleDelete(item.id)}
                           className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg"
@@ -615,13 +611,13 @@ export default function ActivePOTable() {
                     required
                     type="text"
                     placeholder="Enter task name..."
-                    className={`min-w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-black text-sm font-medium ${currentUser?.role === "pic" ? "bg-gray-100 text-gray-500" : ""}`}
+                    className={`min-w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-black text-sm font-medium ${currentUser?.role === "PIC" ? "bg-gray-100 text-gray-500" : ""}`}
                     value={formData.task}
                     onChange={(e) =>
-                      currentUser?.role === "super_admin" &&
+                      currentUser?.role === "SUPER_ADMIN" &&
                       setFormData({ ...formData, task: e.target.value })
                     }
-                    disabled={currentUser?.role === "pic"}
+                    disabled={currentUser?.role === "PIC"}
                   />
                 </div>
               </div>
@@ -629,19 +625,17 @@ export default function ActivePOTable() {
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
                   Due Date
                 </label>
-                <input
-                  required
-                  type="date"
-                  className={`w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-sm font-medium ${currentUser?.role === "pic" ? "bg-gray-100 text-gray-500" : ""}`}
+                <SmoothDatePicker
                   value={formData.dueDate}
-                  onChange={(e) =>
-                    currentUser?.role === "super_admin" &&
-                    setFormData({ ...formData, dueDate: e.target.value })
+                  onChange={(val) =>
+                    currentUser?.role === "SUPER_ADMIN" &&
+                    setFormData({ ...formData, dueDate: val })
                   }
-                  disabled={currentUser?.role === "pic"}
+                  disabled={currentUser?.role === "PIC"}
+                  buttonClassName={`w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-sm font-medium ${currentUser?.role === "PIC" ? "bg-gray-100 text-gray-500" : "bg-white"}`}
                 />
               </div>
-              {currentUser?.role === "super_admin" && (
+              {currentUser?.role === "SUPER_ADMIN" && (
                 <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-3 block">
                     Assign PIC (Max 2)
@@ -660,7 +654,7 @@ export default function ActivePOTable() {
                   </div>
                 </div>
               )}
-              {currentUser?.role === "pic" && (
+              {currentUser?.role === "PIC" && (
                 <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-3 block">
                     Current PIC
@@ -677,26 +671,27 @@ export default function ActivePOTable() {
                   </div>
                 </div>
               )}
-              {currentUser?.role === "pic" && (
+              {currentUser?.role === "PIC" && (
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
                     Status
                   </label>
-                  <select
-                    className="w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-sm font-medium"
+                  <SmoothDropdown
                     value={editingTask ? editingTask.status : "Open"}
-                    onChange={(e) =>
+                    onChange={(val) =>
                       editingTask &&
                       setEditingTask({
                         ...editingTask,
-                        status: e.target.value as StatusType,
+                        status: val as StatusType,
                       })
                     }
-                  >
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Done">Done</option>
-                  </select>
+                    options={[
+                      { value: "Open", label: "Open" },
+                      { value: "In Progress", label: "In Progress" },
+                      { value: "Done", label: "Done" },
+                    ]}
+                    buttonClassName="w-full p-4 bg-gray-50 rounded-2xl outline-none border border-gray-100 focus:border-blue-200 transition-all text-sm font-medium"
+                  />
                 </div>
               )}
               <div className="space-y-2">

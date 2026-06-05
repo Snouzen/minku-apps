@@ -48,3 +48,54 @@ enum Status {
   DONE
   ALMOST_EXPIRED
 }
+
+model UbiMaintenance {
+  id                      Int       @id @default(autoincrement())
+  status                  UbiStatus @default(INISIASI)
+  kegiatan                String
+  site                    String
+  nominalPengajuan        Float?
+  progress                String?
+  nominalHasilEvaluasi    Float?
+  nominalRealisasi        Float?
+  dependency              UbiDependency?
+
+  sdiPengajuanRm          String?
+  ndIzinPrinsipGm         String?
+  ndIzinPrinsipDirsar     String?
+  ndIzinPenggunaanRka     String?
+  ndBalasanDivisiUmum     String?
+  sdiPemberitahuanRm      String?
+  ndPermohonanPembayaran  String?
+  batasPenerbitanKontrak  DateTime?
+  dokumentasiUrls         String[]
+
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  deletedAt               DateTime?
+
+  @@map("ubi_maintenances")
+}
+
+enum UbiStatus {
+  INISIASI
+  SEDANG_BERLANGSUNG
+  SELESAI
+}
+
+enum UbiDependency {
+  MINKU
+  OPERASIONAL
+}
+
+model UnitProduksi {
+  idRegional    String   @id @default(cuid())
+  namaRegional  String
+  siteArea      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  alamat        String?  @default("")
+  kodeRegional  String?
+
+  @@map("unit_produksi")
+}

@@ -1,67 +1,46 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, User, Lock } from "lucide-react";
 import Swal from "sweetalert2";
+import { getUsersList, loginAction } from "../actions/auth";
+import SmoothDropdown from "../component/smoothDropdown";
 
-interface User {
+interface UserOption {
   id: number;
   name: string;
-  role: "super_admin" | "pic";
-  picName?: string;
-  password: string;
 }
-
-const users: User[] = [
-  { id: 1, name: "User Master", role: "super_admin", password: "admin123" },
-  { id: 2, name: "Agung", role: "pic", picName: "Agung", password: "agung123" },
-  {
-    id: 3,
-    name: "Latifah",
-    role: "pic",
-    picName: "Latifah",
-    password: "latifah123",
-  },
-  { id: 4, name: "Pepy", role: "pic", picName: "Pepy", password: "pepy123" },
-  { id: 5, name: "Pandu", role: "pic", picName: "Pandu", password: "pandu123" },
-  { id: 6, name: "Vivi", role: "pic", picName: "Vivi", password: "vivi123" },
-  { id: 7, name: "Rama", role: "pic", picName: "Rama", password: "rama123" },
-  {
-    id: 8,
-    name: "Raysha",
-    role: "pic",
-    picName: "Raysha",
-    password: "raysha123",
-  },
-  { id: 9, name: "Ajo", role: "pic", picName: "Ajo", password: "ajo123" },
-];
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [password, setPassword] = useState("");
+  const [users, setUsers] = useState<UserOption[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function fetchUsers() {
+      const result = await getUsersList();
+      if (result.success) {
+        setUsers(result.users);
+      }
+      setIsLoading(false);
+    }
+    fetchUsers();
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const user = users.find(
-      (u) => u.name === selectedUser && u.password === password,
-    );
+    const result = await loginAction(selectedUser, password);
 
-    if (user) {
-      const userData = {
-        id: user.id,
-        name: user.name,
-        role: user.role,
-        picName: user.picName,
-      };
-
-      localStorage.setItem("currentUser", JSON.stringify(userData));
+    if (result.success && result.user) {
+      localStorage.setItem("currentUser", JSON.stringify(result.user));
 
       Swal.fire({
         icon: "success",
         title: "Login Berhasil",
-        text: `Selamat datang, ${user.name}!`,
+        text: `Selamat datang, ${result.user.name}!`,
         timer: 1500,
         showConfirmButton: false,
       }).then(() => {
@@ -71,7 +50,7 @@ export default function LoginPage() {
       Swal.fire({
         icon: "error",
         title: "Login Gagal",
-        text: "Username atau password salah!",
+        text: result.error || "Username atau password salah!",
       });
     }
   };
@@ -94,19 +73,17 @@ export default function LoginPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Pilih User
             </label>
-            <select
+            <SmoothDropdown
               value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
-              className="w-full px-4 py-3 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              required
-            >
-              <option value="">-- Pilih User --</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.name}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setSelectedUser(val)}
+              placeholder={isLoading ? "Memuat User..." : "-- Pilih User --"}
+              options={users.map((user) => ({
+                value: user.name,
+                label: user.name,
+              }))}
+              disabled={isLoading}
+              buttonClassName="w-full px-4 py-3 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white"
+            />
           </div>
 
           <div>

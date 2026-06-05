@@ -1,7 +1,6 @@
-import { supabase } from "./supabase";
 import { format } from "date-fns";
+import { getTasksAction, createTaskAction, updateTaskAction, deleteTaskAction } from "../actions/tasks";
 
-// Database interface untuk fallback ke localStorage jika Supabase tidak bisa connect
 export interface TaskPO {
   id: number;
   inputDate: string;
@@ -12,58 +11,33 @@ export interface TaskPO {
   remarks: string;
 }
 
-interface TaskRow {
-  id: number;
-  inputDate: string;
-  task: string;
-  dueDate: string;
-  pic: string[] | null;
-  status: string;
-  remarks?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
-  deletedAt?: string | null;
-}
-
-// Helper functions untuk convert status ke/ dari enum di database Supabase
 const statusToDb = (status: TaskPO["status"]): string => {
   switch (status) {
-    case "Open":
-      return "OPEN";
-    case "In Progress":
-      return "IN_PROGRESS";
-    case "Done":
-      return "DONE";
-    default:
-      return "OPEN";
+    case "Open": return "OPEN";
+    case "In Progress": return "IN_PROGRESS";
+    case "Done": return "DONE";
+    default: return "OPEN";
   }
 };
 
 const statusFromDb = (status: string): TaskPO["status"] => {
   switch (status) {
-    case "OPEN":
-      return "Open";
-    case "IN_PROGRESS":
-      return "In Progress";
-    case "DONE":
-      return "Done";
-    case "ALMOST_EXPIRED":
-      // Map legacy status to a workflow status; SLA will show alert separately
-      return "In Progress";
-    default:
-      return "Open";
+    case "OPEN": return "Open";
+    case "IN_PROGRESS": return "In Progress";
+    case "DONE": return "Done";
+    case "ALMOST_EXPIRED": return "In Progress";
+    default: return "Open";
   }
 };
 
 export interface User {
   id: number;
   name: string;
-  role: "super_admin" | "pic";
+  role: "SUPER_ADMIN" | "PIC";
   picName?: string;
   password: string;
 }
 
-// Fallback ke localStorage jika database tidak available
 export const getTasksFromStorage = (): TaskPO[] => {
   if (typeof window === "undefined") return [];
   const savedData = localStorage.getItem("bulog_tasks");
@@ -75,44 +49,18 @@ export const saveTasksToStorage = (tasks: TaskPO[]): void => {
   localStorage.setItem("bulog_tasks", JSON.stringify(tasks));
 };
 
-// Database operations dengan fallback
 export class DatabaseService {
-  private static isConnected = false;
+  private static isConnected = true;
 
   static async testConnection(): Promise<boolean> {
-    try {
-      if (!supabase) {
-        console.warn("Supabase not configured, using localStorage");
-        this.isConnected = false;
-        return false;
-      }
-      const { error } = await supabase.from("tasks").select("id").limit(1);
-      if (error) {
-        console.warn("Supabase connection failed, using localStorage:", error);
-        this.isConnected = false;
-        return false;
-      }
-      this.isConnected = true;
-      return true;
-    } catch (error) {
-      console.warn("Database connection failed, using localStorage:", error);
-      this.isConnected = false;
-      return false;
-    }
+    return true; // Assume always true since we rely on Server Actions
   }
 
   static async getTasks(): Promise<TaskPO[]> {
-    if (supabase) {
-      try {
-        const { data, error } = await supabase
-          .from("tasks")
-          .select("*")
-          .is("deletedAt", null)
-          .order("createdAt", { ascending: false })
-          .order("id", { ascending: false });
-        if (error) throw error;
-        this.isConnected = true;
-        return (data || []).map((task: TaskRow) => ({
+    try {
+      const result = await getTasksAction();
+      if (result.success && result.tasks) {
+        return result.tasks.map((task: any) => ({
           id: task.id,
           inputDate: format(new Date(task.inputDate), "yyyy-MM-dd"),
           task: task.task,
@@ -121,124 +69,74 @@ export class DatabaseService {
           status: statusFromDb(task.status),
           remarks: task.remarks || "",
         }));
-      } catch (error) {
-        console.warn(
-          "Failed to fetch from database, falling back to localStorage:",
-          error,
-        );
-        this.isConnected = false;
       }
+    } catch (error) {
+      console.warn("Failed to fetch from server actions, falling back to localStorage:", error);
     }
-
-    return [...getTasksFromStorage()].reverse();
+    return getTasksFromStorage();
   }
 
   static async createTask(taskData: Omit<TaskPO, "id">): Promise<TaskPO> {
-    if (supabase) {
-      try {
-        const { data, error } = await supabase
-          .from("tasks")
-          .insert({
-            task: taskData.task,
-            // Simpan tanpa timezone agar tidak geser hari
-            inputDate: format(new Date(), "yyyy-MM-dd"),
-            dueDate: taskData.dueDate,
-            pic: taskData.pic,
-            status: statusToDb(taskData.status),
-            remarks: taskData.remarks,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          })
-          .select()
-          .single();
-        if (error) throw error;
-        this.isConnected = true;
+    try {
+      const payload = {
+        task: taskData.task,
+        dueDate: taskData.dueDate,
+        pic: taskData.pic,
+        status: statusToDb(taskData.status),
+        remarks: taskData.remarks,
+      };
+      
+      const result = await createTaskAction(payload);
+      if (result.success && result.task) {
         return {
-          id: (data as TaskRow).id,
-          inputDate: format(
-            new Date((data as TaskRow).inputDate),
-            "yyyy-MM-dd",
-          ),
-          task: (data as TaskRow).task,
-          dueDate: format(new Date((data as TaskRow).dueDate), "yyyy-MM-dd"),
-          pic: (data as TaskRow).pic || [],
-          status: statusFromDb((data as TaskRow).status),
-          remarks: (data as TaskRow).remarks || "",
+          id: result.task.id,
+          inputDate: format(new Date(result.task.inputDate), "yyyy-MM-dd"),
+          task: result.task.task,
+          dueDate: format(new Date(result.task.dueDate), "yyyy-MM-dd"),
+          pic: result.task.pic || [],
+          status: statusFromDb(result.task.status),
+          remarks: result.task.remarks || "",
         };
-      } catch (error) {
-        console.warn(
-          "Failed to create in database, falling back to localStorage:",
-          error,
-        );
-        this.isConnected = false;
       }
+    } catch (error) {
+      console.warn("Failed to create via server action, falling back to localStorage:", error);
     }
 
-    // Fallback to localStorage
     const tasks = getTasksFromStorage();
-    const newTask: TaskPO = {
-      id: Date.now(),
-      ...taskData,
-    };
+    const newTask: TaskPO = { id: Date.now(), ...taskData };
     tasks.push(newTask);
     saveTasksToStorage(tasks);
     return newTask;
   }
 
-  static async updateTask(
-    id: number,
-    updates: Partial<TaskPO>,
-  ): Promise<TaskPO | null> {
+  static async updateTask(id: number, updates: Partial<TaskPO>): Promise<TaskPO | null> {
     const isLocalId = id > 2147483647;
-    if (supabase && !isLocalId) {
+    if (!isLocalId) {
       try {
-        const payload: Partial<{
-          task: string;
-          dueDate: string;
-          pic: string[];
-          status: string;
-          remarks: string | null;
-          updatedAt: string;
-        }> = {};
+        const payload: any = {};
         if (updates.task !== undefined) payload.task = updates.task;
         if (updates.dueDate !== undefined) payload.dueDate = updates.dueDate;
         if (updates.pic !== undefined) payload.pic = updates.pic;
-        if (updates.status !== undefined)
-          payload.status = statusToDb(updates.status);
+        if (updates.status !== undefined) payload.status = statusToDb(updates.status);
         if (updates.remarks !== undefined) payload.remarks = updates.remarks;
-        payload.updatedAt = new Date().toISOString();
 
-        const { data, error } = await supabase
-          .from("tasks")
-          .update(payload)
-          .eq("id", id)
-          .select()
-          .single();
-        if (error) throw error;
-        this.isConnected = true;
-        return {
-          id: (data as TaskRow).id,
-          inputDate: new Date((data as TaskRow).inputDate)
-            .toISOString()
-            .split("T")[0],
-          task: (data as TaskRow).task,
-          dueDate: new Date((data as TaskRow).dueDate)
-            .toISOString()
-            .split("T")[0],
-          pic: (data as TaskRow).pic || [],
-          status: statusFromDb((data as TaskRow).status),
-          remarks: (data as TaskRow).remarks || "",
-        };
+        const result = await updateTaskAction(id, payload);
+        if (result.success && result.task) {
+          return {
+            id: result.task.id,
+            inputDate: format(new Date(result.task.inputDate), "yyyy-MM-dd"),
+            task: result.task.task,
+            dueDate: format(new Date(result.task.dueDate), "yyyy-MM-dd"),
+            pic: result.task.pic || [],
+            status: statusFromDb(result.task.status),
+            remarks: result.task.remarks || "",
+          };
+        }
       } catch (error) {
-        console.warn(
-          "Failed to update in database, falling back to localStorage:",
-          error,
-        );
-        this.isConnected = false;
+        console.warn("Failed to update via server action, falling back to localStorage:", error);
       }
     }
 
-    // Fallback to localStorage
     const tasks = getTasksFromStorage();
     const taskIndex = tasks.findIndex((t) => t.id === id);
     if (taskIndex === -1) return null;
@@ -250,36 +148,20 @@ export class DatabaseService {
 
   static async deleteTask(id: number): Promise<boolean> {
     const isLocalId = id > 2147483647;
-    if (supabase && !isLocalId) {
+    if (!isLocalId) {
       try {
-        const { error } = await supabase
-          .from("tasks")
-          .update({
-            deletedAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          })
-          .eq("id", id);
-        if (error) throw error;
-        this.isConnected = true;
-        return true;
+        const result = await deleteTaskAction(id);
+        if (result.success) return true;
       } catch (error) {
-        console.warn(
-          "Failed to delete from database, falling back to localStorage:",
-          error,
-        );
-        this.isConnected = false;
+        console.warn("Failed to delete via server action, falling back to localStorage:", error);
       }
     }
 
-    // Fallback to localStorage
     const tasks = getTasksFromStorage();
     const idx = tasks.findIndex((t) => t.id === id);
     if (idx !== -1) {
       const [removed] = tasks.splice(idx, 1);
-      const logsRaw =
-        (typeof window !== "undefined" &&
-          localStorage.getItem("bulog_tasks_deleted")) ||
-        "[]";
+      const logsRaw = (typeof window !== "undefined" && localStorage.getItem("bulog_tasks_deleted")) || "[]";
       const logs = JSON.parse(logsRaw);
       logs.push({ ...removed, deletedAt: new Date().toISOString() });
       if (typeof window !== "undefined") {
@@ -290,6 +172,3 @@ export class DatabaseService {
     return true;
   }
 }
-
-// Initialize connection test
-DatabaseService.testConnection();

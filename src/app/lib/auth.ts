@@ -1,7 +1,7 @@
 export interface CurrentUser {
   id: number;
   name: string;
-  role: "super_admin" | "pic";
+  role: "SUPER_ADMIN" | "PIC";
   picName?: string;
 }
 
