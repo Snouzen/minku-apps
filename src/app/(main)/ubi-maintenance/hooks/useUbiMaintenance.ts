@@ -94,7 +94,7 @@ export function useUbiMaintenance() {
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           const filePath = `dokumentasi_pekerjaan/${fileName}`;
 
-          const { error: uploadError } = await supabase.storage
+          const { error: uploadError } = await supabase!.storage
             .from("dokumentasi")
             .upload(filePath, file);
 
@@ -102,7 +102,7 @@ export function useUbiMaintenance() {
             throw new Error(`Gagal mengupload file ${file.name}: ` + uploadError.message);
           }
 
-          const { data: publicUrlData } = supabase.storage
+          const { data: publicUrlData } = supabase!.storage
             .from("dokumentasi")
             .getPublicUrl(filePath);
 

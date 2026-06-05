@@ -53,8 +53,10 @@ export default function SmoothDatePicker({
 
   useEffect(() => {
     if (value && isOpen) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       setCurrentMonth(parseISO(value));
     } else if (!value && isOpen) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       setCurrentMonth(new Date());
     }
   }, [value, isOpen]);
@@ -71,8 +73,8 @@ export default function SmoothDatePicker({
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart, { weekStarts: 1 }); // Monday start
-  const endDate = endOfWeek(monthEnd, { weekStarts: 1 });
+  const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Monday start
+  const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: startDate, end: endDate });
 
   const weekDays = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];

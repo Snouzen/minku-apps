@@ -28,10 +28,6 @@ export function useUnitProduksi() {
     .filter(Boolean)
     .sort((a: any, b: any) => a.namaRegional.localeCompare(b.namaRegional));
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
     setLoading(true);
     const res = await getUnitProduksiAction();
@@ -40,6 +36,10 @@ export function useUnitProduksi() {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const filteredData = data.filter((item) => {
     const term = filterText.toLowerCase();
