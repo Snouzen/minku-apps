@@ -24,6 +24,13 @@ export default function LoginPage() {
         const result = await getUsersList();
         if (result && result.success) {
           setUsers(result.users || []);
+        } else if (result && result.error) {
+          console.error("Database error:", result.error);
+          Swal.fire({
+            icon: "error",
+            title: "Database Error",
+            text: result.error,
+          });
         }
       } catch (err) {
         console.error("Failed to fetch users:", err);

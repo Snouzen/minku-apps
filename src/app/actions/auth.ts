@@ -48,8 +48,8 @@ export async function getUsersList() {
       }
     });
     return { success: true, users };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Fetch users error:", error);
-    return { success: false, users: [] };
+    return { success: false, users: [], error: error.message || String(error) };
   }
 }
