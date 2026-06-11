@@ -5,6 +5,7 @@ import { getCurrentUser } from "../lib/auth";
 
 import Sidebar from "../component/sidebar";
 import Navbar from "../component/navbar";
+import AutoLogout from "../component/AutoLogout";
 
 export default function AuthLayout({
   children,
@@ -40,6 +41,8 @@ export default function AuthLayout({
 
   return (
     <div className="flex h-screen w-full bg-[#F8F9FB] relative">
+      <AutoLogout timeoutMinutes={30} />
+      
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
@@ -58,8 +61,6 @@ export default function AuthLayout({
         </main>
       </div>
 
-      {/* Issue Label Fixed */}
-      {/* Issue Label Fixed */}
     </div>
   );
 }

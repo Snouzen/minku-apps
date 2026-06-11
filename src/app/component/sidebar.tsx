@@ -7,6 +7,7 @@ import {
   ChevronRight,
   X,
   MapPin,
+  Server,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,6 +35,12 @@ export default function Sidebar({
       href: "/ubi-maintenance",
       icon: <Building2 size={20} />,
       active: pathname === "/ubi-maintenance",
+    },
+    {
+      name: "Matrix IT",
+      href: "/matrix-it",
+      icon: <Server size={20} />,
+      active: pathname === "/matrix-it",
     },
     {
       name: "Unit Produksi",

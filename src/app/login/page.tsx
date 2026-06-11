@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, User, Lock } from "lucide-react";
 import Swal from "sweetalert2";
 import { getUsersList, loginAction } from "../actions/auth";
-import SmoothDropdown from "../component/smoothDropdown";
+import SmoothAutocomplete from "../component/smoothAutocomplete";
 
 interface UserOption {
   id: number;
@@ -73,16 +73,17 @@ export default function LoginPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Pilih User
             </label>
-            <SmoothDropdown
+            <SmoothAutocomplete
               value={selectedUser}
               onChange={(val) => setSelectedUser(val)}
-              placeholder={isLoading ? "Memuat User..." : "-- Pilih User --"}
+              placeholder={isLoading ? "Memuat User..." : "Ketik atau Pilih User..."}
               options={users.map((user) => ({
                 value: user.name,
                 label: user.name,
               }))}
               disabled={isLoading}
-              buttonClassName="w-full px-4 py-3 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white"
+              inputClassName="w-full px-2 py-1 outline-none bg-transparent text-black"
+              className="w-full"
             />
           </div>
 

@@ -99,3 +99,50 @@ model UnitProduksi {
 
   @@map("unit_produksi")
 }
+
+model MatrixKegiatan {
+  id              Int          @id @default(autoincrement())
+  namaKegiatan    String
+  tasks           MatrixTask[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("matrix_kegiatan")
+}
+
+model MatrixTask {
+  id              Int          @id @default(autoincrement())
+  namaTask        String
+  kegiatanId      Int
+  kegiatan        MatrixKegiatan @relation(fields: [kegiatanId], references: [id], onDelete: Cascade)
+  subTasks        MatrixSubTask[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("matrix_tasks")
+}
+
+model MatrixSubTask {
+  id                    Int          @id @default(autoincrement())
+  namaSubTask           String
+  goals                 String?
+  actionPlan            String?
+  status                String       @default("OPEN") // OPEN, IN_PROGRESS, COMPLETED
+  
+  // Tracker Administrasi
+  sdiPengajuanRm          String?
+  ndIzinPrinsipGm         String?
+  ndIzinPrinsipDirsar     String?
+  ndIzinPenggunaanRka     String?
+  ndBalasanDivisiUmum     String?
+  sdiPemberitahuanRm      String?
+  ndPermohonanPembayaran  String?
+  batasPenerbitanKontrak  DateTime?
+
+  taskId                Int
+  task                  MatrixTask   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  @@map("matrix_sub_tasks")
+}
