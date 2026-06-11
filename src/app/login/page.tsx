@@ -20,11 +20,16 @@ export default function LoginPage() {
 
   useEffect(() => {
     async function fetchUsers() {
-      const result = await getUsersList();
-      if (result.success) {
-        setUsers(result.users);
+      try {
+        const result = await getUsersList();
+        if (result && result.success) {
+          setUsers(result.users || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
     fetchUsers();
   }, []);
