@@ -11,6 +11,39 @@ import { getVendorsAction } from "../../../actions/vendor";
 import { getCurrentUser } from "../../../lib/auth";
 import { supabase } from "../../../lib/supabase";
 
+export interface KegiatanItem {
+  kegiatan: string;
+  site: string;
+  sdiPengajuanRm: string;
+  nominalPengajuan: string;
+  progress: string;
+}
+
+const emptyKegiatanItem: KegiatanItem = {
+  kegiatan: "",
+  site: "",
+  sdiPengajuanRm: "",
+  nominalPengajuan: "",
+  progress: "",
+};
+
+const initialFormData = {
+  status: "INISIASI",
+  dependency: "",
+  vendorId: "",
+  nominalHasilEvaluasi: "",
+  nominalRealisasi: "",
+  ndIzinPrinsipGm: "",
+  ndIzinPrinsipDirsar: "",
+  ndIzinPenggunaanRka: "",
+  ndBalasanDivisiUmum: "",
+  sdiPemberitahuanRm: "",
+  ndPermohonanPembayaran: "",
+  batasPenerbitanKontrak: "",
+  dokumentasiUrls: [] as string[],
+  kegiatanItems: [{ ...emptyKegiatanItem }] as KegiatanItem[],
+};
+
 export function useUbiMaintenance() {
   const [data, setData] = useState<any[]>([]);
   const [unitProduksiOptions, setUnitProduksiOptions] = useState<{label: string, value: string}[]>([]);
@@ -32,25 +65,7 @@ export function useUbiMaintenance() {
 
   const currentUser = getCurrentUser();
 
-  const [formData, setFormData] = useState<any>({
-    status: "INISIASI",
-    kegiatan: "",
-    site: "",
-    vendorId: "",
-    nominalPengajuan: "",
-    progress: "",
-    nominalHasilEvaluasi: "",
-    nominalRealisasi: "",
-    sdiPengajuanRm: "",
-    ndIzinPrinsipGm: "",
-    ndIzinPrinsipDirsar: "",
-    ndIzinPenggunaanRka: "",
-    ndBalasanDivisiUmum: "",
-    sdiPemberitahuanRm: "",
-    ndPermohonanPembayaran: "",
-    batasPenerbitanKontrak: "",
-    dokumentasiUrls: [],
-  });
+  const [formData, setFormData] = useState<any>({ ...initialFormData });
 
   const fetchData = useCallback(async () => {
     const res = await getUbiMaintenancesAction();
@@ -89,8 +104,11 @@ export function useUbiMaintenance() {
        return Swal.fire("Error", "Unauthorized", "error");
     }
 
-    if (!formData.kegiatan.trim()) return Swal.fire("Peringatan", "Nama kegiatan wajib diisi!", "warning");
-    if (!formData.site.trim()) return Swal.fire("Peringatan", "Site wajib diisi!", "warning");
+    // Validate: at least 1 kegiatan with name and site
+    const validItems = formData.kegiatanItems?.filter((k: KegiatanItem) => k.kegiatan.trim() && k.site.trim());
+    if (!validItems || validItems.length === 0) {
+      return Swal.fire("Peringatan", "Minimal 1 kegiatan dengan nama dan site harus diisi!", "warning");
+    }
 
     setIsUploading(true);
     let finalDokumentasiUrls = [...(formData.dokumentasiUrls || [])];
@@ -121,7 +139,7 @@ export function useUbiMaintenance() {
         finalDokumentasiUrls = [...finalDokumentasiUrls, ...newUrls];
       }
 
-      const payload = { ...formData, dokumentasiUrls: finalDokumentasiUrls };
+      const payload = { ...formData, dokumentasiUrls: finalDokumentasiUrls, kegiatanItems: validItems };
 
       if (selectedRecord) {
         const res = await updateUbiMaintenanceAction(selectedRecord.id, payload);
@@ -174,15 +192,10 @@ export function useUbiMaintenance() {
     setFilesToUpload([]);
     setFormData({
       status: item.status,
-      kegiatan: item.kegiatan,
       dependency: item.dependency || "",
-      site: item.site,
       vendorId: item.vendorId ? item.vendorId.toString() : "",
-      nominalPengajuan: item.nominalPengajuan?.toString() || "",
-      progress: item.progress || "",
-      nominalHasilEvaluasi: item.nominalHasilEvaluasi || "",
-      nominalRealisasi: item.nominalRealisasi || "",
-      sdiPengajuanRm: item.sdiPengajuanRm || "",
+      nominalHasilEvaluasi: item.nominalHasilEvaluasi?.toString() || "",
+      nominalRealisasi: item.nominalRealisasi?.toString() || "",
       ndIzinPrinsipGm: item.ndIzinPrinsipGm || "",
       ndIzinPrinsipDirsar: item.ndIzinPrinsipDirsar || "",
       ndIzinPenggunaanRka: item.ndIzinPenggunaanRka || "",
@@ -191,6 +204,15 @@ export function useUbiMaintenance() {
       ndPermohonanPembayaran: item.ndPermohonanPembayaran || "",
       batasPenerbitanKontrak: item.batasPenerbitanKontrak ? new Date(item.batasPenerbitanKontrak).toISOString().split('T')[0] : "",
       dokumentasiUrls: item.dokumentasiUrls || [],
+      kegiatanItems: item.kegiatan?.length
+        ? item.kegiatan.map((k: any) => ({
+            kegiatan: k.kegiatan,
+            site: k.site,
+            sdiPengajuanRm: k.sdiPengajuanRm || "",
+            nominalPengajuan: k.nominalPengajuan?.toString() || "",
+            progress: k.progress || "",
+          }))
+        : [{ ...emptyKegiatanItem }],
     });
     setIsModalOpen(true);
   };
@@ -200,10 +222,12 @@ export function useUbiMaintenance() {
     setIsViewModalOpen(true);
   };
 
+  // Filter: search across all child kegiatan names & sites
   const filteredData = data.filter((item) => {
-    const matchesText =
-      item.kegiatan.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.site.toLowerCase().includes(filterText.toLowerCase());
+    const childTexts = (item.kegiatan || []).map((k: any) =>
+      `${k.kegiatan} ${k.site}`.toLowerCase()
+    ).join(" ");
+    const matchesText = childTexts.includes(filterText.toLowerCase());
     const matchesStatus = filterStatus === "All" || item.status === filterStatus;
     return matchesText && matchesStatus;
   });
@@ -248,6 +272,8 @@ export function useUbiMaintenance() {
     handleSave,
     handleDelete,
     handleEdit,
-    handleView
+    handleView,
+    initialFormData,
+    emptyKegiatanItem,
   };
 }

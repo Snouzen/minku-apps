@@ -5,8 +5,6 @@ import {
   Building2,
   Database,
   ChevronRight,
-  X,
-  MapPin,
   Server,
 } from "lucide-react";
 import Image from "next/image";
@@ -28,6 +26,7 @@ export default function Sidebar({
 
   useEffect(() => {
     if (pathname === "/unit-produksi" || pathname === "/vendor") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpenDropdown("Master Data");
     }
   }, [pathname]);

@@ -18,8 +18,8 @@ interface MatrixTableProps {
 }
 
 export default function MatrixTable({
-  data, loading, expandedKegiatan, expandedTasks,
-  toggleKegiatan, toggleTask,
+  data, loading, expandedKegiatan,
+  toggleKegiatan,
   openAddKegiatan, openEditKegiatan,
   openAddTask, openEditTask,
   handleDelete

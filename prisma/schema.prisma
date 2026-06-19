@@ -49,20 +49,15 @@ enum Status {
   ALMOST_EXPIRED
 }
 
-model UbiMaintenance {
-  id                      Int       @id @default(autoincrement())
-  status                  UbiStatus @default(INISIASI)
-  kegiatan                String
-  site                    String
-  nominalPengajuan        Float?
-  progress                String?
-  nominalHasilEvaluasi    Float?
-  nominalRealisasi        Float?
+model UbiAdministrasi {
+  id                      Int             @id @default(autoincrement())
+  status                  UbiStatus       @default(INISIASI)
   dependency              UbiDependency?
   vendorId                Int?
-  vendor                  Vendor?   @relation(fields: [vendorId], references: [id])
+  vendor                  Vendor?         @relation(fields: [vendorId], references: [id])
+  nominalHasilEvaluasi    Float?
+  nominalRealisasi        Float?
 
-  sdiPengajuanRm          String?
   ndIzinPrinsipGm         String?
   ndIzinPrinsipDirsar     String?
   ndIzinPenggunaanRka     String?
@@ -72,11 +67,29 @@ model UbiMaintenance {
   batasPenerbitanKontrak  DateTime?
   dokumentasiUrls         String[]
 
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
+  kegiatan                UbiKegiatan[]
+
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
   deletedAt               DateTime?
 
-  @@map("ubi_maintenances")
+  @@map("ubi_administrasi")
+}
+
+model UbiKegiatan {
+  id              Int              @id @default(autoincrement())
+  administrasiId  Int
+  administrasi    UbiAdministrasi  @relation(fields: [administrasiId], references: [id], onDelete: Cascade)
+  kegiatan        String
+  site            String
+  sdiPengajuanRm  String?
+  nominalPengajuan Float?
+  progress        String?
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("ubi_kegiatan")
 }
 
 enum UbiStatus {
@@ -153,7 +166,7 @@ model Vendor {
   id         Int              @id @default(autoincrement())
   namaVendor String
   picVendor  String?
-  kegiatan   UbiMaintenance[]
+  kegiatan   UbiAdministrasi[]
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
 

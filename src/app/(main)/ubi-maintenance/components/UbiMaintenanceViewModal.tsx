@@ -1,7 +1,7 @@
 import React from "react";
-import { X, Calendar, Building2, DollarSign, Activity, CheckCircle2, Circle, Eye } from "lucide-react";
+import { X, Calendar, Building2, DollarSign, Activity, CheckCircle2, Circle, Eye, MapPin } from "lucide-react";
 import Swal from "sweetalert2";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 
 interface UbiMaintenanceViewModalProps {
@@ -33,17 +33,22 @@ export default function UbiMaintenanceViewModal({
 }: UbiMaintenanceViewModalProps) {
   if (!isOpen || !selectedRecord) return null;
 
+  const children: any[] = selectedRecord.kegiatan || [];
+  const totalNominalPengajuan = children.reduce((sum: number, k: any) => sum + (k.nominalPengajuan || 0), 0);
+  const siteSummary = [...new Set(children.flatMap((k: any) => (k.site || "").split(",").map((s: string) => s.trim()).filter(Boolean)))].join(", ") || "-";
+
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[#1A237E]/20 backdrop-blur-md" onClick={onClose} />
       <div className="relative bg-white w-full max-w-4xl rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in duration-200 border border-white max-h-[90vh] flex flex-col">
+        {/* Header */}
         <div className="p-6 bg-[#1A237E] text-white flex justify-between items-center shrink-0">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-200">
               Detail & Tracker Administrasi
             </p>
             <h3 className="text-xl font-black uppercase italic tracking-tight mt-1">
-              {selectedRecord.site}
+              {siteSummary}
             </h3>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors">
@@ -54,22 +59,12 @@ export default function UbiMaintenanceViewModal({
         <div className="p-8 overflow-y-auto text-black flex-1 flex flex-col md:flex-row gap-8">
           {/* Left Column: Details */}
           <div className="flex-1 space-y-6">
+            {/* Info Administrasi */}
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
               <h4 className="text-lg font-bold text-[#1A237E] flex items-center gap-2 mb-4 border-b pb-2">
-                <Building2 size={20} /> Info Kegiatan
+                <Building2 size={20} /> Info Administrasi
               </h4>
-              
               <div className="space-y-4">
-                <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Deskripsi</p>
-                  <p className="font-bold text-gray-800 leading-relaxed">{selectedRecord.kegiatan}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Progress Terakhir</p>
-                  <p className="font-bold text-orange-600 bg-orange-50 inline-block px-3 py-1 rounded-lg">
-                    {selectedRecord.progress || "Belum ada progress"}
-                  </p>
-                </div>
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Batas Kontrak/SPK</p>
                   <div className="flex items-center gap-2 font-bold text-gray-800">
@@ -77,7 +72,6 @@ export default function UbiMaintenanceViewModal({
                     {selectedRecord.batasPenerbitanKontrak ? format(new Date(selectedRecord.batasPenerbitanKontrak), "dd MMM yyyy", { locale: localeId }) : "-"}
                   </div>
                 </div>
-
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Vendor Pelaksana</p>
                   <div className="flex items-center gap-2">
@@ -103,9 +97,7 @@ export default function UbiMaintenanceViewModal({
                             `,
                             confirmButtonColor: '#1A237E',
                             confirmButtonText: 'Tutup',
-                            customClass: {
-                              popup: 'rounded-3xl'
-                            }
+                            customClass: { popup: 'rounded-3xl' }
                           });
                         }}
                         className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
@@ -116,35 +108,46 @@ export default function UbiMaintenanceViewModal({
                     )}
                   </div>
                 </div>
-
-                {selectedRecord.dokumentasiUrls && selectedRecord.dokumentasiUrls.length > 0 && (
-                  <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Dokumentasi</p>
-                    <div className="flex flex-col gap-2">
-                      {selectedRecord.dokumentasiUrls.slice(0, 3).map((url: string, index: number) => (
-                        <button key={index} onClick={() => onPreviewImage(url)} className="text-left font-semibold text-blue-600 hover:underline text-sm flex items-center gap-2">
-                          Lihat File Dokumentasi {index + 1}
-                        </button>
-                      ))}
-                      {selectedRecord.dokumentasiUrls.length > 3 && (
-                        <button onClick={onOpenGallery} className="text-left font-semibold text-[#1A237E] hover:underline text-sm flex items-center gap-2 mt-1 px-3 py-1 bg-blue-50 rounded-lg w-fit">
-                          + Lihat {selectedRecord.dokumentasiUrls.length - 3} File Lainnya
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
+            {/* Daftar Kegiatan */}
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <h4 className="text-lg font-bold text-[#1A237E] flex items-center gap-2 mb-4 border-b pb-2">
+                <MapPin size={20} /> Daftar Kegiatan ({children.length})
+              </h4>
+              <div className="space-y-3">
+                {children.map((child: any, idx: number) => (
+                  <div key={child.id || idx} className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <p className="font-bold text-gray-800">{child.kegiatan}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{child.site}</p>
+                      </div>
+                      <span className="font-black text-sm text-[#1A237E] whitespace-nowrap">{formatRupiah(child.nominalPengajuan)}</span>
+                    </div>
+                    <div className="flex gap-4 mt-2 text-xs">
+                      {child.sdiPengajuanRm && (
+                        <span className="font-mono bg-white px-2 py-1 rounded border border-blue-100 text-blue-700">SDI: {child.sdiPengajuanRm}</span>
+                      )}
+                      {child.progress && (
+                        <span className="bg-orange-50 text-orange-600 font-bold px-2 py-1 rounded">{child.progress}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Finansial */}
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
               <h4 className="text-lg font-bold text-[#1A237E] flex items-center gap-2 mb-4 border-b pb-2">
                 <DollarSign size={20} /> Informasi Finansial
               </h4>
               <div className="space-y-3">
                 <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
-                  <span className="text-xs font-bold text-gray-500">Nominal Pengajuan</span>
-                  <span className="font-black text-gray-800">{formatRupiah(selectedRecord.nominalPengajuan)}</span>
+                  <span className="text-xs font-bold text-gray-500">Total Nominal Pengajuan</span>
+                  <span className="font-black text-gray-800">{formatRupiah(totalNominalPengajuan || null)}</span>
                 </div>
                 <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
                   <span className="text-xs font-bold text-gray-500">Nominal Hasil Evaluasi</span>
@@ -156,6 +159,25 @@ export default function UbiMaintenanceViewModal({
                 </div>
               </div>
             </div>
+
+            {/* Dokumentasi */}
+            {selectedRecord.dokumentasiUrls && selectedRecord.dokumentasiUrls.length > 0 && (
+              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                <h4 className="text-sm font-bold text-[#1A237E] mb-3">Dokumentasi</h4>
+                <div className="flex flex-col gap-2">
+                  {selectedRecord.dokumentasiUrls.slice(0, 3).map((url: string, index: number) => (
+                    <button key={index} onClick={() => onPreviewImage(url)} className="text-left font-semibold text-blue-600 hover:underline text-sm flex items-center gap-2">
+                      Lihat File Dokumentasi {index + 1}
+                    </button>
+                  ))}
+                  {selectedRecord.dokumentasiUrls.length > 3 && (
+                    <button onClick={onOpenGallery} className="text-left font-semibold text-[#1A237E] hover:underline text-sm flex items-center gap-2 mt-1 px-3 py-1 bg-blue-50 rounded-lg w-fit">
+                      + Lihat {selectedRecord.dokumentasiUrls.length - 3} File Lainnya
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Tracker Stepper */}
@@ -165,18 +187,24 @@ export default function UbiMaintenanceViewModal({
             </h4>
             <div className="space-y-0 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
               {adminSteps.map((step, idx) => {
-                const docNumber = selectedRecord[step.key as keyof typeof selectedRecord];
+                // SDI Pengajuan RM is per-kegiatan, show combined
+                let docNumber: string | null = null;
+                if (step.key === "sdiPengajuanRm") {
+                  const sdiValues = children.map((k: any) => k.sdiPengajuanRm).filter(Boolean);
+                  docNumber = sdiValues.length > 0 ? sdiValues.join(", ") : null;
+                } else {
+                  docNumber = selectedRecord[step.key as keyof typeof selectedRecord] as string | null;
+                }
+
                 const isCompleted = !!docNumber;
                 return (
                   <div key={step.key} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    {/* Status Icon */}
                     <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 ${
                       isCompleted ? "bg-green-500 border-white text-white" : "bg-white border-slate-200 text-slate-300"
                     }`}>
                       {isCompleted ? <CheckCircle2 size={16} /> : <Circle size={10} className="fill-current" />}
                     </div>
                     
-                    {/* Card */}
                     <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:border-blue-100 group-hover:-translate-y-1 my-2">
                       <div className="flex flex-col gap-1">
                         <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">Tahap {idx + 1}</span>

@@ -1,5 +1,5 @@
 import React from "react";
-import { X, ExternalLink, FileText } from "lucide-react";
+import { X, ExternalLink } from "lucide-react";
 import Image from "next/image";
 
 interface UbiMaintenanceImagePreviewProps {

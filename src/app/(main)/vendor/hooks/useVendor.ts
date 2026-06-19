@@ -33,6 +33,7 @@ export function useVendor() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
     fetchData();
   }, [fetchData]);
 
@@ -77,8 +78,8 @@ export function useVendor() {
       }
       setModalOpen(false);
       fetchData();
-    } catch (err: any) {
-      Swal.fire("Error", "Gagal menyimpan data", "error");
+    } catch (_err: any) {
+      Swal.fire("Error", _err.message || "Gagal menyimpan data", "error");
     }
   };
 

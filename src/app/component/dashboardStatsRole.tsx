@@ -1,11 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { CheckCircle2, AlertCircle, Clock, User2 } from "lucide-react";
+import { CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { getCurrentUser } from "../lib/auth";
 import { DatabaseService, TaskPO } from "../lib/database";
 import { computeSLA } from "../lib/sla";
-
-type StatusType = "Open" | "Done" | "In Progress";
 
 interface DashboardStatsProps {
   userPicName?: string;

@@ -1,8 +1,6 @@
 import React from "react";
-import { X, CheckCircle2, Circle } from "lucide-react";
+import { X, Save } from "lucide-react";
 import Button from "../../../component/ui/Button";
-import SmoothDropdown from "../../../component/smoothDropdown";
-import SmoothDatePicker from "../../../component/smoothDatePicker";
 
 interface MatrixFormModalProps {
   modalType: "KEGIATAN" | "TASK" | null;
