@@ -26,8 +26,8 @@ export default function Button({
     outline: "bg-white border border-gray-200 hover:border-blue-400 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-bold shadow-sm",
     icon: "p-2 text-gray-400 hover:bg-gray-100 rounded-lg",
     "icon-blue": "p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg",
-    "icon-orange": "p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg",
-    "icon-red": "p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg"
+    "icon-orange": "p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg",
+    "icon-red": "p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
   };
 
   return (

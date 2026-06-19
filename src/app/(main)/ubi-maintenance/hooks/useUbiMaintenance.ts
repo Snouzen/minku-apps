@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import {
   getUbiMaintenancesAction,
@@ -7,12 +7,14 @@ import {
   deleteUbiMaintenanceAction,
 } from "../../../actions/ubi";
 import { getUnitProduksiAction } from "../../../actions/unitProduksi";
+import { getVendorsAction } from "../../../actions/vendor";
 import { getCurrentUser } from "../../../lib/auth";
 import { supabase } from "../../../lib/supabase";
 
 export function useUbiMaintenance() {
   const [data, setData] = useState<any[]>([]);
   const [unitProduksiOptions, setUnitProduksiOptions] = useState<{label: string, value: string}[]>([]);
+  const [vendorOptions, setVendorOptions] = useState<{label: string, value: string}[]>([]);
   const [filterText, setFilterText] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
 
@@ -34,6 +36,7 @@ export function useUbiMaintenance() {
     status: "INISIASI",
     kegiatan: "",
     site: "",
+    vendorId: "",
     nominalPengajuan: "",
     progress: "",
     nominalHasilEvaluasi: "",
@@ -49,17 +52,15 @@ export function useUbiMaintenance() {
     dokumentasiUrls: [],
   });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const res = await getUbiMaintenancesAction();
     if (res.success && res.maintenances) {
       setData(res.maintenances);
     }
-  };
 
-  const fetchUnitProduksi = async () => {
-    const res = await getUnitProduksiAction();
-    if (res.success && res.data) {
-      const sites = res.data.filter((d: any) => d.siteArea !== "-");
+    const unitRes = await getUnitProduksiAction();
+    if (unitRes.success && unitRes.data) {
+      const sites = unitRes.data.filter((d: any) => d.siteArea !== "-");
       const options = sites.map((s: any) => ({
         label: s.siteArea,
         value: s.siteArea,
@@ -67,12 +68,20 @@ export function useUbiMaintenance() {
       const uniqueOptions = Array.from(new Map(options.map((item: any) => [item.value, item])).values());
       setUnitProduksiOptions(uniqueOptions as {label: string, value: string}[]);
     }
-  };
+
+    const vendorsRes = await getVendorsAction();
+    if (vendorsRes.success && vendorsRes.data) {
+      const vOpts = vendorsRes.data.map((v: any) => ({
+        value: v.id.toString(),
+        label: v.namaVendor
+      }));
+      setVendorOptions(vOpts);
+    }
+  }, []);
 
   useEffect(() => {
     fetchData();
-    fetchUnitProduksi();
-  }, []);
+  }, [fetchData]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,9 +89,8 @@ export function useUbiMaintenance() {
        return Swal.fire("Error", "Unauthorized", "error");
     }
 
-    if (formData.status === "SELESAI" && (!formData.dokumentasiUrls || formData.dokumentasiUrls.length === 0) && filesToUpload.length === 0) {
-      return Swal.fire("Peringatan", "Upload dokumentasi pekerjaan wajib untuk status Selesai!", "warning");
-    }
+    if (!formData.kegiatan.trim()) return Swal.fire("Peringatan", "Nama kegiatan wajib diisi!", "warning");
+    if (!formData.site.trim()) return Swal.fire("Peringatan", "Site wajib diisi!", "warning");
 
     setIsUploading(true);
     let finalDokumentasiUrls = [...(formData.dokumentasiUrls || [])];
@@ -169,7 +177,8 @@ export function useUbiMaintenance() {
       kegiatan: item.kegiatan,
       dependency: item.dependency || "",
       site: item.site,
-      nominalPengajuan: item.nominalPengajuan || "",
+      vendorId: item.vendorId ? item.vendorId.toString() : "",
+      nominalPengajuan: item.nominalPengajuan?.toString() || "",
       progress: item.progress || "",
       nominalHasilEvaluasi: item.nominalHasilEvaluasi || "",
       nominalRealisasi: item.nominalRealisasi || "",
@@ -216,6 +225,7 @@ export function useUbiMaintenance() {
     setCurrentPage,
     totalPages,
     unitProduksiOptions,
+    vendorOptions,
     filterText,
     setFilterText,
     filterStatus,

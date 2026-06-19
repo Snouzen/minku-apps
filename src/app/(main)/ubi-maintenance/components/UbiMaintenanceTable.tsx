@@ -24,12 +24,13 @@ export default function UbiMaintenanceTable({ data, onView, onEdit, onDelete }: 
   return (
     <div className="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left">
+        <table className="w-full text-left whitespace-nowrap">
           <thead className="bg-gray-50/50 text-[10px] font-black uppercase text-gray-400 tracking-widest border-b border-gray-50">
             <tr>
               <th className="px-6 py-5 w-16 text-center">No</th>
               <th className="px-6 py-5">Site</th>
-              <th className="px-6 py-5 max-w-xs">Kegiatan</th>
+              <th className="px-6 py-5">Kegiatan</th>
+              <th className="px-6 py-5">Vendor</th>
               <th className="px-6 py-5">Dependency</th>
               <th className="px-6 py-5">Progress</th>
               <th className="px-6 py-5">Status</th>
@@ -54,7 +55,8 @@ export default function UbiMaintenanceTable({ data, onView, onEdit, onDelete }: 
                 <tr key={item.id} className="hover:bg-gray-50/30 group transition-colors text-black">
                   <td className="px-6 py-5 text-gray-400 text-center font-medium">{idx + 1}</td>
                   <td className="px-6 py-5 font-bold text-gray-700">{item.site}</td>
-                  <td className="px-6 py-5 font-medium max-w-xs text-sm">{item.kegiatan}</td>
+                  <td className="px-6 py-5 font-medium text-sm">{item.kegiatan}</td>
+                  <td className="px-6 py-5 font-medium text-sm text-gray-600">{item.vendor?.namaVendor || "-"}</td>
                   <td className="px-6 py-5">
                     {item.dependency ? (
                       <Badge label={item.dependency} color={depColor} />
@@ -70,7 +72,7 @@ export default function UbiMaintenanceTable({ data, onView, onEdit, onDelete }: 
                     {formatRupiah(item.nominalPengajuan)}
                   </td>
                   <td className="px-6 py-5">
-                    <div className="flex justify-center gap-1 group-hover:opacity-100 transition-all">
+                    <div className="flex justify-center gap-1 transition-all">
                       <Button variant="icon-blue" icon={Eye} title="Lihat Detail & Tracker" onClick={() => onView(item)} />
                       <Button variant="icon-orange" icon={Pencil} title="Edit" onClick={() => onEdit(item)} />
                       <Button variant="icon-red" icon={Trash2} title="Hapus" onClick={() => onDelete(item.id)} />
@@ -81,7 +83,7 @@ export default function UbiMaintenanceTable({ data, onView, onEdit, onDelete }: 
             })}
             {data.length === 0 && (
               <tr>
-                <td colSpan={8} className="text-center py-10 text-gray-400 text-sm">
+                <td colSpan={9} className="text-center py-10 text-gray-400 text-sm">
                   Tidak ada data ditemukan.
                 </td>
               </tr>

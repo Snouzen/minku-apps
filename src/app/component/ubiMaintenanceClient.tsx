@@ -30,6 +30,7 @@ export default function UbiMaintenanceClient() {
     setCurrentPage,
     totalPages,
     unitProduksiOptions,
+    vendorOptions,
     filterText,
     setFilterText,
     filterStatus,
@@ -163,6 +164,7 @@ export default function UbiMaintenanceClient() {
         setFormData={setFormData}
         handleSave={handleSave}
         unitProduksiOptions={unitProduksiOptions}
+        vendorOptions={vendorOptions}
         filesToUpload={filesToUpload}
         setFilesToUpload={setFilesToUpload}
         isUploading={isUploading}

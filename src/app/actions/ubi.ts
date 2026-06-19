@@ -10,6 +10,9 @@ export async function getUbiMaintenancesAction() {
       },
       orderBy: {
         createdAt: 'desc'
+      },
+      include: {
+        vendor: true
       }
     });
 
@@ -28,6 +31,7 @@ export async function createUbiMaintenanceAction(data: any) {
         dependency: data.dependency || null,
         kegiatan: data.kegiatan,
         site: data.site,
+        vendorId: data.vendorId ? parseInt(data.vendorId, 10) : null,
         nominalPengajuan: data.nominalPengajuan ? parseFloat(data.nominalPengajuan) : null,
         progress: data.progress || null,
         nominalHasilEvaluasi: data.nominalHasilEvaluasi ? parseFloat(data.nominalHasilEvaluasi) : null,
@@ -58,6 +62,7 @@ export async function updateUbiMaintenanceAction(id: number, data: any) {
     if (data.dependency !== undefined) payload.dependency = data.dependency || null;
     if (data.kegiatan !== undefined) payload.kegiatan = data.kegiatan;
     if (data.site !== undefined) payload.site = data.site;
+    if (data.vendorId !== undefined) payload.vendorId = data.vendorId ? parseInt(data.vendorId, 10) : null;
     if (data.nominalPengajuan !== undefined) payload.nominalPengajuan = data.nominalPengajuan ? parseFloat(data.nominalPengajuan) : null;
     if (data.progress !== undefined) payload.progress = data.progress;
     if (data.nominalHasilEvaluasi !== undefined) payload.nominalHasilEvaluasi = data.nominalHasilEvaluasi ? parseFloat(data.nominalHasilEvaluasi) : null;

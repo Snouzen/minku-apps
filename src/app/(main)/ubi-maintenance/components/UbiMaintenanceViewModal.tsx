@@ -1,5 +1,6 @@
 import React from "react";
-import { X, Calendar, Building2, DollarSign, Activity, CheckCircle2, Circle } from "lucide-react";
+import { X, Calendar, Building2, DollarSign, Activity, CheckCircle2, Circle, Eye } from "lucide-react";
+import Swal from "sweetalert2";
 import { format, parseISO } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 
@@ -74,6 +75,45 @@ export default function UbiMaintenanceViewModal({
                   <div className="flex items-center gap-2 font-bold text-gray-800">
                     <Calendar size={16} className="text-red-500" />
                     {selectedRecord.batasPenerbitanKontrak ? format(new Date(selectedRecord.batasPenerbitanKontrak), "dd MMM yyyy", { locale: localeId }) : "-"}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Vendor Pelaksana</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-gray-800 leading-relaxed">
+                      {selectedRecord.vendor?.namaVendor || "-"}
+                    </p>
+                    {selectedRecord.vendor && (
+                      <button
+                        onClick={() => {
+                          Swal.fire({
+                            title: 'Informasi Vendor',
+                            html: `
+                              <div class="text-left space-y-4 mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <div>
+                                  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Nama Vendor</p>
+                                  <p class="font-bold text-gray-800 text-lg">${selectedRecord.vendor.namaVendor}</p>
+                                </div>
+                                <div>
+                                  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">PIC Vendor</p>
+                                  <p class="font-bold text-gray-800">${selectedRecord.vendor.picVendor || '-'}</p>
+                                </div>
+                              </div>
+                            `,
+                            confirmButtonColor: '#1A237E',
+                            confirmButtonText: 'Tutup',
+                            customClass: {
+                              popup: 'rounded-3xl'
+                            }
+                          });
+                        }}
+                        className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Lihat Info Vendor"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 

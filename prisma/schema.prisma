@@ -59,6 +59,8 @@ model UbiMaintenance {
   nominalHasilEvaluasi    Float?
   nominalRealisasi        Float?
   dependency              UbiDependency?
+  vendorId                Int?
+  vendor                  Vendor?   @relation(fields: [vendorId], references: [id])
 
   sdiPengajuanRm          String?
   ndIzinPrinsipGm         String?
@@ -145,4 +147,15 @@ model MatrixSubTask {
   updatedAt             DateTime     @updatedAt
 
   @@map("matrix_sub_tasks")
+}
+
+model Vendor {
+  id         Int              @id @default(autoincrement())
+  namaVendor String
+  picVendor  String?
+  kegiatan   UbiMaintenance[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@map("vendors")
 }

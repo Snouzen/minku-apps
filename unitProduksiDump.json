@@ -1,0 +1,227 @@
+[
+  {
+    "idRegional": "cmpzas0g00000s0p1sza2xauo",
+    "namaRegional": "Regional 1 Bandung",
+    "siteArea": "-",
+    "createdAt": "2026-06-04T09:33:07.775Z",
+    "updatedAt": "2026-06-04T09:33:07.775Z",
+    "alamat": "",
+    "kodeRegional": "27001"
+  },
+  {
+    "idRegional": "cmpzasax10001s0p1hh1wl7wn",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "-",
+    "createdAt": "2026-06-04T09:33:21.349Z",
+    "updatedAt": "2026-06-04T09:33:21.349Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzasioi0002s0p1i0co43pe",
+    "namaRegional": "Regional 3 Makassar",
+    "siteArea": "-",
+    "createdAt": "2026-06-04T09:33:31.410Z",
+    "updatedAt": "2026-06-04T09:33:31.410Z",
+    "alamat": "",
+    "kodeRegional": "27003"
+  },
+  {
+    "idRegional": "cmpzaz1gb0004s0p1ubspu19w",
+    "namaRegional": "Regional 1 Bandung",
+    "siteArea": "SPB DKI",
+    "createdAt": "2026-06-04T09:38:35.675Z",
+    "updatedAt": "2026-06-04T09:38:35.675Z",
+    "alamat": "",
+    "kodeRegional": "27001"
+  },
+  {
+    "idRegional": "cmpzazp1d0005s0p1tld71796",
+    "namaRegional": "Regional 1 Bandung",
+    "siteArea": "SPP Karawang",
+    "createdAt": "2026-06-04T09:39:06.241Z",
+    "updatedAt": "2026-06-04T09:39:06.241Z",
+    "alamat": "",
+    "kodeRegional": "27001"
+  },
+  {
+    "idRegional": "cmpzazwip0006s0p1i77pj0j1",
+    "namaRegional": "Regional 1 Bandung",
+    "siteArea": "SPB Indramayu",
+    "createdAt": "2026-06-04T09:39:15.937Z",
+    "updatedAt": "2026-06-04T09:39:15.937Z",
+    "alamat": "",
+    "kodeRegional": "27001"
+  },
+  {
+    "idRegional": "cmpzb02o60007s0p1wyln6wy1",
+    "namaRegional": "Regional 1 Bandung",
+    "siteArea": "SPP Subang",
+    "createdAt": "2026-06-04T09:39:23.910Z",
+    "updatedAt": "2026-06-04T09:39:23.910Z",
+    "alamat": "",
+    "kodeRegional": "27001"
+  },
+  {
+    "idRegional": "cmpzb0glc0008s0p1gnnkh5mw",
+    "namaRegional": "Regional 1 Bandung",
+    "siteArea": "SPP Lampung",
+    "createdAt": "2026-06-04T09:39:41.951Z",
+    "updatedAt": "2026-06-04T09:39:41.951Z",
+    "alamat": "",
+    "kodeRegional": "27001"
+  },
+  {
+    "idRegional": "cmpzb0trh0009s0p1drj9qvmq",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "SPP Banyuwangi",
+    "createdAt": "2026-06-04T09:39:59.021Z",
+    "updatedAt": "2026-06-04T09:39:59.021Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb0z16000as0p1p1sytgkt",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "SPP Jember",
+    "createdAt": "2026-06-04T09:40:05.850Z",
+    "updatedAt": "2026-06-04T09:40:05.850Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb17jm000bs0p1qipkh6qu",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "SPP Kendal",
+    "createdAt": "2026-06-04T09:40:16.882Z",
+    "updatedAt": "2026-06-04T09:40:16.882Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb1g9h000cs0p1p960yyxo",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "UP Candirejo",
+    "createdAt": "2026-06-04T09:40:28.181Z",
+    "updatedAt": "2026-06-04T09:40:28.181Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb1mfv000ds0p1gtk8f0xu",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "UP Mojolaban",
+    "createdAt": "2026-06-04T09:40:36.187Z",
+    "updatedAt": "2026-06-04T09:40:36.187Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb1rqr000es0p1dq2npcl6",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "SPP Bojonegoro",
+    "createdAt": "2026-06-04T09:40:43.059Z",
+    "updatedAt": "2026-06-04T09:40:43.059Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb1wpb000fs0p16qpity4b",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "SPP Magetan",
+    "createdAt": "2026-06-04T09:40:49.487Z",
+    "updatedAt": "2026-06-04T09:40:49.487Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb23xc000gs0p1xeorl5jj",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "SPB Sidoarjo",
+    "createdAt": "2026-06-04T09:40:58.848Z",
+    "updatedAt": "2026-06-04T09:40:58.848Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb298u000hs0p1x50zpqmq",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "UP Bantul",
+    "createdAt": "2026-06-04T09:41:05.742Z",
+    "updatedAt": "2026-06-04T09:41:05.742Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb2dzw000is0p1kjbwx3fy",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "SPP Sragen",
+    "createdAt": "2026-06-04T09:41:11.899Z",
+    "updatedAt": "2026-06-04T09:41:11.899Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb2jcl000js0p1ybis1pc2",
+    "namaRegional": "Regional 2 Surabaya",
+    "siteArea": "SPB Sukoharjo",
+    "createdAt": "2026-06-04T09:41:18.837Z",
+    "updatedAt": "2026-06-04T09:41:18.837Z",
+    "alamat": "",
+    "kodeRegional": "27002"
+  },
+  {
+    "idRegional": "cmpzb2ygz000ks0p1qr8kxnut",
+    "namaRegional": "Regional 3 Makassar",
+    "siteArea": "SPP Sumbawa",
+    "createdAt": "2026-06-04T09:41:38.434Z",
+    "updatedAt": "2026-06-04T09:41:38.434Z",
+    "alamat": "",
+    "kodeRegional": "27003"
+  },
+  {
+    "idRegional": "cmpzb33wl000ls0p1qm6s44ja",
+    "namaRegional": "Regional 3 Makassar",
+    "siteArea": "SPB Lombok Timur",
+    "createdAt": "2026-06-04T09:41:45.477Z",
+    "updatedAt": "2026-06-04T09:41:45.477Z",
+    "alamat": "",
+    "kodeRegional": "27003"
+  },
+  {
+    "idRegional": "cmpzb3ayi000ms0p1fk1aq30u",
+    "namaRegional": "Regional 3 Makassar",
+    "siteArea": "SPB Sidrap",
+    "createdAt": "2026-06-04T09:41:54.618Z",
+    "updatedAt": "2026-06-04T09:41:54.618Z",
+    "alamat": "",
+    "kodeRegional": "27003"
+  },
+  {
+    "idRegional": "cmpzb3icb000ns0p1vzxbi1xu",
+    "namaRegional": "Regional 3 Makassar",
+    "siteArea": "UP Annabanua",
+    "createdAt": "2026-06-04T09:42:04.187Z",
+    "updatedAt": "2026-06-04T09:42:04.187Z",
+    "alamat": "",
+    "kodeRegional": "27003"
+  },
+  {
+    "idRegional": "cmpzb3pj5000os0p1qxsvma28",
+    "namaRegional": "Regional 3 Makassar",
+    "siteArea": "SPB Makassar",
+    "createdAt": "2026-06-04T09:42:13.505Z",
+    "updatedAt": "2026-06-04T09:42:13.505Z",
+    "alamat": "",
+    "kodeRegional": "27003"
+  },
+  {
+    "idRegional": "cmpzb3ufr000ps0p1hwsbc5u6",
+    "namaRegional": "Regional 3 Makassar",
+    "siteArea": "UP Lancirang",
+    "createdAt": "2026-06-04T09:42:19.863Z",
+    "updatedAt": "2026-06-04T09:42:19.863Z",
+    "alamat": "",
+    "kodeRegional": "27003"
+  }
+]

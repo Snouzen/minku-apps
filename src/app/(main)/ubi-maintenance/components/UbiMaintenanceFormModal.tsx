@@ -12,9 +12,10 @@ interface UbiMaintenanceFormModalProps {
   onClose: () => void;
   selectedRecord: any | null;
   formData: any;
-  setFormData: React.Dispatch<React.SetStateAction<any>>;
+  setFormData: (val: any) => void;
   handleSave: (e: React.FormEvent) => void;
   unitProduksiOptions: { label: string; value: string }[];
+  vendorOptions: { label: string; value: string }[];
   filesToUpload: File[];
   setFilesToUpload: React.Dispatch<React.SetStateAction<File[]>>;
   isUploading: boolean;
@@ -28,6 +29,7 @@ export default function UbiMaintenanceFormModal({
   setFormData,
   handleSave,
   unitProduksiOptions,
+  vendorOptions,
   filesToUpload,
   setFilesToUpload,
   isUploading,
@@ -35,8 +37,7 @@ export default function UbiMaintenanceFormModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
       <div className="relative bg-white w-full max-w-2xl rounded-[2.5rem] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
         <div className="p-6 bg-[#1A237E] text-white flex justify-between items-center shrink-0">
           <h3 className="font-black uppercase tracking-tight">
@@ -89,6 +90,16 @@ export default function UbiMaintenanceFormModal({
                 <input required type="text" className="w-full p-3 bg-white rounded-xl outline-none border border-gray-200 focus:border-blue-400 text-sm" value={formData.kegiatan} onChange={e => setFormData({...formData, kegiatan: e.target.value})} />
               </div>
               
+              <div className="md:col-span-3 space-y-1">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Vendor</label>
+                <SmoothAutocomplete
+                  options={vendorOptions}
+                  value={formData.vendorId || ""}
+                  onChange={(val) => setFormData({ ...formData, vendorId: val })}
+                  placeholder="Pilih vendor..."
+                />
+              </div>
+
               {formData.status === "SELESAI" && (
                 <div className="md:col-span-3 space-y-1">
                   <label className="text-[10px] font-black text-red-500 uppercase tracking-widest ml-1">Upload Dokumentasi Pekerjaan (Wajib)</label>

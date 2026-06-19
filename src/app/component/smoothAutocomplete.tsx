@@ -35,7 +35,12 @@ export default function SmoothAutocomplete({
 
   // Sync internal input value with external value prop
   useEffect(() => {
-    setInputValue(value);
+    const selectedOption = options.find((opt) => opt.value === value);
+    if (selectedOption) {
+      setInputValue(selectedOption.label);
+    } else {
+      setInputValue(value);
+    }
   }, [value]);
 
   useEffect(() => {
@@ -55,7 +60,7 @@ export default function SmoothAutocomplete({
     if (!inputValue) return options;
     const lowerVal = inputValue.toLowerCase();
     // If the input exactly matches an option's value (meaning it was selected), show all options
-    const exactMatch = options.find((opt) => opt.value === inputValue);
+    const exactMatch = options.find((opt) => opt.value === value || opt.label === inputValue);
     if (exactMatch) return options;
 
     return options.filter(
@@ -90,7 +95,7 @@ export default function SmoothAutocomplete({
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (filteredOptions.length > 0 && activeIndex >= 0 && activeIndex < filteredOptions.length) {
-        handleOptionClick(filteredOptions[activeIndex].value);
+        handleOptionClick(filteredOptions[activeIndex].value, filteredOptions[activeIndex].label);
       } else {
         setIsOpen(false);
       }
@@ -102,8 +107,8 @@ export default function SmoothAutocomplete({
     }
   };
 
-  const handleOptionClick = (optionValue: string) => {
-    setInputValue(optionValue);
+  const handleOptionClick = (optionValue: string, optionLabel: string) => {
+    setInputValue(optionLabel);
     onChange(optionValue);
     setIsOpen(false);
   };
@@ -175,7 +180,7 @@ export default function SmoothAutocomplete({
                 key={option.value}
                 type="button"
                 onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => handleOptionClick(option.value)}
+                onClick={() => handleOptionClick(option.value, option.label)}
                 className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                   activeIndex === index
                     ? "bg-blue-50 border-l-4 border-blue-500 text-[#1A237E] font-bold"
