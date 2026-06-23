@@ -55,7 +55,7 @@ export async function createUbiMaintenanceAction(data: any) {
       }
 
       return parent;
-    });
+    }, { maxWait: 15000, timeout: 30000 });
 
     return { success: true, record };
   } catch (error: any) {
@@ -105,7 +105,7 @@ export async function updateUbiMaintenanceAction(id: number, data: any) {
       }
 
       return updated;
-    });
+    }, { maxWait: 15000, timeout: 30000 });
 
     return { success: true, record };
   } catch (error: any) {

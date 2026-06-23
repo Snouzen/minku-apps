@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, FileText, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import SmoothDropdown from "../../../component/smoothDropdown";
 import SmoothDatePicker from "../../../component/smoothDatePicker";
@@ -41,6 +42,12 @@ export default function UbiMaintenanceFormModal({
   emptyKegiatanItem,
 }: UbiMaintenanceFormModalProps) {
   const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (isOpen) {
+      setStep(0);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

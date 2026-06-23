@@ -64,35 +64,38 @@ export default function MatrixTable({
             </div>
 
             {/* TASK LEVEL */}
-            {expandedKegiatan.includes(kegiatan.id) && (
-              <div className="bg-white border-t border-gray-200">
-                {kegiatan.tasks.length === 0 && <div className="p-4 text-center text-sm text-gray-500">Belum ada task.</div>}
-                
-                {kegiatan.tasks.map((task: any) => (
-                  <div key={task.id} className="border-b border-gray-100 last:border-b-0">
-                    <div className="flex items-center justify-between p-3 pl-12 hover:bg-orange-50 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <ChevronRight size={18} className="text-orange-300" />
-                        <h4 className="font-semibold text-gray-700">{task.namaTask}</h4>
-                        <span className="bg-orange-100 text-orange-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
-                          {task.subTasks.length} Sub-Tasks
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Link 
-                          href={`/matrix-it/task/${task.id}`}
-                          className="text-xs bg-orange-100 text-orange-700 px-3 py-1.5 rounded-lg hover:bg-orange-200 font-bold flex items-center gap-1 transition-all"
-                        >
-                          Lihat Detail <ArrowRight size={14} />
-                        </Link>
-                        <button onClick={(e) => { e.stopPropagation(); openEditTask(task); }} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-white"><Pencil size={16} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDelete("TASK", task.id); }} className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-white"><Trash2 size={16} /></button>
+            {/* TASK LEVEL */}
+            <div className={`transition-all duration-500 ease-out grid ${expandedKegiatan.includes(kegiatan.id) ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+              <div className="overflow-hidden">
+                <div className="bg-white border-t border-gray-200">
+                  {kegiatan.tasks.length === 0 && <div className="p-4 text-center text-sm text-gray-500">Belum ada task.</div>}
+                  
+                  {kegiatan.tasks.map((task: any) => (
+                    <div key={task.id} className="border-b border-gray-100 last:border-b-0">
+                      <div className="flex items-center justify-between p-3 pl-12 hover:bg-orange-50 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <ChevronRight size={18} className="text-orange-300" />
+                          <h4 className="font-semibold text-gray-700">{task.namaTask}</h4>
+                          <span className="bg-orange-100 text-orange-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                            {task.subTasks.length} Sub-Tasks
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Link 
+                            href={`/matrix-it/task/${task.id}`}
+                            className="text-xs bg-orange-100 text-orange-700 px-3 py-1.5 rounded-lg hover:bg-orange-200 font-bold flex items-center gap-1 transition-all"
+                          >
+                            Lihat Detail <ArrowRight size={14} />
+                          </Link>
+                          <button onClick={(e) => { e.stopPropagation(); openEditTask(task); }} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-white"><Pencil size={16} /></button>
+                          <button onClick={(e) => { e.stopPropagation(); handleDelete("TASK", task.id); }} className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-white"><Trash2 size={16} /></button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         ))}
       </div>

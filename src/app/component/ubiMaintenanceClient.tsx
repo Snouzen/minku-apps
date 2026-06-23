@@ -4,6 +4,7 @@ import React from "react";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import SearchInput from "./ui/SearchInput";
 import Button from "./ui/Button";
+import SmoothDropdown from "./smoothDropdown";
 
 import UbiMaintenanceFormModal from "../(main)/ubi-maintenance/components/UbiMaintenanceFormModal";
 import UbiMaintenanceTable from "../(main)/ubi-maintenance/components/UbiMaintenanceTable";
@@ -35,6 +36,8 @@ export default function UbiMaintenanceClient() {
     setFilterText,
     filterStatus,
     setFilterStatus,
+    filterDependency,
+    setFilterDependency,
     isModalOpen,
     setIsModalOpen,
     isViewModalOpen,
@@ -52,6 +55,7 @@ export default function UbiMaintenanceClient() {
     setFormData,
     handleSave,
     handleDelete,
+    handleStatusChange,
     handleEdit,
     handleView,
     initialFormData,
@@ -113,6 +117,19 @@ export default function UbiMaintenanceClient() {
             value={filterText}
             onChange={setFilterText} 
           />
+          <div className="w-[180px]">
+            <SmoothDropdown
+              options={[
+                { label: "All", value: "All" },
+                { label: "MINKU", value: "MINKU" },
+                { label: "OPERASIONAL", value: "OPERASIONAL" }
+              ]}
+              value={filterDependency}
+              onChange={setFilterDependency}
+              className="w-full"
+              buttonClassName="!py-[10px] !px-4 !bg-white hover:!bg-gray-50 border-gray-200"
+            />
+          </div>
         </div>
 
         <Button
@@ -135,6 +152,7 @@ export default function UbiMaintenanceClient() {
           onEdit={handleEdit} 
           onView={handleView} 
           onDelete={handleDelete}
+          onStatusChange={handleStatusChange}
           currentPage={currentPage}
         />
         

@@ -29,7 +29,7 @@ const emptyKegiatanItem: KegiatanItem = {
 
 const initialFormData = {
   status: "INISIASI",
-  dependency: "",
+  dependency: "MINKU",
   vendorId: "",
   nominalHasilEvaluasi: "",
   nominalRealisasi: "",
@@ -50,6 +50,7 @@ export function useUbiMaintenance() {
   const [vendorOptions, setVendorOptions] = useState<{label: string, value: string}[]>([]);
   const [filterText, setFilterText] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [filterDependency, setFilterDependency] = useState("All");
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -168,6 +169,24 @@ export function useUbiMaintenance() {
     }
   };
 
+  const handleStatusChange = async (id: number, newStatus: string) => {
+    const prevData = [...data];
+    setData(prevData.map(item => item.id === id ? { ...item, status: newStatus } : item));
+    
+    try {
+      const res = await updateUbiMaintenanceAction(id, { status: newStatus });
+      if (!res.success) {
+        Swal.fire("Error", res.error || "Gagal mengubah status", "error");
+        setData(prevData);
+      } else {
+        Swal.fire({ icon: "success", title: "Status berhasil diubah", toast: true, position: "top-end", showConfirmButton: false, timer: 3000 });
+      }
+    } catch (err: any) {
+      Swal.fire("Error", err.message || "Gagal mengubah status", "error");
+      setData(prevData);
+    }
+  };
+
   const handleDelete = async (id: number) => {
     Swal.fire({
       title: "Hapus Data?",
@@ -229,7 +248,8 @@ export function useUbiMaintenance() {
     ).join(" ");
     const matchesText = childTexts.includes(filterText.toLowerCase());
     const matchesStatus = filterStatus === "All" || item.status === filterStatus;
-    return matchesText && matchesStatus;
+    const matchesDependency = filterDependency === "All" || item.dependency === filterDependency;
+    return matchesText && matchesStatus && matchesDependency;
   });
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
@@ -254,6 +274,8 @@ export function useUbiMaintenance() {
     setFilterText,
     filterStatus,
     setFilterStatus,
+    filterDependency,
+    setFilterDependency,
     isModalOpen,
     setIsModalOpen,
     isViewModalOpen,
@@ -271,6 +293,7 @@ export function useUbiMaintenance() {
     setFormData,
     handleSave,
     handleDelete,
+    handleStatusChange,
     handleEdit,
     handleView,
     initialFormData,
