@@ -15,6 +15,7 @@ export interface KegiatanItem {
   kegiatan: string;
   site: string;
   sdiPengajuanRm: string;
+  sdiPengajuanRmUrl: string;
   nominalPengajuan: string;
   progress: string;
 }
@@ -23,6 +24,7 @@ const emptyKegiatanItem: KegiatanItem = {
   kegiatan: "",
   site: "",
   sdiPengajuanRm: "",
+  sdiPengajuanRmUrl: "",
   nominalPengajuan: "",
   progress: "",
 };
@@ -34,12 +36,21 @@ const initialFormData = {
   nominalHasilEvaluasi: "",
   nominalRealisasi: "",
   ndIzinPrinsipGm: "",
+  ndIzinPrinsipGmUrl: "",
   ndIzinPrinsipDirsar: "",
+  ndIzinPrinsipDirsarUrl: "",
   ndIzinPenggunaanRka: "",
+  ndIzinPenggunaanRkaUrl: "",
   ndBalasanDivisiUmum: "",
+  ndBalasanDivisiUmumUrl: "",
   sdiPemberitahuanRm: "",
+  sdiPemberitahuanRmUrl: "",
   ndPermohonanPembayaran: "",
+  ndPermohonanPembayaranUrl: "",
   batasPenerbitanKontrak: "",
+  tanggalKontrak: "",
+  tanggalSelesai: "",
+  sumberAnggaran: "",
   dokumentasiUrls: [] as string[],
   kegiatanItems: [{ ...emptyKegiatanItem }] as KegiatanItem[],
 };
@@ -216,18 +227,28 @@ export function useUbiMaintenance() {
       nominalHasilEvaluasi: item.nominalHasilEvaluasi?.toString() || "",
       nominalRealisasi: item.nominalRealisasi?.toString() || "",
       ndIzinPrinsipGm: item.ndIzinPrinsipGm || "",
+      ndIzinPrinsipGmUrl: item.ndIzinPrinsipGmUrl || "",
       ndIzinPrinsipDirsar: item.ndIzinPrinsipDirsar || "",
+      ndIzinPrinsipDirsarUrl: item.ndIzinPrinsipDirsarUrl || "",
       ndIzinPenggunaanRka: item.ndIzinPenggunaanRka || "",
+      ndIzinPenggunaanRkaUrl: item.ndIzinPenggunaanRkaUrl || "",
       ndBalasanDivisiUmum: item.ndBalasanDivisiUmum || "",
+      ndBalasanDivisiUmumUrl: item.ndBalasanDivisiUmumUrl || "",
       sdiPemberitahuanRm: item.sdiPemberitahuanRm || "",
+      sdiPemberitahuanRmUrl: item.sdiPemberitahuanRmUrl || "",
       ndPermohonanPembayaran: item.ndPermohonanPembayaran || "",
+      ndPermohonanPembayaranUrl: item.ndPermohonanPembayaranUrl || "",
       batasPenerbitanKontrak: item.batasPenerbitanKontrak ? new Date(item.batasPenerbitanKontrak).toISOString().split('T')[0] : "",
+      tanggalKontrak: item.tanggalKontrak ? new Date(item.tanggalKontrak).toISOString().split('T')[0] : "",
+      tanggalSelesai: item.tanggalSelesai ? new Date(item.tanggalSelesai).toISOString().split('T')[0] : "",
+      sumberAnggaran: item.sumberAnggaran || "",
       dokumentasiUrls: item.dokumentasiUrls || [],
       kegiatanItems: item.kegiatan?.length
         ? item.kegiatan.map((k: any) => ({
             kegiatan: k.kegiatan,
             site: k.site,
             sdiPengajuanRm: k.sdiPengajuanRm || "",
+            sdiPengajuanRmUrl: k.sdiPengajuanRmUrl || "",
             nominalPengajuan: k.nominalPengajuan?.toString() || "",
             progress: k.progress || "",
           }))

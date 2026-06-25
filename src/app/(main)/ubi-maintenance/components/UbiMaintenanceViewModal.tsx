@@ -73,6 +73,26 @@ export default function UbiMaintenanceViewModal({
                   </div>
                 </div>
                 <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tanggal Kontrak</p>
+                  <div className="flex items-center gap-2 font-bold text-gray-800">
+                    <Calendar size={16} className="text-blue-500" />
+                    {selectedRecord.tanggalKontrak ? format(new Date(selectedRecord.tanggalKontrak), "dd MMM yyyy", { locale: localeId }) : "-"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tanggal Selesai</p>
+                  <div className="flex items-center gap-2 font-bold text-gray-800">
+                    <Calendar size={16} className="text-green-500" />
+                    {selectedRecord.tanggalSelesai ? format(new Date(selectedRecord.tanggalSelesai), "dd MMM yyyy", { locale: localeId }) : "-"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Sumber Anggaran</p>
+                  <div className="flex items-center gap-2 font-bold text-gray-800">
+                    {selectedRecord.sumberAnggaran ? selectedRecord.sumberAnggaran.replace("_", " ") : "-"}
+                  </div>
+                </div>
+                <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Vendor Pelaksana</p>
                   <div className="flex items-center gap-2">
                     <p className="font-bold text-gray-800 leading-relaxed">
@@ -126,12 +146,32 @@ export default function UbiMaintenanceViewModal({
                       </div>
                       <span className="font-black text-sm text-[#1A237E] whitespace-nowrap">{formatRupiah(child.nominalPengajuan)}</span>
                     </div>
-                    <div className="flex gap-4 mt-2 text-xs">
+                    <div className="flex flex-col sm:flex-row gap-2 mt-3 text-xs">
                       {child.sdiPengajuanRm && (
-                        <span className="font-mono bg-white px-2 py-1 rounded border border-blue-100 text-blue-700">SDI: {child.sdiPengajuanRm}</span>
+                        <div className="flex-1 min-w-0">
+                          {child.sdiPengajuanRmUrl ? (
+                            <a
+                              href={child.sdiPengajuanRmUrl.startsWith('http') ? child.sdiPengajuanRmUrl : `https://${child.sdiPengajuanRmUrl}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-block font-mono bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:underline transition-all break-words max-w-full"
+                              title="Buka Dokumen"
+                            >
+                              SDI: {child.sdiPengajuanRm} ↗
+                            </a>
+                          ) : (
+                            <span className="inline-block font-mono bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 text-gray-700 break-words max-w-full">
+                              SDI: {child.sdiPengajuanRm}
+                            </span>
+                          )}
+                        </div>
                       )}
                       {child.progress && (
-                        <span className="bg-orange-50 text-orange-600 font-bold px-2 py-1 rounded">{child.progress}</span>
+                        <div className="flex-1 min-w-0 text-left">
+                          <span className="inline-block bg-orange-50 text-orange-600 font-bold px-3 py-2 rounded-lg border border-orange-100 break-words max-w-full">
+                            {child.progress}
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -210,9 +250,23 @@ export default function UbiMaintenanceViewModal({
                         <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">Tahap {idx + 1}</span>
                         <h5 className={`font-bold text-sm ${isCompleted ? "text-[#1A237E]" : "text-gray-500"}`}>{step.label}</h5>
                         {isCompleted ? (
-                          <p className="text-xs font-mono bg-blue-50 text-blue-700 px-2 py-1 rounded mt-1 border border-blue-100 inline-block max-w-full break-all">
-                            {docNumber}
-                          </p>
+                          <div className="mt-1">
+                            {selectedRecord[`${step.key}Url`] ? (
+                              <a
+                                href={selectedRecord[`${step.key}Url`].startsWith('http') ? selectedRecord[`${step.key}Url`] : `https://${selectedRecord[`${step.key}Url`]}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs font-mono bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200 inline-block max-w-full break-all hover:bg-blue-100 hover:border-blue-300 hover:underline transition-all"
+                                title="Buka Dokumen"
+                              >
+                                {docNumber} ↗
+                              </a>
+                            ) : (
+                              <p className="text-xs font-mono bg-slate-50 text-gray-700 px-2 py-1 rounded border border-slate-200 inline-block max-w-full break-all">
+                                {docNumber}
+                              </p>
+                            )}
+                          </div>
                         ) : (
                           <p className="text-[10px] text-gray-400 italic mt-1">Belum ada dokumen</p>
                         )}

@@ -31,12 +31,21 @@ export async function createUbiMaintenanceAction(data: any) {
           nominalHasilEvaluasi: data.nominalHasilEvaluasi ? parseFloat(data.nominalHasilEvaluasi) : null,
           nominalRealisasi: data.nominalRealisasi ? parseFloat(data.nominalRealisasi) : null,
           ndIzinPrinsipGm: data.ndIzinPrinsipGm || null,
+          ndIzinPrinsipGmUrl: data.ndIzinPrinsipGmUrl || null,
           ndIzinPrinsipDirsar: data.ndIzinPrinsipDirsar || null,
+          ndIzinPrinsipDirsarUrl: data.ndIzinPrinsipDirsarUrl || null,
           ndIzinPenggunaanRka: data.ndIzinPenggunaanRka || null,
+          ndIzinPenggunaanRkaUrl: data.ndIzinPenggunaanRkaUrl || null,
           ndBalasanDivisiUmum: data.ndBalasanDivisiUmum || null,
+          ndBalasanDivisiUmumUrl: data.ndBalasanDivisiUmumUrl || null,
           sdiPemberitahuanRm: data.sdiPemberitahuanRm || null,
+          sdiPemberitahuanRmUrl: data.sdiPemberitahuanRmUrl || null,
           ndPermohonanPembayaran: data.ndPermohonanPembayaran || null,
+          ndPermohonanPembayaranUrl: data.ndPermohonanPembayaranUrl || null,
           batasPenerbitanKontrak: data.batasPenerbitanKontrak ? new Date(data.batasPenerbitanKontrak) : null,
+          tanggalKontrak: data.tanggalKontrak ? new Date(data.tanggalKontrak) : null,
+          tanggalSelesai: data.tanggalSelesai ? new Date(data.tanggalSelesai) : null,
+          sumberAnggaran: data.sumberAnggaran || null,
           dokumentasiUrls: data.dokumentasiUrls || [],
         },
       });
@@ -48,6 +57,7 @@ export async function createUbiMaintenanceAction(data: any) {
             kegiatan: item.kegiatan,
             site: item.site,
             sdiPengajuanRm: item.sdiPengajuanRm || null,
+            sdiPengajuanRmUrl: item.sdiPengajuanRmUrl || null,
             nominalPengajuan: item.nominalPengajuan ? parseFloat(item.nominalPengajuan) : null,
             progress: item.progress || null,
           })),
@@ -74,12 +84,21 @@ export async function updateUbiMaintenanceAction(id: number, data: any) {
       if (data.nominalHasilEvaluasi !== undefined) parentPayload.nominalHasilEvaluasi = data.nominalHasilEvaluasi ? parseFloat(data.nominalHasilEvaluasi) : null;
       if (data.nominalRealisasi !== undefined) parentPayload.nominalRealisasi = data.nominalRealisasi ? parseFloat(data.nominalRealisasi) : null;
       if (data.ndIzinPrinsipGm !== undefined) parentPayload.ndIzinPrinsipGm = data.ndIzinPrinsipGm;
+      if (data.ndIzinPrinsipGmUrl !== undefined) parentPayload.ndIzinPrinsipGmUrl = data.ndIzinPrinsipGmUrl;
       if (data.ndIzinPrinsipDirsar !== undefined) parentPayload.ndIzinPrinsipDirsar = data.ndIzinPrinsipDirsar;
+      if (data.ndIzinPrinsipDirsarUrl !== undefined) parentPayload.ndIzinPrinsipDirsarUrl = data.ndIzinPrinsipDirsarUrl;
       if (data.ndIzinPenggunaanRka !== undefined) parentPayload.ndIzinPenggunaanRka = data.ndIzinPenggunaanRka;
+      if (data.ndIzinPenggunaanRkaUrl !== undefined) parentPayload.ndIzinPenggunaanRkaUrl = data.ndIzinPenggunaanRkaUrl;
       if (data.ndBalasanDivisiUmum !== undefined) parentPayload.ndBalasanDivisiUmum = data.ndBalasanDivisiUmum;
+      if (data.ndBalasanDivisiUmumUrl !== undefined) parentPayload.ndBalasanDivisiUmumUrl = data.ndBalasanDivisiUmumUrl;
       if (data.sdiPemberitahuanRm !== undefined) parentPayload.sdiPemberitahuanRm = data.sdiPemberitahuanRm;
+      if (data.sdiPemberitahuanRmUrl !== undefined) parentPayload.sdiPemberitahuanRmUrl = data.sdiPemberitahuanRmUrl;
       if (data.ndPermohonanPembayaran !== undefined) parentPayload.ndPermohonanPembayaran = data.ndPermohonanPembayaran;
+      if (data.ndPermohonanPembayaranUrl !== undefined) parentPayload.ndPermohonanPembayaranUrl = data.ndPermohonanPembayaranUrl;
       if (data.batasPenerbitanKontrak !== undefined) parentPayload.batasPenerbitanKontrak = data.batasPenerbitanKontrak ? new Date(data.batasPenerbitanKontrak) : null;
+      if (data.tanggalKontrak !== undefined) parentPayload.tanggalKontrak = data.tanggalKontrak ? new Date(data.tanggalKontrak) : null;
+      if (data.tanggalSelesai !== undefined) parentPayload.tanggalSelesai = data.tanggalSelesai ? new Date(data.tanggalSelesai) : null;
+      if (data.sumberAnggaran !== undefined) parentPayload.sumberAnggaran = data.sumberAnggaran || null;
       if (data.dokumentasiUrls !== undefined) parentPayload.dokumentasiUrls = data.dokumentasiUrls;
 
       const updated = await tx.ubiAdministrasi.update({
@@ -97,6 +116,7 @@ export async function updateUbiMaintenanceAction(id: number, data: any) {
               kegiatan: item.kegiatan,
               site: item.site,
               sdiPengajuanRm: item.sdiPengajuanRm || null,
+              sdiPengajuanRmUrl: item.sdiPengajuanRmUrl || null,
               nominalPengajuan: item.nominalPengajuan ? parseFloat(item.nominalPengajuan) : null,
               progress: item.progress || null,
             })),

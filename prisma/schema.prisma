@@ -59,12 +59,21 @@ model UbiAdministrasi {
   nominalRealisasi        Float?
 
   ndIzinPrinsipGm         String?
+  ndIzinPrinsipGmUrl      String?
   ndIzinPrinsipDirsar     String?
+  ndIzinPrinsipDirsarUrl  String?
   ndIzinPenggunaanRka     String?
+  ndIzinPenggunaanRkaUrl  String?
   ndBalasanDivisiUmum     String?
+  ndBalasanDivisiUmumUrl  String?
   sdiPemberitahuanRm      String?
+  sdiPemberitahuanRmUrl   String?
   ndPermohonanPembayaran  String?
+  ndPermohonanPembayaranUrl String?
   batasPenerbitanKontrak  DateTime?
+  tanggalKontrak          DateTime?
+  tanggalSelesai          DateTime?
+  sumberAnggaran          SumberAnggaran?
   dokumentasiUrls         String[]
 
   kegiatan                UbiKegiatan[]
@@ -83,6 +92,7 @@ model UbiKegiatan {
   kegiatan        String
   site            String
   sdiPengajuanRm  String?
+  sdiPengajuanRmUrl String?
   nominalPengajuan Float?
   progress        String?
 
@@ -96,6 +106,12 @@ enum UbiStatus {
   INISIASI
   SEDANG_BERLANGSUNG
   SELESAI
+}
+
+enum SumberAnggaran {
+  DIVISI_UMUM
+  DIVISI_TI
+  UBI_INDUSTRI
 }
 
 enum UbiDependency {

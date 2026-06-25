@@ -160,6 +160,36 @@ export default function UbiMaintenanceFormModal({
                     buttonClassName="w-full p-3 bg-white rounded-xl outline-none border border-gray-200 focus:border-red-400 text-sm"
                   />
                 </div>
+                <div className="md:col-span-1 space-y-1">
+                  <label className="text-[10px] font-black text-blue-500 uppercase tracking-widest ml-1">Tanggal Kontrak</label>
+                  <SmoothDatePicker
+                    value={formData.tanggalKontrak}
+                    onChange={(val) => setFormData({ ...formData, tanggalKontrak: val })}
+                    buttonClassName="w-full p-3 bg-white rounded-xl outline-none border border-gray-200 focus:border-blue-400 text-sm"
+                  />
+                </div>
+                <div className="md:col-span-1 space-y-1">
+                  <label className="text-[10px] font-black text-green-500 uppercase tracking-widest ml-1">Tanggal Selesai</label>
+                  <SmoothDatePicker
+                    value={formData.tanggalSelesai}
+                    onChange={(val) => setFormData({ ...formData, tanggalSelesai: val })}
+                    buttonClassName="w-full p-3 bg-white rounded-xl outline-none border border-gray-200 focus:border-green-400 text-sm"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Sumber Anggaran</label>
+                  <SmoothDropdown
+                    value={formData.sumberAnggaran || ""}
+                    onChange={(val) => setFormData({ ...formData, sumberAnggaran: val })}
+                    options={[
+                      { value: "", label: "Pilih Sumber Anggaran" },
+                      { value: "DIVISI_UMUM", label: "Divisi Umum" },
+                      { value: "DIVISI_TI", label: "Divisi TI" },
+                      { value: "UBI_INDUSTRI", label: "UBI Industri" },
+                    ]}
+                    buttonClassName="w-full p-3 bg-white rounded-xl outline-none border border-gray-200 focus:border-blue-400 text-sm"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -231,6 +261,13 @@ export default function UbiMaintenanceFormModal({
                         onChange={(e) => updateKegiatanItem(idx, "sdiPengajuanRm", e.target.value)}
                         placeholder="No. Dokumen"
                       />
+                      <input
+                        type="text"
+                        className="w-full p-3 bg-white rounded-xl outline-none border border-gray-200 focus:border-orange-400 text-sm mt-2"
+                        value={item.sdiPengajuanRmUrl}
+                        onChange={(e) => updateKegiatanItem(idx, "sdiPengajuanRmUrl", e.target.value)}
+                        placeholder="Link Dokumen URL"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Progress</label>
@@ -271,9 +308,10 @@ export default function UbiMaintenanceFormModal({
                 <h4 className="text-xs font-black uppercase text-slate-800 mb-4 tracking-wider">Tracker Nomor Dokumen Administrasi</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {adminSteps.filter(s => s.key !== "sdiPengajuanRm").map((step) => (
-                    <div key={step.key} className="space-y-1">
+                    <div key={step.key} className="space-y-2 bg-white p-3 border border-gray-100 rounded-xl">
                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">{step.label}</label>
-                      <input type="text" placeholder="No. Dokumen" className="w-full p-3 bg-white rounded-xl outline-none border border-gray-200 focus:border-slate-400 text-sm font-mono" value={formData[step.key]} onChange={e => setFormData({...formData, [step.key]: e.target.value})} />
+                      <input type="text" placeholder="No. Dokumen" className="w-full p-3 bg-slate-50 rounded-xl outline-none border border-gray-200 focus:border-slate-400 text-sm font-mono" value={formData[step.key]} onChange={e => setFormData({...formData, [step.key]: e.target.value})} />
+                      <input type="text" placeholder="Link Dokumen URL" className="w-full p-3 bg-slate-50 rounded-xl outline-none border border-gray-200 focus:border-slate-400 text-sm" value={formData[`${step.key}Url`]} onChange={e => setFormData({...formData, [`${step.key}Url`]: e.target.value})} />
                     </div>
                   ))}
                 </div>
