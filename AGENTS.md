@@ -1,0 +1,162 @@
+# Workspace Rules & Development Guidelines (Minku Apps)
+
+## 1. Strict Preservation of Existing Features and Business Logic (Non-Regression Rule)
+- **Do Not Alter Established Logic**: When adding new features, columns, tabs, UI components, or refactoring existing code, **NEVER alter, break, or overwrite existing processes, calculation formulas, data structures, or verified flows** unless explicitly requested by the USER.
+- **Strict Cross-Report Isolation (Non-Interference Invariant)**:
+  - When working on or updating a subsequent report type (e.g., Report 2 "Harga Pembelian", Report 3 "Realisasi Pengadaan UB", Slide Deck Presentasi, etc.), **all previously established reports (especially Report 1 "Realisasi Pengadaan" and Report 2 "Harga Pembelian") must remain 100% untouched, isolated, and operational in both UI layout and underlying data calculations**.
+  - No shared mutable state, parser changes, or styling overrides should bleed across different report types or tabs.
+- **Commodity Filter Standards (Pivot Raw Data & Subtabs)**:
+  - The `Semua Komoditi` option is omitted.
+  - Dropdown options strictly consist of:
+    1. `Beras (Beras Bahan Baku)` (`BERAS,BAHAN BAKU` / `BERAS`) — **Default active filter**
+    2. `Gabah (GKP)` (`GABAH,GKP` / `GABAH`)
+    3. `Jagung` (`JAGUNG`) — Always available even if data is currently empty.
+- **Protected Core Modules & Calculations**:
+  - **Realisasi Pengadaan (Report 1)**:
+    - **Strict Commodity Filter (`classifyCommodity`)**: Commodity classification must strictly evaluate `Product Category` and prefix codes. Non-commodity categories (`KEMASAN`, `NON COMODITY`, `SPARE PART`, `JASTASMA`, `EXPENSE`, `BIAYA`, `SEWA`, `JASA`, prefix `[D...]`, prefix `[E...]`) must **NEVER** be categorized as Beras/Gabah/Jagung even if the product name contains the word "BERAS" or "GABAH".
+    - **Smart Price-Based Kuantum Validator (`getRealKuantumKg`)**: Validate unit price (`Total / Qty`). If `Qty (Kg)` gives an unrealistic procurement price (< Rp 2.500/kg) due to ERP 50x multiplier anomalies while `Qty Received` yields a realistic price (Rp 4.000 - Rp 25.000/kg), use `Qty Received`. If packed in 50 kg sacks entered as units, accurately multiply by sack weight.
+    - **Closed Matrix Math & Reconciled Totals**: Monthly columns for the active month must equal the sum of their displayed weekly integer tons ($\text{W1}+\text{W2}+\text{W3}+\text{W4}$). Summary footers must directly sum the displayed rounded integer values of their respective columns to eliminate 1-Ton rounding discrepancies.
+    - **SPB Commodity Restriction**: SPB only handles Beras Bahan Baku.
+    - **RM Grouping & Ordering**: Sequential numbering (1–24 across groups SPB, SPP, UP, CDC) and RM groupings (RM I, RM II, RM III) must remain consistent.
+    - **Weekly Bucketing & Rollups**: Dynamic monthly weeks (`W_1-9`, `W_10-16`, `W_17-23`, `W_24-31` / dynamic month-end tail merging) and dynamic month rollups (`REAL S/D [BULAN AKTUAL]`) must be preserved.
+    - **R. Pengadaan UB (Tab 4)**: Table 1 (Realisasi Pengadaan UBI Nasional) and Table 2 (Realisasi Pengadaan Per RM) with `TARGET_2026_RM` must remain synced with `finalTotals` and `rmData`.
+    - **Target 2026**: Target 2026 data and percentage calculations `(Real S/D / Target 2026) * 100%` must not be modified or removed.
+  - **Harga Pembelian (Report 2)**:
+    - **Sub-Tabs Architecture**: `Pivot Raw Data`, `Final Report (Gabah & Beras)`, `Final Report (Jagung)`, `R. Harga Pembelian`, `Pivot Custom`.
+    - **Pivot Raw Data (Tab 1)**: Display columns `No`, `Company`, and dynamic month columns (e.g., `AGUSTUS 2026`, `SEPTEMBER 2026`). The unit price must be the weighted average procurement price:
+      $$\text{Harga Pembelian (Rp/Kg)} = \frac{\sum \text{Total Nominal PO (Rp)}}{\sum \text{Kuantum Realisasi (Kg)}}$$
+    - **Final Report & Jagung (Tab 2 & 3)**:
+      - Columns: `No`, `RM`, `LOKASI`, past historical months (`JAN`..`JULI`), Active Month (`AGT` / `SEPT` etc. dynamically detected), `MINGGUAN` (`W_1-9`, `W_10-16`, `W_17-23`, `W_24-31`), and **`REAL S/D [BULAN_AKTUAL]`**.
+      - Active Month Value: Weighted average price ($\frac{\sum \text{Total PO Bulan Berjalan}}{\sum \text{Qty Kg Bulan Berjalan}}$) of the weekly data.
+      - `REAL S/D [BULAN_AKTUAL]` Value: Equal to the active month weighted average price.
+      - Summary Footers (`HARGA BERAS SPB`, `HARGA BERAS SPP`, `HARGA GABAH SPP`, `HARGA BERAS UP`, `HARGA GABAH UP`, `HARGA JAGUNG`, `HARGA BERAS`, `HARGA GABAH`): Display weighted average prices (not arithmetic sum) for historical months, active month, weekly buckets, and `REAL S/D`.
+    - **R. Harga Pembelian (Tab 4)**:
+      - Title: `REALISASI HARGA PEMBELIAN UBI`.
+      - Displays summarized national weighted average prices: Row 1 `GABAH` (from `HARGA GABAH`), Row 2 `BERAS` (from `HARGA BERAS`), Row 3 `JAGUNG` (from `HARGA JAGUNG`).
+    - **Dynamic Month Detection & Multi-Month Accumulation**: Automatically adapt active month and weekly buckets from the uploaded dataset (`Order Date` / `Tanggal PO`). When the active month advances (e.g., September), all prior months in the dataset (e.g., August) are automatically accumulated into their respective monthly historical columns (`M_7` / `AGT`) in both warehouse rows and summary footers.
+  - **Realisasi Pengadaan UB (Report 3)**:
+    - **Sub-Tabs Architecture**: `Pivot Raw Data`, `Harga`, `Final Report`, `Pivot Custom`.
+    - **Pivot Raw Data (Tab 1)**: Displays `No`, `Company`, dynamic month columns, daily toggle, and grand average price:
+      $$\text{Harga Pembelian (Rp/Kg)} = \frac{\sum \text{Total Nominal PO (Rp)}}{\sum \text{Kuantum Realisasi (Kg)}}$$
+    - **Harga (Tab 2)**:
+      - 2-level header: `No`, `Company`, `31 [Bulan Sebelumnya] 2026` (`Kuantum` | `Nilai`), `S/d Terakhir` (`Kuantum` | `Nilai`), `Total` (`Kuantum` | `Nilai`), `HARGA (Rp/KG)`.
+      - Seeded with `HISTORICAL_REALISASI_PENGADAAN_UB_JULI_2026` for 31 Juli 2026 Kuantum and Nilai.
+      - Unit price: $\text{Harga} = \frac{\text{Total Nilai (Rp)}}{\text{Total Kuantum (Kg)}}$.
+    - **Final Report (Tab 3)**:
+      - 3-level header structure:
+        - Level 1: `NO`, `Infrastruktur`, `Target 2026` (3 cols), `Realisasi (ton)` (9 cols: `s.d [Tanggal Kemarin]`, `[Tanggal Terakhir]`, `Total (ton)`), `Persentase Pencapaian (%)` (3 cols), `Harga Rata-rata Gabah (Rp/kg)` (2 cols: `[Bulan]` | `Real s.d. [Bulan]`), `Harga Rata-rata Beras (Rp/kg)` (2 cols), `Harga Rata-rata Jagung (Rp/kg)` (2 cols).
+        - Level 2 & 3: Commodity breakdown (`Gabah`, `Beras`, `Jagung`) for Target, Realisasi sub-groups, and Persentase Pencapaian.
+      - Grand Total footer row: displays national totals for targets, realisasi ton, achievement percentages, and weighted average prices.
+    - **Pivot Custom (Tab 4)**: Custom pivot layout matching workspace standards.
+  - **Data Penyerapan (Report 4)**:
+    - **Sub-Tabs Architecture**: `Penyerapan`, `HPP`, `Final Report`, `Pivot Custom`.
+    - **Penyerapan (Tab 1)**:
+      - Table 1 (Realisasi Penyerapan Gabah SPP):
+        - 2-level header identical to Report 3 Tab Harga: `No`, `Company`, `31 [Bulan Sebelumnya] 2026` (`Kuantum` | `Nilai`), `S/d Terakhir` (`Kuantum` | `Nilai`), `Total` (`Kuantum` | `Nilai`), `HARGA (Rp/KG)`.
+        - Exclusively displays Gabah / GKP (`GABAH`) for **SPP units only** (SPP 1–10; UP and other units omitted) with no commodity dropdown filter.
+        - Seeded with `HISTORICAL_REALISASI_PENGADAAN_UB_JULI_2026.GABAH` for SPP 31 Juli 2026 baseline.
+        - Unit price: $\text{Harga} = \frac{\text{Total Nilai (Rp)}}{\text{Total Kuantum (Kg)}}$.
+      - Table 2 (Perbandingan Realisasi 2026 vs 2025):
+        - Positioned directly below Table 1 on the left column of a 2-column responsive grid.
+        - Columns: `COMPANY`, `2026` (`TON`), `2025` (`TON`), `2026` (`Rp`), `2025` (`Rp`).
+        - 2026 Data: Dynamically taken from Table 1 (`TON` = total kuantum kg / 1000, `Rp` = unit price Rp/kg).
+        - 2025 Data: Hardcoded baseline `DATA_PENYERAPAN_2025`.
+        - Footer `TOTAL`: Displays sum of 2026 & 2025 TON, and weighted average price for 2026 & 2025 Rp.
+      - Table 3 (Ringkasan Penyerapan & Persediaan SPP):
+        - Positioned side-by-side with Table 2 on the right column.
+        - Dynamic Date Header: `1 Jan - [Tanggal Terakhir Dataset]` (e.g. `1 Jan - 31 AGUSTUS 2026`).
+        - Columns: `No`, `Lokasi`, `Penyerapan` (`Kuantum Penyerapan (Ton)` | `Harga Rata-Rata (Rp)`), `Persediaan` (`Persediaan GKP (TON)` | `Persediaan GKG (TON)`).
+        - Dynamic Sources: Penyerapan from Table 1, Persediaan GKP & GKG from Slot 2 (`inventoryData`). Footer sums tonages and weighted average price.
+  - **Data Persediaan (Report 5)**:
+    - **Sub-Tabs Architecture**: `Persediaan` (Tab 1), `HPP` (Tab 2), `Hasil Samping` (Tab 3).
+    - **Persediaan (Tab 1)**:
+      - Sourced dynamically from Slot 2 (`inventoryData` / `inventoryColumns`).
+      - Product Category Filter: Clean multi-select dropdown selector matching Report 1 & 2 standards (`GKG`, `GKP`, `Beras Bahan Baku`, `Beras Jadi`, `Kemasan`, `Produk Sampingan`) with default active filter `GKG`.
+      - Optional Checkbox Filter: `Sembunyikan Gudang Kosong` to hide warehouses with 0 quantity (default active).
+      - Columns: `No`, `Row Labels` (Company), `Sum of Qty (Kg)` (or `(Pcs)` for Kemasan).
+      - Footer: `Grand Total` with sum of quantities.
+    - **HPP (Tab 2)**:
+      - Sourced dynamically from Slot 2 (`inventoryData` / `inventoryColumns`).
+      - Product Category Filter: Clean multi-select dropdown selector (`GKG`, `Beras Bahan Baku`, `Beras Jadi`, `Kemasan`, `Produk Sampingan`) with `GKP` omitted and default active filter `GKG`.
+      - Optional Checkbox Filter: `Sembunyikan Gudang Kosong` (default active).
+      - Columns: 2-level header with `No`, `Company`, `Product`, and `Values` (`Sum of Qty (Kg)`, `Sum of Total Value`, `Average of HPP`).
+      - Unit / Average HPP: $\text{HPP (Rp/Kg)} = \frac{\sum \text{Total Value}}{\sum \text{Qty}}$.
+      - Footer: `Grand Total` with total sum of Qty, total Value, and grand weighted average HPP.
+    - **Hasil Samping (Tab 3)**:
+      - Sourced dynamically from Slot 2 (`inventoryData` / `inventoryColumns`) specifically for category `PRODUK SAMPINGAN`.
+      - Product Filter: Clean multi-select dropdown selector of side products (`BROKEN`, `MENIR`, `BEKATUL`, `BUTIR RIJEK`, `DEDAK`, `SEKAM`) with default active filter `BROKEN`.
+      - Optional Checkbox Filter: `Sembunyikan Gudang Kosong` (default active).
+      - Columns: `No`, `INFRASTRUKTUR`, `SKU`, `KUANTUM (KG)`, `NILAI PERSEDIAAN`, `HPP`.
+      - Unit HPP: $\text{HPP (Rp/Kg)} = \frac{\text{Nilai Persediaan (Rp)}}{\text{Kuantum (Kg)}}$.
+      - Footer: `TOTAL` with sum of Kuantum, sum of Nilai Persediaan, and grand weighted average HPP.
+  - **Realisasi Penjualan (Report 6)**:
+    - **Sub-Tabs Architecture**: `Pivot Raw Data` (Tab 1), `Final Report` (Tab 2).
+    - **Pivot Raw Data (Tab 1)**:
+      - Sourced dynamically from Slot 3 (`salesData` / `salesColumns`).
+      - Displays `Sum of Total` sales nominal in Rupiah aggregated per company.
+      - Product Category Filter: Multi-select dropdown selector (`Beras Bahan Baku`, `Beras Jadi`, `Produk Sampingan`, `Services`).
+      - Daily / Monthly Toggle: `Tampilkan Harian` / `Tampilkan Per Bulan`.
+      - Optional Checkbox Filter: `Sembunyikan Gudang Kosong` (default active).
+      - Columns: `No`, `Row Labels` (Company), dynamic date/month columns, and `Grand Total`.
+      - Footer: `Grand Total` summing daily/monthly nominals and grand total sales.
+    - **Final Report (Tab 2)**:
+      - Denominated in **Rp Juta** (values divided by 1,000,000, rounded).
+      - Seeded with `HISTORICAL_REALISASI_PENJUALAN_2026_DATA` for `JAN` to `JULI` (`M_0`–`M_6`).
+      - 24 standard warehouses grouped by `SPB` (1–7), `SPP` (8–17), `UP` (18–22), `CDC` (23–24), each containing 2 sub-rows:
+        1. `PRODUK` (Beras, Gabah, Jagung, Sampingan, etc.)
+        2. `JASA` (Services, Jastasma, Sewa, etc.)
+      - Active Month (e.g. `AGT`) broken down into dynamic weekly buckets (`W_1-9`, `W_10-16`, `W_17-23`, `W_24-31` / tail merging), with active month value equal to sum of weekly values.
+      - Dynamic **`REAL S/D [BULAN_AKTUAL]`** column accumulating `JAN` through active month.
+      - Footers: `TOTAL PRODUK SPB`, `TOTAL JASA SPB`, `TOTAL PRODUK SPP`, `TOTAL JASA SPP`, `TOTAL PRODUK UP`, `TOTAL JASA UP`, `TOTAL PRODUK CDC`, `TOTAL JASA CDC`, `TOTAL PRODUK`, `TOTAL JASA`, and `GRAND TOTAL`.
+  - **Slide Deck Presentasi (Tab Preview PPT)**:
+    - **Cross-Report Data Architecture & Non-Sequential Slide Mapping**:
+      - Slide presentation tables are mapped dynamically from their respective underlying reports independently of slide ordering (e.g. Slide 1 aggregates summaries from Report 1, Report 2, and Report 6; Slide 7 & 8 map detailed tables from Report 1 "Realisasi Pengadaan", etc.).
+      - PPT slide components must remain responsive to uploaded datasets even when users switch directly to `Preview PPT` without visiting intermediate report tabs.
+    - **Slide 1 (Progress Operasional)**:
+      - **Card Stok Hari Ini**: Sourced dynamically from Slot 2 (`inventoryData` / `stokHariIni`) for actual inventory persediaan (Gabah: GKG+GKP, Beras: Beras Bahan Baku + Beras Jadi + Beras WIP, Jagung; excluding Kemasan & Produk Sampingan, normalized to 24 UB warehouses). Fallback baseline: Gabah `8.596 Ton`, Beras `4.447 Ton`, Jagung `- Ton` (synced with Slide 12 Update Persediaan).
+      - **Table 1 (Realisasi Pengadaan)**: Sourced from **Report 1 Tab 4 (`R. Pengadaan UB`)** — Table 1 (Realisasi Pengadaan UBI Nasional only; rows `GABAH`, `BERAS`, `JAGUNG`). Columns: `NO`, `LOKASI`, past monthly columns (`JAN`..), `MINGGUAN` dynamic weekly buckets, `REAL S/D [BULAN]`, `TARGET 2026`, `VS TGT 2026 (%)`.
+      - **Table 2 (Rerata Penawaran Harga Papan Pembelian)**: Sourced from **Report 2 Tab 4 (`R. Harga Pembelian`)** — rows `GABAH`, `BERAS`, `JAGUNG`. Columns: `NO`, `LOKASI`, past monthly columns (`JAN`..), active month, `MINGGUAN` dynamic weekly buckets, `REAL S/D [BULAN]`.
+      - **Table 3 (Realisasi Penjualan)**: Preserved strictly as is until explicitly instructed to integrate with Report 6.
+      - **Charts**: Cumulative Penjualan & Cumulative Pengadaan (Gabah, Beras, Jagung) linked to dynamic monthly rollups.
+    - **Slide 6 (Kuantum Penjualan UB Industri)**:
+      - Dedicated slide inserted before Realisasi Pengadaan Nasional, titled `KUANTUM PENJUALAN UB INDUSTRI` with date header (e.g., `08 September 2026`).
+      - Center Table: 2-level header with `Infrastruktur` and `Kuantum Penjualan (Kg)` breakdown into `Beras`, `Gabah (GKG)`, `Hasil Samping`, and `Jasa`.
+      - Contains all 24 infrastructures grouped sequentially: SPP (10), SPB (7), UP (5), CDC (2) with baseline figures and footer `TOTAL`.
+      - Bottom bar: notes `*Data diperoleh dari laporan tarikan system ERP` & `** Update Persediaan per Tanggal 07 September 2026`, and brand blue wave with `Passion In Every Grain`.
+    - **Slide 7 (Realisasi Pengadaan Gabah & Beras - Nasional)**:
+      - Sourced dynamically from **Report 3 Tab 3 (`Final Report`)** via `finalReportPengadaanUB`.
+      - Displays dynamic date ranges: Subtitle (`latestDayStr`), columns `prevDayStr`, `latestDayStr`, and active month headers (`activeMonthName`).
+      - Rows: 24 infrastructures with dynamic `Target 2026`, `Realisasi (ton)` (`s.d [Kemarin]`, `[Hari Terakhir]`, `Total`), `Persentase Pencapaian (%)`, and average prices for Gabah, Beras, and Jagung.
+      - Footer: `GRAND TOTAL` reflecting national totals and weighted average prices.
+      - Fallback: Gracefully falls back to baseline (31 Juli 2026) when no dataset is uploaded.
+    - **Slide 8 (Realisasi Rekapitulasi Pengadaan Gabah dan Beras)**:
+      - Sourced dynamically from **Report 1 Tab 3 (`Final Report`)** via `finalReportRealisasiPengadaan`.
+      - Title: `REALISASI REKAPITULASI PENGADAAN GABAH DAN BERAS` (wrapped into 2 lines).
+      - Exclusively displays Group A (`SPB`, rows 1–7) and Group B (`SPP`, rows 8–17 with sub-rows `BERAS` and `GABAH`). UP and CDC are omitted (handled on Slide 9).
+      - Columns: `No`, `RM`, `LOKASI`, dynamic past months (`JAN`..), dynamic weekly buckets (`W_...`), `REAL S/D [BULAN]`, `TARGET 2026`, and `VS TGT 2026 (%)`.
+    - **Slide 9 (Realisasi Rekapitulasi Pengadaan Gabah dan Beras - UP & CDC)**:
+      - Title: `REALISASI REKAPITULASI PENGADAAN GABAH DAN BERAS` (wrapped into 2 lines matching Slide 8).
+      - Exclusively displays Group C (`UNIT PENGOLAHAN / UP`, rows 18–22 with sub-rows `BERAS` and `GABAH`), Group D (`CDC`, rows 23–24 with `JAGUNG`), and national summary footers (`TOTAL BERAS SPB`, `TOTAL BERAS SPP`, `TOTAL GABAH SPP`, `TOTAL BERAS UP`, `TOTAL GABAH UP`, `TOTAL JAGUNG`, `JUMLAH BERAS`, `JUMLAH GABAH`, `JUMLAH JAGUNG`).
+      - Centered table layout eliminating empty bottom space, with text size `text-[8px]` and comfortable padding.
+    - **Dynamic Sequence Mapping & Selective Slide Export (On/Off per Slide)**:
+      - Slides are sequentially and dynamically numbered (`id: idx + 1`) across all 28 slides (`TOTAL_PPT_SLIDES = 28`), ensuring insertions automatically update downstream sequence numbers and selectors.
+      - Each slide in the Preview PPT deck can be toggled On/Off individually via a dedicated toggle switch beside each slide card, in the Pop Out full screen view, and in the "Kelola Halaman" modal.
+      - Disabled slides are visually dimmed (`opacity-55`) with an interactive reactivation overlay.
+      - Export to PPT (.pptx) strictly captures only the enabled slides in sequence, skipping any disabled slides, and shows progress for the selected subset. If 0 slides are enabled, export is disabled with a friendly prompt.
+  - **Data Historical & Metadata**:
+    - `historicalData2026.ts` (`WAREHOUSE_METADATA`, `TARGET_2026_DATA`, `TARGET_2026_TOTALS`, `TARGET_2026_RM`, `HISTORICAL_HARGA_PEMBELIAN_2026_DATA`, `HISTORICAL_REALISASI_PENGADAAN_UB_JULI_2026`, `HISTORICAL_REALISASI_PENJUALAN_2026_DATA`, `TARGET_REALISASI_PENJUALAN_2026_DATA`, `TARGET_REALISASI_PENJUALAN_2026_TOTALS`, `DATA_PENYERAPAN_2025`, `normalizeGudangName`) must be maintained as the single source of truth for warehouse mappings and targets.
+  - **Smart 3-Slot ERP Data Hub (Multi-Source Architecture)**:
+    - **Slot 1 (Data Pengadaan / PO)**: State `data`, `columns`, `fileName`. Powers Report 1 (Realisasi Pengadaan), Report 2 (Harga Pembelian), Report 3 (Realisasi Pengadaan UB), and Report 4 Tab 1 (Penyerapan Gabah SPP).
+    - **Slot 2 (Data Persediaan / Stok & Valuation)**: State `inventoryData`, `inventoryColumns`, `inventoryFileName`. Powers Report 4 Tab 2 (HPP), Report 5 (Data Persediaan), and Stock Monitoring PPT slides.
+    - **Slot 3 (Data Penjualan / SO & Sales)**: State `salesData`, `salesColumns`, `salesFileName`. Powers Report 6 (Realisasi Penjualan) and Sales PPT slides.
+    - **Smart Classifier & Multi-Dropzone (`classifyExcel`)**: Automatically routes uploaded files to their respective slot based on header heuristic signatures (`REMAINING QTY`, `TOTAL VALUE`, `CUSTOMER`, `SALES`, `ORDER DATE`, `PO`). Supports simultaneous multi-file uploads and individual slot management.
+
+## 2. Additive & Modular Enhancements
+- **Additive Updates**: Implement new requirements as isolated additions or modular extensions rather than restructuring existing working logic.
+- **Maintain UI/UX Performance**:
+  - Keep sticky headers smooth by using `border-separate border-spacing-0`, `[transform:translateZ(0)]`, `scroll-smooth`, and `bg-clip-padding`.
+
+## 3. Verification & Code Integrity
+- Always run `npm run build` to verify type-safety and ensure no broken JSX, syntax errors, or orphaned code blocks before concluding tasks.
+- Keep all documentation and comments intact.
+

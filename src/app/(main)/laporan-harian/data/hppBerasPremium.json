@@ -1,0 +1,650 @@
+[
+  {
+    "no": 1,
+    "loc": "SPP BANYUWANGI",
+    "sku": "[B0020005A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "1,220",
+    "val": "18,710,082",
+    "hpp": "15,336"
+  },
+  {
+    "no": 2,
+    "loc": "",
+    "sku": "[B0020038A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "6,800",
+    "val": "102,732,273",
+    "hpp": "15,108"
+  },
+  {
+    "no": 3,
+    "loc": "SPP BOJONEGORO",
+    "sku": "[B0020006A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "25,775",
+    "val": "395,087,551",
+    "hpp": "15,328"
+  },
+  {
+    "no": 4,
+    "loc": "",
+    "sku": "[B0020018A] BERAS PREMIUM PREMIUM 15% BEFOOD SLYP SUPER EDISI RAMADHAN 5 KG UBI KOM DN",
+    "qty": "75",
+    "val": "1,079,288",
+    "hpp": "14,391"
+  },
+  {
+    "no": 5,
+    "loc": "",
+    "sku": "[B0020038A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "62,995",
+    "val": "951,801,608",
+    "hpp": "15,109"
+  },
+  {
+    "no": 6,
+    "loc": "",
+    "sku": "[B0020053A] BERAS PREMIUM PREMIUM 15% BEFOOD SLYP SUPER 5 KG UBI KOM DN",
+    "qty": "40,000",
+    "val": "565,659,120",
+    "hpp": "14,141"
+  },
+  {
+    "no": 7,
+    "loc": "",
+    "sku": "[B0020109A] BERAS PREMIUM PREMIUM 15% CANDIMULYO 25 KG UBI KOM DN",
+    "qty": "7,000",
+    "val": "98,207,259",
+    "hpp": "14,030"
+  },
+  {
+    "no": 8,
+    "loc": "",
+    "sku": "[B0020178A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 3 KG UBI KOM DN",
+    "qty": "60",
+    "val": "855,109",
+    "hpp": "14,252"
+  },
+  {
+    "no": 9,
+    "loc": "SPP JEMBER",
+    "sku": "[B0020040A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "10,140",
+    "val": "153,206,002",
+    "hpp": "15,109"
+  },
+  {
+    "no": 10,
+    "loc": "",
+    "sku": "[B0020053A] BERAS PREMIUM PREMIUM 15% BEFOOD SLYP SUPER 5 KG UBI KOM DN",
+    "qty": "2,205",
+    "val": "33,058,414",
+    "hpp": "14,992"
+  },
+  {
+    "no": 11,
+    "loc": "",
+    "sku": "[B0020109A] BERAS PREMIUM PREMIUM 15% CANDIMULYO 25 KG UBI KOM DN",
+    "qty": "20,975",
+    "val": "294,271,037",
+    "hpp": "14,030"
+  },
+  {
+    "no": 12,
+    "loc": "SPP KARAWANG",
+    "sku": "[B0020020A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "8,775",
+    "val": "128,580,088",
+    "hpp": "14,651"
+  },
+  {
+    "no": 13,
+    "loc": "",
+    "sku": "[B0020040A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "1,100",
+    "val": "16,053,556",
+    "hpp": "14,594"
+  },
+  {
+    "no": 14,
+    "loc": "",
+    "sku": "[B0020054A] BERAS PREMIUM PREMIUM 15% TUGU PADI 5 KG UBI KOM DN",
+    "qty": "7,000",
+    "val": "94,812,594",
+    "hpp": "13,545"
+  },
+  {
+    "no": 15,
+    "loc": "",
+    "sku": "[B0020105A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 10 KG UBI KOM DN",
+    "qty": "4,000",
+    "val": "57,572,548",
+    "hpp": "14,393"
+  },
+  {
+    "no": 16,
+    "loc": "SPP KENDAL",
+    "sku": "[B0020006A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "56,790",
+    "val": "869,665,089",
+    "hpp": "15,328"
+  },
+  {
+    "no": 17,
+    "loc": "",
+    "sku": "[B0020018A] BERAS PREMIUM PREMIUM 15% BEFOOD SLYP SUPER EDISI RAMADHAN 5 KG UBI KOM DN",
+    "qty": "45",
+    "val": "647,690",
+    "hpp": "14,393"
+  },
+  {
+    "no": 18,
+    "loc": "",
+    "sku": "[B0020038A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "10,205",
+    "val": "154,185,951",
+    "hpp": "15,109"
+  },
+  {
+    "no": 19,
+    "loc": "",
+    "sku": "[B0020053A] BERAS PREMIUM PREMIUM 15% BEFOOD SLYP SUPER 5 KG UBI KOM DN",
+    "qty": "1,060",
+    "val": "15,892,027",
+    "hpp": "14,992"
+  },
+  {
+    "no": 20,
+    "loc": "",
+    "sku": "[B0020105A] BERAS PREMIUM PREMIUM 15% 365 PULEN WANGI 5 KG UBI KOM DN",
+    "qty": "1,325",
+    "val": "20,597,525",
+    "hpp": "15,545"
+  },
+  {
+    "no": 21,
+    "loc": "SPP LAMPUNG",
+    "sku": "[B0020040A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "20",
+    "val": "293,028",
+    "hpp": "14,651"
+  },
+  {
+    "no": 22,
+    "loc": "",
+    "sku": "[B0020049A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "5,520",
+    "val": "90,050,064",
+    "hpp": "14,594"
+  },
+  {
+    "no": 23,
+    "loc": "SPP MAGETAN",
+    "sku": "[B0020045A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "8,410",
+    "val": "128,911,205",
+    "hpp": "15,328"
+  },
+  {
+    "no": 24,
+    "loc": "",
+    "sku": "[B0020046A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "8,580",
+    "val": "129,636,576",
+    "hpp": "15,109"
+  },
+  {
+    "no": 25,
+    "loc": "",
+    "sku": "[B0020105A] BERAS PREMIUM PREMIUM 15% CANDIMULYO 25 KG UBI KOM DN",
+    "qty": "10,425",
+    "val": "146,258,958",
+    "hpp": "14,030"
+  },
+  {
+    "no": 26,
+    "loc": "",
+    "sku": "[B0020178A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 3 KG UBI KOM DN",
+    "qty": "150",
+    "val": "2,137,846",
+    "hpp": "14,252"
+  },
+  {
+    "no": 27,
+    "loc": "",
+    "sku": "[B0020188A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 20 KG UBI KOM DN",
+    "qty": "2,000",
+    "val": "30,035,394",
+    "hpp": "15,018"
+  },
+  {
+    "no": 28,
+    "loc": "",
+    "sku": "[B0020189A] BERAS PREMIUM PREMIUM 15% 365 PULEN WANGI 5 KG UBI KOM DN",
+    "qty": "345",
+    "val": "5,363,149",
+    "hpp": "15,545"
+  },
+  {
+    "no": 29,
+    "loc": "SPP SRAGEN",
+    "sku": "[B0020045A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "87,290",
+    "val": "1,338,842,235",
+    "hpp": "15,328"
+  },
+  {
+    "no": 30,
+    "loc": "",
+    "sku": "[B0020046A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "102,600",
+    "val": "1,550,210,673",
+    "hpp": "15,109"
+  },
+  {
+    "no": 31,
+    "loc": "",
+    "sku": "[B0020053A] BERAS PREMIUM PREMIUM 15% BEFOOD SLYP SUPER 5 KG UBI KOM DN",
+    "qty": "45",
+    "val": "674,662",
+    "hpp": "14,992"
+  },
+  {
+    "no": 32,
+    "loc": "",
+    "sku": "[B0020105A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 10 KG UBI KOM DN",
+    "qty": "30,000",
+    "val": "463,645,740",
+    "hpp": "15,455"
+  },
+  {
+    "no": 33,
+    "loc": "",
+    "sku": "[B0020189A] BERAS PREMIUM PREMIUM 15% 365 PULEN WANGI 5 KG UBI KOM DN",
+    "qty": "1,335",
+    "val": "20,753,043",
+    "hpp": "15,545"
+  },
+  {
+    "no": 34,
+    "loc": "SPP SUBANG",
+    "sku": "[B0020040A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "25",
+    "val": "366,280",
+    "hpp": "14,651"
+  },
+  {
+    "no": 35,
+    "loc": "",
+    "sku": "[B0020049A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "955",
+    "val": "13,934,435",
+    "hpp": "14,594"
+  },
+  {
+    "no": 36,
+    "loc": "SPP SUMBAWA",
+    "sku": "[B0020045A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "22,330",
+    "val": "323,347,558",
+    "hpp": "14,480"
+  },
+  {
+    "no": 37,
+    "loc": "",
+    "sku": "[B0020046A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "565",
+    "val": "8,228,887",
+    "hpp": "14,564"
+  },
+  {
+    "no": 38,
+    "loc": "SPB DKI JAKARTA",
+    "sku": "[B0020020A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "4,260",
+    "val": "62,485,300",
+    "hpp": "14,651"
+  },
+  {
+    "no": 39,
+    "loc": "",
+    "sku": "[B0020038A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS EDISI RAMADHAN 5 KG UBI KOM",
+    "qty": "2,590",
+    "val": "39,373,597",
+    "hpp": "15,200"
+  },
+  {
+    "no": 40,
+    "loc": "",
+    "sku": "[B0020039A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "12,140",
+    "val": "177,172,668",
+    "hpp": "14,594"
+  },
+  {
+    "no": 41,
+    "loc": "",
+    "sku": "[B0020178A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 3 KG UBI KOM DN",
+    "qty": "81",
+    "val": "1,153,131",
+    "hpp": "14,236"
+  },
+  {
+    "no": 42,
+    "loc": "",
+    "sku": "[B0020185A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 10 KG UBI KOM DN",
+    "qty": "10",
+    "val": "143,931",
+    "hpp": "14,393"
+  },
+  {
+    "no": 43,
+    "loc": "SPB INDRAMAYU",
+    "sku": "[B0020045A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "14,420",
+    "val": "211,236,965",
+    "hpp": "14,651"
+  },
+  {
+    "no": 44,
+    "loc": "",
+    "sku": "[B0020049A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "19,895",
+    "val": "290,350,456",
+    "hpp": "14,594"
+  },
+  {
+    "no": 45,
+    "loc": "",
+    "sku": "[B0020053A] BERAS PREMIUM PREMIUM 15% BEFOOD SLYP SUPER 5 KG UBI KOM DN",
+    "qty": "100",
+    "val": "1,499,245",
+    "hpp": "14,992"
+  },
+  {
+    "no": 46,
+    "loc": "",
+    "sku": "[B0020178A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 3 KG UBI KOM DN",
+    "qty": "441",
+    "val": "6,278,165",
+    "hpp": "14,236"
+  },
+  {
+    "no": 47,
+    "loc": "",
+    "sku": "[B0020185A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 10 KG UBI KOM DN",
+    "qty": "40",
+    "val": "575,720",
+    "hpp": "14,393"
+  },
+  {
+    "no": 48,
+    "loc": "SPB LOMBOK TIMUR",
+    "sku": "[B0020005A] BERAS PREMIUM PREMIUM 15% CANDIMULYO 5 KG UBI KOM DN",
+    "qty": "-",
+    "val": "-",
+    "hpp": "-"
+  },
+  {
+    "no": 49,
+    "loc": "",
+    "sku": "[B0020045A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "27,705",
+    "val": "401,179,759",
+    "hpp": "14,480"
+  },
+  {
+    "no": 50,
+    "loc": "",
+    "sku": "[B0020046A] BERAS PREMIUM PREMIUM 15% BEFOOD SLYP SUPER EDISI RAMADHAN 5 KG UBI KOM",
+    "qty": "-",
+    "val": "-",
+    "hpp": "-"
+  },
+  {
+    "no": 51,
+    "loc": "",
+    "sku": "[B0020049A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "1,270",
+    "val": "18,495,865",
+    "hpp": "14,564"
+  },
+  {
+    "no": 52,
+    "loc": "SPB MAKASSAR",
+    "sku": "[B0020039A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "45,680",
+    "val": "666,161,892",
+    "hpp": "14,580"
+  },
+  {
+    "no": 53,
+    "loc": "",
+    "sku": "[B0020049A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "55,250",
+    "val": "804,634,260",
+    "hpp": "14,564"
+  },
+  {
+    "no": 54,
+    "loc": "",
+    "sku": "[B0020106A] BERAS PREMIUM PREMIUM 15% MALLOPI 5 KG UBI KOM DN",
+    "qty": "95",
+    "val": "1,366,597",
+    "hpp": "14,385"
+  },
+  {
+    "no": 55,
+    "loc": "",
+    "sku": "[B0020107A] BERAS PREMIUM PREMIUM 15% MALLOPI 10 KG UBI KOM DN",
+    "qty": "1,210",
+    "val": "18,145,277",
+    "hpp": "14,996"
+  },
+  {
+    "no": 56,
+    "loc": "",
+    "sku": "[B0020108A] BERAS PREMIUM PREMIUM 15% MALLOPI 25 KG UBI KOM DN",
+    "qty": "8,375",
+    "val": "124,332,387",
+    "hpp": "14,845"
+  },
+  {
+    "no": 57,
+    "loc": "",
+    "sku": "[B0020178A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 3 KG UBI KOM DN",
+    "qty": "2,191",
+    "val": "33,019,366",
+    "hpp": "15,026"
+  },
+  {
+    "no": 58,
+    "loc": "",
+    "sku": "[B0020185A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 10 KG UBI KOM DN",
+    "qty": "20,250",
+    "val": "304,186,453",
+    "hpp": "15,022"
+  },
+  {
+    "no": 59,
+    "loc": "",
+    "sku": "[B0020186A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 20 KG UBI KOM DN",
+    "qty": "2,000",
+    "val": "26,731,075",
+    "hpp": "13,365"
+  },
+  {
+    "no": 60,
+    "loc": "",
+    "sku": "[B0020187A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 25 KG UBI KOM DN",
+    "qty": "200",
+    "val": "2,494,445",
+    "hpp": "12,472"
+  },
+  {
+    "no": 61,
+    "loc": "",
+    "sku": "[B0020190A] BERAS PREMIUM PREMIUM 15% BEFOOD MALLOPI 5 KG UBI KOM DN",
+    "qty": "6,855",
+    "val": "102,283,724",
+    "hpp": "14,922"
+  },
+  {
+    "no": 62,
+    "loc": "",
+    "sku": "[B0020191A] BERAS PREMIUM PREMIUM 15% BEFOOD MALLOPI 10 KG UBI KOM DN",
+    "qty": "36,100",
+    "val": "537,010,603",
+    "hpp": "14,876"
+  },
+  {
+    "no": 63,
+    "loc": "SPB SIDOARJO",
+    "sku": "[B0020008A] BERAS PREMIUM PREMIUM 15% CANDIMULYO 5 KG UBI KOM DN",
+    "qty": "475",
+    "val": "6,896,893",
+    "hpp": "14,519"
+  },
+  {
+    "no": 64,
+    "loc": "",
+    "sku": "[B0020045A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "15,260",
+    "val": "234,370,073",
+    "hpp": "15,328"
+  },
+  {
+    "no": 65,
+    "loc": "",
+    "sku": "[B0020046A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "5,780",
+    "val": "87,382,025",
+    "hpp": "15,109"
+  },
+  {
+    "no": 66,
+    "loc": "",
+    "sku": "[B0020053A] BERAS PREMIUM PREMIUM 15% BEFOOD SLYP SUPER 5 KG UBI KOM DN",
+    "qty": "1,515",
+    "val": "22,713,804",
+    "hpp": "14,992"
+  },
+  {
+    "no": 67,
+    "loc": "",
+    "sku": "[B0020071A] BERAS PREMIUM PREMIUM 15% CANDIMULYO 3 KG UBI KOM DN",
+    "qty": "957",
+    "val": "13,487,852",
+    "hpp": "14,094"
+  },
+  {
+    "no": 68,
+    "loc": "",
+    "sku": "[B0020187A] BERAS PREMIUM PREMIUM 15% HARMONI BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "240",
+    "val": "3,274,534",
+    "hpp": "13,634"
+  },
+  {
+    "no": 69,
+    "loc": "",
+    "sku": "[B0020105A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 10 KG UBI KOM DN",
+    "qty": "6,000",
+    "val": "92,728,140",
+    "hpp": "15,455"
+  },
+  {
+    "no": 70,
+    "loc": "",
+    "sku": "[B0020189A] BERAS PREMIUM PREMIUM 15% 365 PULEN WANGI 5 KG UBI KOM DN",
+    "qty": "695",
+    "val": "10,804,015",
+    "hpp": "15,545"
+  },
+  {
+    "no": 71,
+    "loc": "SPB SIDRAP",
+    "sku": "[B0020045A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "97,715",
+    "val": "1,414,863,263",
+    "hpp": "14,480"
+  },
+  {
+    "no": 72,
+    "loc": "",
+    "sku": "[B0020049A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "152,725",
+    "val": "2,224,342,353",
+    "hpp": "14,564"
+  },
+  {
+    "no": 73,
+    "loc": "",
+    "sku": "[B0020106A] BERAS PREMIUM PREMIUM 15% MALLOPI 5 KG UBI KOM DN",
+    "qty": "30,100",
+    "val": "432,985,803",
+    "hpp": "14,385"
+  },
+  {
+    "no": 74,
+    "loc": "",
+    "sku": "[B0020185A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 10 KG UBI KOM DN",
+    "qty": "75,200",
+    "val": "1,054,828,254",
+    "hpp": "14,027"
+  },
+  {
+    "no": 75,
+    "loc": "SPB SUKOHARJO",
+    "sku": "[B0020045A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 5 KG UBI KOM DN",
+    "qty": "20,605",
+    "val": "315,840,118",
+    "hpp": "15,328"
+  },
+  {
+    "no": 76,
+    "loc": "",
+    "sku": "[B0020046A] BERAS PREMIUM PREMIUM 15% BEFOOD SETRA RAMOS 5 KG UBI KOM DN",
+    "qty": "3,885",
+    "val": "58,698,090",
+    "hpp": "15,109"
+  },
+  {
+    "no": 77,
+    "loc": "",
+    "sku": "[B0020178A] BERAS PREMIUM PREMIUM 15% PUNOKAWAN 3 KG UBI KOM DN",
+    "qty": "8,280",
+    "val": "118,005,097",
+    "hpp": "14,252"
+  },
+  {
+    "no": 78,
+    "loc": "",
+    "sku": "[B0020185A] BERAS PREMIUM PREMIUM 15% BEFOOD PUNOKAWAN 10 KG UBI KOM DN",
+    "qty": "1,210",
+    "val": "18,700,479",
+    "hpp": "15,455"
+  },
+  {
+    "no": 79,
+    "loc": "",
+    "sku": "[B0020189A] BERAS PREMIUM PREMIUM 15% 365 PULEN WANGI 5 KG UBI KOM DN",
+    "qty": "25,205",
+    "val": "391,820,547",
+    "hpp": "15,545"
+  },
+  {
+    "no": 80,
+    "loc": "UP CANDIREJO",
+    "sku": "[B0020005A] BERAS PREMIUM PREMIUM 15% CANDIMULYO 5 KG UBI KOM DN",
+    "qty": "150",
+    "val": "2,177,903",
+    "hpp": "14,519"
+  },
+  {
+    "no": 81,
+    "loc": "UP MOJOLABAN",
+    "sku": "[A0020004A] BERAS PREMIUM PREMIUM 15% POLOS 50 KG UBI KOM DN",
+    "qty": "30,400",
+    "val": "413,072,513",
+    "hpp": "13,588"
+  }
+]

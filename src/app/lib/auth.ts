@@ -1,8 +1,9 @@
 export interface CurrentUser {
   id: number;
   name: string;
-  role: "SUPER_ADMIN" | "PIC";
-  picName?: string;
+  role: "SUPER_ADMIN" | "PIC" | "GUEST";
+  jabatan?: string | null;
+  picName?: string | null;
 }
 
 export const getCurrentUser = (): CurrentUser | null => {

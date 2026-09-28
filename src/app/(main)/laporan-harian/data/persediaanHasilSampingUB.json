@@ -1,0 +1,211 @@
+{
+  "bekatul": [
+    {
+      "infra": "SPP BOJONEGORO",
+      "sku": "[C0250003A] BEKATUL REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "770",
+      "nilai": "2,173,710",
+      "hpp": "2,823"
+    },
+    {
+      "infra": "SPP KARAWANG",
+      "sku": "[C0250002A] BEKATUL REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "45,880",
+      "nilai": "118,370,400",
+      "hpp": "2,580"
+    },
+    {
+      "infra": "SPP KENDAL",
+      "sku": "[C0250003A] BEKATUL REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "21,910",
+      "nilai": "61,851,930",
+      "hpp": "2,823"
+    },
+    {
+      "infra": "SPP LAMPUNG",
+      "sku": "[C0250002A] BEKATUL REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "3,110",
+      "nilai": "8,023,800",
+      "hpp": "2,580"
+    },
+    {
+      "infra": "SPP MAGETAN",
+      "sku": "[C0250003A] BEKATUL REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "10,610",
+      "nilai": "29,952,030",
+      "hpp": "2,823"
+    },
+    {
+      "infra": "SPP SRAGEN",
+      "sku": "[C0250003A] BEKATUL REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "5,302",
+      "nilai": "14,967,546",
+      "hpp": "2,823"
+    },
+    {
+      "infra": "SPP SUBANG",
+      "sku": "[C0250002A] BEKATUL REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "9,630",
+      "nilai": "24,845,400",
+      "hpp": "2,580"
+    },
+    {
+      "infra": "SPP SUMBAWA",
+      "sku": "[C0250004A] BEKATUL REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "8,700",
+      "nilai": "21,967,500",
+      "hpp": "2,525"
+    },
+    {
+      "infra": "SPB LOMBOK TIMUR",
+      "sku": "[C0250003A] BEKATUL REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "-",
+      "nilai": "-",
+      "hpp": "-"
+    },
+    {
+      "infra": "",
+      "sku": "[C0250004A] BEKATUL REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "10,165",
+      "nilai": "25,666,625",
+      "hpp": "2,525"
+    },
+    {
+      "infra": "SPB MAKASSAR",
+      "sku": "[C0250004A] BEKATUL REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "2,864",
+      "nilai": "7,231,600",
+      "hpp": "2,525"
+    },
+    {
+      "infra": "SPB SIDRAP",
+      "sku": "[C0250004A] BEKATUL REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "9,197",
+      "nilai": "23,222,425",
+      "hpp": "2,525"
+    },
+    {
+      "infra": "SPB SUKOHARJO",
+      "sku": "[C0250003A] BEKATUL REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "2,730",
+      "nilai": "7,706,790",
+      "hpp": "2,823"
+    },
+    {
+      "infra": "UP MOJOLABAN",
+      "sku": "[C0250003A] BEKATUL REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "6,630",
+      "nilai": "18,716,490",
+      "hpp": "2,823"
+    },
+    {
+      "infra": "TOTAL",
+      "sku": "",
+      "qty": "137,498",
+      "nilai": "364,696,246",
+      "hpp": "2,652",
+      "isTotal": true
+    }
+  ],
+  "broken": [
+    {
+      "infra": "SPP BOJONEGORO",
+      "sku": "[C0230003A] BROKEN REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "730",
+      "nilai": "6,356,840",
+      "hpp": "8,708"
+    },
+    {
+      "infra": "SPP KENDAL",
+      "sku": "[C0230003A] BROKEN REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "18,000",
+      "nilai": "156,744,000",
+      "hpp": "8,708"
+    },
+    {
+      "infra": "SPP LAMPUNG",
+      "sku": "[C0230002A] BROKEN REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "1,100",
+      "nilai": "9,570,000",
+      "hpp": "8,700"
+    },
+    {
+      "infra": "SPP MAGETAN",
+      "sku": "[C0230003A] BROKEN REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "22,030",
+      "nilai": "191,837,240",
+      "hpp": "8,708"
+    },
+    {
+      "infra": "SPP SRAGEN",
+      "sku": "[C0230003A] BROKEN REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "7,668",
+      "nilai": "66,772,944",
+      "hpp": "8,708"
+    },
+    {
+      "infra": "SPP SUBANG",
+      "sku": "[C0230002A] BROKEN REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "5,800",
+      "nilai": "50,460,000",
+      "hpp": "8,700"
+    },
+    {
+      "infra": "SPB INDRAMAYU",
+      "sku": "[C0230002A] BROKEN REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "1,472",
+      "nilai": "12,806,400",
+      "hpp": "8,700"
+    },
+    {
+      "infra": "SPB LOMBOK TIMUR",
+      "sku": "[C0230003A] BROKEN REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "-",
+      "nilai": "-",
+      "hpp": "-"
+    },
+    {
+      "infra": "",
+      "sku": "[C0230004A] BROKEN REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "18,033",
+      "nilai": "164,551,125",
+      "hpp": "9,125"
+    },
+    {
+      "infra": "SPB MAKASSAR",
+      "sku": "[C0230004A] BROKEN REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "7,802",
+      "nilai": "71,193,250",
+      "hpp": "9,125"
+    },
+    {
+      "infra": "SPB SIDOARJO",
+      "sku": "[C0230003A] BROKEN REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "210",
+      "nilai": "1,828,680",
+      "hpp": "8,708"
+    },
+    {
+      "infra": "SPB SIDRAP",
+      "sku": "[C0230004A] BROKEN REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "8,217",
+      "nilai": "74,980,125",
+      "hpp": "9,125"
+    },
+    {
+      "infra": "SPB SUKOHARJO",
+      "sku": "[C0230003A] BROKEN REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "9,800",
+      "nilai": "85,338,400",
+      "hpp": "8,708"
+    },
+    {
+      "infra": "TOTAL",
+      "sku": "",
+      "qty": "100,862",
+      "nilai": "892,439,004",
+      "hpp": "8,848",
+      "isTotal": true
+    }
+  ]
+}

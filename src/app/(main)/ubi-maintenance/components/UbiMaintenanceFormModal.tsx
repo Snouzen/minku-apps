@@ -92,20 +92,27 @@ export default function UbiMaintenanceFormModal({
             <div key={i} className="flex items-center gap-2 flex-1">
               <button
                 type="button"
-                onClick={() => setStep(i)}
-                className={`w-8 h-8 rounded-full text-xs font-black flex items-center justify-center transition-all ${
-                  i === step
-                    ? "bg-[#1A237E] text-white shadow-lg scale-110"
-                    : i < step
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 text-gray-500"
-                }`}
+                onClick={() => {
+                  // Allow going back freely. If going forward, optionally ensure current step is valid
+                  if (i <= step || canGoNext()) setStep(i);
+                }}
+                className="flex items-center gap-2 group outline-none text-left"
               >
-                {i < step ? "✓" : i + 1}
+                <div
+                  className={`w-8 h-8 rounded-full text-xs font-black flex items-center justify-center transition-all ${
+                    i === step
+                      ? "bg-[#1A237E] text-white shadow-lg scale-110"
+                      : i < step
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-200 text-gray-500 group-hover:bg-gray-300"
+                  }`}
+                >
+                  {i < step ? "✓" : i + 1}
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-wider hidden md:block transition-colors ${i === step ? "text-[#1A237E]" : "text-gray-400 group-hover:text-gray-600"}`}>
+                  {label}
+                </span>
               </button>
-              <span className={`text-[10px] font-black uppercase tracking-wider hidden md:block ${i === step ? "text-[#1A237E]" : "text-gray-400"}`}>
-                {label}
-              </span>
               {i < STEP_LABELS.length - 1 && <div className="flex-1 h-0.5 bg-gray-200 rounded mx-1" />}
             </div>
           ))}

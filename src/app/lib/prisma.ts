@@ -19,6 +19,8 @@ export function getPrisma(): any {
     new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 5000,
+      max: 10
     });
   const adapter = new PrismaPg(pool);
   // eslint-disable-next-line @typescript-eslint/no-require-imports

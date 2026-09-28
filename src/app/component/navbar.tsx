@@ -4,6 +4,7 @@ import React from "react";
 import { Menu, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { getCurrentUser, logout } from "../lib/auth";
+import NotificationBell from "./NotificationBell";
 
 export default function Navbar({ onToggle }: { onToggle: () => void }) {
   const currentUser = getCurrentUser();
@@ -42,19 +43,23 @@ export default function Navbar({ onToggle }: { onToggle: () => void }) {
           >
             <Menu size={20} />
           </button>
-
-
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
-            <User size={16} className="text-gray-600" />
-            <span className="text-sm font-medium text-gray-700">
-              {currentUser?.name}
-            </span>
-            <span className="text-xs text-gray-500">
-              ({currentUser?.role === "SUPER_ADMIN" ? "User Master" : "PIC"})
-            </span>
+          <NotificationBell />
+          
+          <div className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+              <User size={16} />
+            </div>
+            <div className="hidden md:flex flex-col items-start justify-center">
+              <span className="text-sm font-bold text-gray-800 leading-none mb-1">
+                {currentUser?.picName || currentUser?.name || "User"}
+              </span>
+              <span className="text-xs font-medium text-blue-600 leading-none">
+                {currentUser?.jabatan || (currentUser?.role === "SUPER_ADMIN" ? "Manager" : "Staff")}
+              </span>
+            </div>
           </div>
 
           <button

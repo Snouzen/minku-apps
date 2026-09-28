@@ -10,6 +10,27 @@ export interface AutocompleteOption {
   value: string;
 }
 
+const escapeRegex = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const renderHighlightedText = (text: string, highlight: string) => {
+  if (!highlight.trim()) return <span>{text}</span>;
+  const regex = new RegExp(`(${escapeRegex(highlight)})`, "gi");
+  const parts = text.split(regex);
+  return (
+    <span>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <span key={i} className="bg-yellow-200 text-yellow-900 font-bold rounded-sm">
+            {part}
+          </span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </span>
+  );
+};
+
 interface SmoothAutocompleteProps {
   options: AutocompleteOption[];
   value: string;
@@ -236,7 +257,7 @@ export default function SmoothAutocomplete({
                       : "text-gray-700 font-medium hover:bg-gray-50 border-l-4 border-transparent"
                   }`}
                 >
-                  {option.label}
+                  {renderHighlightedText(option.label, inputValue !== (options.find(o => o.value === value)?.label || "") ? inputValue : "")}
                 </button>
               ))
             )}

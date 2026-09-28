@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import TaskDetailClient from "./components/TaskDetailClient";
 
 export default async function TaskDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -7,7 +7,9 @@ export default async function TaskDetailPage(props: { params: Promise<{ id: stri
 
   return (
     <div className="space-y-6">
-      <TaskDetailClient taskId={taskId} />
+      <Suspense fallback={<div className="text-center py-10 text-gray-400">Memuat...</div>}>
+        <TaskDetailClient taskId={taskId} />
+      </Suspense>
     </div>
   );
 }

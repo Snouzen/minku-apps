@@ -1,5 +1,5 @@
 import React from "react";
-import { X, CheckCircle2, Circle } from "lucide-react";
+import { X, CheckCircle2, Circle, Plus, Trash2 } from "lucide-react";
 import Button from "../../../../../component/ui/Button";
 import SmoothDropdown from "../../../../../component/smoothDropdown";
 import SmoothDatePicker from "../../../../../component/smoothDatePicker";
@@ -11,20 +11,11 @@ interface SubTaskModalProps {
   handleSave: (e: React.FormEvent) => void;
   formData: any;
   setFormData: (data: any) => void;
+  unitProduksiOptions: {label: string, value: string}[];
 }
 
-const trackerSteps = [
-  { key: "sdiPengajuanRm", label: "SDI Pengajuan RM" },
-  { key: "ndIzinPrinsipGm", label: "ND Izin Prinsip GM" },
-  { key: "ndIzinPrinsipDirsar", label: "ND Izin Prinsip Dirsar" },
-  { key: "ndIzinPenggunaanRka", label: "ND Izin Penggunaan RKA" },
-  { key: "ndBalasanDivisiUmum", label: "ND Balasan Divisi Umum" },
-  { key: "sdiPemberitahuanRm", label: "SDI Pemberitahuan RM" },
-  { key: "ndPermohonanPembayaran", label: "ND Permohonan Pembayaran" },
-];
-
 export default function SubTaskModal({
-  isOpen, editMode, onClose, handleSave, formData, setFormData
+  isOpen, editMode, onClose, handleSave, formData, setFormData, unitProduksiOptions
 }: SubTaskModalProps) {
   if (!isOpen) return null;
 
@@ -41,7 +32,7 @@ export default function SubTaskModal({
         </div>
 
         <div className="p-6 overflow-y-auto flex-1">
-          <form id="subTaskForm" onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <form id="subTaskForm" onSubmit={handleSave} className="flex flex-col gap-6">
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Sub-Task <span className="text-red-500">*</span></label>
@@ -63,13 +54,63 @@ export default function SubTaskModal({
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Action Plan</label>
-                <textarea
-                  value={formData.actionPlan || ""}
-                  onChange={(e) => setFormData({ ...formData, actionPlan: e.target.value })}
-                  className="w-full px-4 py-2.5 text-gray-900 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all min-h-[80px]"
-                  placeholder="Rencana aksi..."
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-semibold text-gray-700">Action Plan <span className="text-gray-400 font-normal">(Opsional)</span></label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const current = Array.isArray(formData.actionPlan) ? formData.actionPlan : [];
+                      setFormData({ ...formData, actionPlan: [...current, { id: Date.now().toString(), text: "", isCompleted: false }] });
+                    }}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md"
+                  >
+                    <Plus size={14} /> Tambah Item
+                  </button>
+                </div>
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {Array.isArray(formData.actionPlan) && formData.actionPlan.length > 0 ? (
+                    formData.actionPlan.map((item: any, index: number) => (
+                      <div key={item.id} className="flex items-start gap-2 bg-white border border-gray-200 rounded-xl p-2 shadow-sm relative group">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newArr = [...formData.actionPlan];
+                            newArr[index].isCompleted = !newArr[index].isCompleted;
+                            setFormData({ ...formData, actionPlan: newArr });
+                          }}
+                          className={`mt-1 flex-shrink-0 transition-colors ${item.isCompleted ? 'text-green-500' : 'text-gray-300 hover:text-gray-400'}`}
+                        >
+                          {item.isCompleted ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                        </button>
+                        <textarea
+                          value={item.text}
+                          onChange={(e) => {
+                            const newArr = [...formData.actionPlan];
+                            newArr[index].text = e.target.value;
+                            setFormData({ ...formData, actionPlan: newArr });
+                          }}
+                          className={`w-full px-2 py-1 text-sm bg-transparent border-none outline-none resize-none min-h-[40px] ${item.isCompleted ? 'text-gray-400 line-through' : 'text-gray-900'}`}
+                          placeholder="Detail action plan..."
+                          rows={2}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newArr = formData.actionPlan.filter((_: any, i: number) => i !== index);
+                            setFormData({ ...formData, actionPlan: newArr });
+                          }}
+                          className="opacity-0 group-hover:opacity-100 flex-shrink-0 text-gray-300 hover:text-red-500 p-1 transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6 bg-gray-50 border border-dashed border-gray-200 rounded-xl">
+                      <p className="text-sm text-gray-500 mb-2">Belum ada action plan.</p>
+                    </div>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Status <span className="text-red-500">*</span></label>
@@ -83,57 +124,6 @@ export default function SubTaskModal({
                   onChange={(val) => setFormData({ ...formData, status: val })}
                   placeholder="Pilih Status"
                 />
-              </div>
-            </div>
-
-            {/* Tracker Administrasi Side */}
-            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-              <h3 className="text-sm font-bold text-[#1A237E] mb-4 uppercase tracking-wider flex items-center gap-2">
-                Tracker Administrasi
-              </h3>
-              <div className="space-y-3 relative">
-                <div className="absolute left-3 top-2 bottom-4 w-px bg-blue-100 z-0" />
-                {trackerSteps.map((step, idx) => {
-                  const isFilled = !!formData[step.key];
-                  return (
-                    <div key={idx} className="relative z-10 flex gap-3">
-                      <div className="mt-1">
-                        {isFilled ? (
-                          <CheckCircle2 className="text-green-500 bg-gray-50" size={24} />
-                        ) : (
-                          <Circle className="text-gray-300 bg-gray-50" size={24} />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">{step.label}</label>
-                        <input
-                          type="text"
-                          value={formData[step.key] || ""}
-                          onChange={(e) => setFormData({ ...formData, [step.key]: e.target.value })}
-                          className="w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                          placeholder="Keterangan..."
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-                <div className="relative z-10 flex gap-3 mt-4">
-                  <div className="mt-1">
-                    {formData.batasPenerbitanKontrak ? (
-                      <CheckCircle2 className="text-green-500 bg-gray-50" size={24} />
-                    ) : (
-                      <Circle className="text-gray-300 bg-gray-50" size={24} />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Batas Penerbitan Kontrak</label>
-                    <SmoothDatePicker
-                      value={formData.batasPenerbitanKontrak || ""}
-                      onChange={(val) => setFormData({ ...formData, batasPenerbitanKontrak: val })}
-                      placeholder="Pilih Tanggal..."
-                    />
-                  </div>
-                </div>
               </div>
             </div>
           </form>

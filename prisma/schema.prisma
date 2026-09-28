@@ -11,11 +11,17 @@ model User {
   id        Int      @id @default(autoincrement())
   name      String
   role      Role     @default(PIC)
+  jabatan   String?  // e.g. "Manager", "Asman", "Staff", "Guest"
   picName   String?  @unique
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   tasks     Task[]
+  matrixTasks MatrixTask[]
+  subTasksCreated MatrixSubTask[] @relation("SubTaskCreator")
+  subTaskComments SubTaskComment[]
+  notificationsReceived Notification[] @relation("UserNotifications")
+  notificationsSent     Notification[] @relation("NotificationSender")
 
   @@map("users")
 }
@@ -40,6 +46,7 @@ model Task {
 enum Role {
   SUPER_ADMIN
   PIC
+  GUEST
 }
 
 enum Status {
@@ -120,13 +127,14 @@ enum UbiDependency {
 }
 
 model UnitProduksi {
-  idRegional    String   @id @default(cuid())
-  namaRegional  String
-  siteArea      String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  alamat        String?  @default("")
-  kodeRegional  String?
+  idRegional     String          @id @default(cuid())
+  namaRegional   String
+  siteArea       String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  alamat         String?         @default("")
+  kodeRegional   String?
+  matrixSubTasks MatrixSubTask[]
 
   @@map("unit_produksi")
 }
@@ -147,6 +155,8 @@ model MatrixTask {
   kegiatanId      Int
   kegiatan        MatrixKegiatan @relation(fields: [kegiatanId], references: [id], onDelete: Cascade)
   subTasks        MatrixSubTask[]
+  createdById     Int?
+  createdBy       User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
@@ -162,16 +172,30 @@ model MatrixSubTask {
   
   // Tracker Administrasi
   sdiPengajuanRm          String?
+  sdiPengajuanRmLink      String?
   ndIzinPrinsipGm         String?
+  ndIzinPrinsipGmLink     String?
   ndIzinPrinsipDirsar     String?
+  ndIzinPrinsipDirsarLink String?
   ndIzinPenggunaanRka     String?
+  ndIzinPenggunaanRkaLink String?
   ndBalasanDivisiUmum     String?
+  ndBalasanDivisiUmumLink String?
   sdiPemberitahuanRm      String?
+  sdiPemberitahuanRmLink  String?
   ndPermohonanPembayaran  String?
+  ndPermohonanPembayaranLink String?
   batasPenerbitanKontrak  DateTime?
+  batasPenerbitanKontrakLink String?
+
+  unitProduksiId        String?
+  unitProduksi          UnitProduksi? @relation(fields: [unitProduksiId], references: [idRegional], onDelete: SetNull)
 
   taskId                Int
   task                  MatrixTask   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdById           Int?
+  createdBy             User?        @relation("SubTaskCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  comments              SubTaskComment[]
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
 
@@ -187,4 +211,43 @@ model Vendor {
   updatedAt  DateTime         @updatedAt
 
   @@map("vendors")
+}
+
+model SubTaskComment {
+  id          Int      @id @default(autoincrement())
+  subTaskId   Int
+  subTask     MatrixSubTask @relation(fields: [subTaskId], references: [id], onDelete: Cascade)
+  
+  section     String   
+  content     String
+  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  
+  parentId    Int?     
+  parent      SubTaskComment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies     SubTaskComment[] @relation("CommentReplies")
+  
+  createdAt   DateTime @default(now())
+
+  @@map("sub_task_comments")
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  
+  userId      Int      
+  user        User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  
+  senderId    Int?     
+  sender      User?    @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
+  
+  type        String   
+  message     String   
+  linkUrl     String?  
+  isRead      Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+
+  @@map("notifications")
 }

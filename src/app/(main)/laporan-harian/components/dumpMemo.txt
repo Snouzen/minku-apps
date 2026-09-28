@@ -1,0 +1,230 @@
+const finalReportHargaPembelian = useMemo(() => {
+    if (!data.length || activeTab !== 'report2') return null;
+
+    const gudangCol = columns.find(c => c.toLowerCase().includes('gudang') || c.toLowerCase().includes('company')) || 'Company';
+    const tglPoCol = columns.find(c => c.toLowerCase().includes('tanggal po') || c.toLowerCase().includes('order date')) || 'Order Date';
+    const kuantumCol = columns.find(c => c.toLowerCase().includes('kuantum realisasi') || c.toLowerCase() === 'qty (kg)') || 'Qty (Kg)';
+    const totalCol = columns.find(c => c.toLowerCase() === 'total') || 'Total';
+    const komoditiCol = columns.find(c => c.toLowerCase() === 'komoditi' || c.toLowerCase().includes('product category')) || 'Product Category';
+    const productCol = columns.find(c => c.toLowerCase() === 'product') || 'Product';
+
+    // 1. Find the latest month in the dataset
+    let maxDate = new Date(0);
+    data.forEach(row => {
+      const d = parseDate(row[tglPoCol]);
+      if (d && d > maxDate) maxDate = d;
+    });
+    
+    if (maxDate.getTime() === 0) return null; // No valid dates
+
+    const latestMonth = maxDate.getMonth(); // 0-11
+    const latestYear = maxDate.getFullYear();
+
+    const generateWeeks = (year: number, month: number) => {
+      const buckets = [];
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      let currentStart = 1;
+      while (currentStart <= lastDay) {
+        let currentEnd = currentStart;
+        let d = new Date(year, month, currentEnd);
+        while (d.getDay() !== 0 && currentEnd < lastDay) {
+          currentEnd++;
+          d = new Date(year, month, currentEnd);
+        }
+        if (currentStart === 1 && currentEnd <= 2 && currentEnd < lastDay) {
+          currentEnd++;
+          d = new Date(year, month, currentEnd);
+          while (d.getDay() !== 0 && currentEnd < lastDay) {
+            currentEnd++;
+            d = new Date(year, month, currentEnd);
+          }
+        }
+        buckets.push(currentStart === currentEnd ? `W_${currentStart}` : `W_${currentStart}-${currentEnd}`);
+        currentStart = currentEnd + 1;
+      }
+      return buckets;
+    };
+
+    const weeks = generateWeeks(latestYear, latestMonth);
+
+    // 2. Setup Data Structure for accumulation
+    // For Harga, we need sum(nom) / sum(qty). 
+    // We will store { nom: 0, qty: 0 } then map to average at the end.
+    
+    const accumData: Record<string, Record<string, Record<string, Record<string, { nom: number, qty: number }>>>> = {
+      'SPB': {}, 'SPP': {}, 'UP': {}, 'CDC': {}
+    };
+    
+    const accumTotals: Record<string, Record<string, { nom: number, qty: number }>> = {
+      'TOTAL BERAS SPB': {},
+      'TOTAL BERAS SPP': {},
+      'TOTAL GABAH SPP': {},
+      'TOTAL GABAH UP': {},
+      'TOTAL BERAS UP': {},
+      'JUMLAH BERAS': {},
+      'JUMLAH GABAH': {}
+    };
+
+    
+    const finalData: Record<string, Record<string, Record<string, Record<string, number | null>>>> = {
+      'SPB': {}, 'SPP': {}, 'UP': {}, 'CDC': {}
+    };
+
+    const pastMonthsSet = new Set<number>();
+
+    // HISTORICAL INJECTION
+    if (latestYear === 2026) {
+      Object.keys(HISTORICAL_HARGA_PEMBELIAN_2026_DATA).forEach(gudang => {
+        if (gudang === 'TOTALS') return;
+        
+        let group = "OTHER";
+        if (gudang.startsWith("SPB")) group = "SPB";
+        else if (gudang.startsWith("SPP")) group = "SPP";
+        else if (gudang.startsWith("UP")) group = "UP";
+        
+        if (group !== "OTHER") {
+          if (!finalData[group][gudang]) finalData[group][gudang] = {};
+          Object.keys(HISTORICAL_HARGA_PEMBELIAN_2026_DATA[gudang]).forEach(komoditi => {
+            if (!finalData[group][gudang][komoditi]) {
+              finalData[group][gudang][komoditi] = {};
+            }
+            Object.keys(HISTORICAL_HARGA_PEMBELIAN_2026_DATA[gudang][komoditi]).forEach(monthKey => {
+              const val = HISTORICAL_HARGA_PEMBELIAN_2026_DATA[gudang][komoditi][monthKey];
+              finalData[group][gudang][komoditi][monthKey] = val;
+              pastMonthsSet.add(parseInt(monthKey.replace("M_", "")));
+            });
+          });
+        }
+      });
+    }
+
+    data.forEach(row => {
+      const gudangRaw = (row[gudangCol] || '').toString().trim().toUpperCase();
+      let group = 'OTHER';
+      if (gudangRaw.startsWith('SPB')) group = 'SPB';
+      else if (gudangRaw.startsWith('SPP')) group = 'SPP';
+      else if (gudangRaw.startsWith('UP') || gudangRaw.includes('UNIT PENGOLAHAN')) group = 'UP';
+
+      if (group === 'OTHER') return; 
+
+      const komoditiVal1 = (row[komoditiCol] || '').toString().trim().toLowerCase();
+      const komoditiVal2 = (row[productCol] || '').toString().trim().toLowerCase();
+      
+      let komoditi = 'LAINNYA';
+      if (komoditiVal1.includes('beras bahan baku') || komoditiVal2.includes('beras bahan baku') || komoditiVal1 === 'beras' || komoditiVal2 === 'beras') komoditi = 'BERAS';
+      if (komoditiVal1.includes('gkp') || komoditiVal2.includes('gkp') || komoditiVal1 === 'gabah' || komoditiVal2 === 'gabah') komoditi = 'GABAH';
+
+      if (!['BERAS', 'GABAH'].includes(komoditi)) return; 
+
+      const d = parseDate(row[tglPoCol]);
+      if (!d) return;
+
+      const m = d.getMonth();
+      const y = d.getFullYear();
+      const dateNum = d.getDate();
+      
+      let bucket = "";
+      if (y === latestYear && m === latestMonth) {
+        const match = weeks.find(b => {
+          const range = b.replace('W_', '').split('-');
+          if (range.length === 1) return dateNum === parseInt(range[0]);
+          return dateNum >= parseInt(range[0]) && dateNum <= parseInt(range[1]);
+        });
+        if (match) bucket = match;
+      } else {
+        return; // We only compute current month from ERP (past is historical)
+      }
+
+      const qty = parseNumber(row[kuantumCol]);
+      const nom = parseNumber(row[totalCol]);
+
+      if (!accumData[group][gudangRaw]) accumData[group][gudangRaw] = {};
+      if (!accumData[group][gudangRaw][komoditi]) accumData[group][gudangRaw][komoditi] = {};
+      if (!accumData[group][gudangRaw][komoditi][bucket]) accumData[group][gudangRaw][komoditi][bucket] = { nom: 0, qty: 0 };
+      if (!accumData[group][gudangRaw][komoditi]['REAL_YTD']) accumData[group][gudangRaw][komoditi]['REAL_YTD'] = { nom: 0, qty: 0 };
+
+      
+      accumData[group][gudangRaw][komoditi][bucket].nom += nom;
+      accumData[group][gudangRaw][komoditi][bucket].qty += qty;
+      accumData[group][gudangRaw][komoditi]['REAL_YTD'].nom += nom;
+      accumData[group][gudangRaw][komoditi]['REAL_YTD'].qty += qty;
+      
+      const addTotal = (key: string, buck: string, n: number, q: number) => {
+        if (!accumTotals[key][buck]) accumTotals[key][buck] = { nom: 0, qty: 0 };
+        accumTotals[key][buck].nom += n;
+        accumTotals[key][buck].qty += q;
+      };
+
+      if (group === 'SPB' && komoditi === 'BERAS') {
+        addTotal('TOTAL BERAS SPB', bucket, nom, qty);
+        addTotal('TOTAL BERAS SPB', 'REAL_YTD', nom, qty);
+      }
+      if (group === 'SPP' && komoditi === 'BERAS') {
+        addTotal('TOTAL BERAS SPP', bucket, nom, qty);
+        addTotal('TOTAL BERAS SPP', 'REAL_YTD', nom, qty);
+      }
+      if (group === 'SPP' && komoditi === 'GABAH') {
+        addTotal('TOTAL GABAH SPP', bucket, nom, qty);
+        addTotal('TOTAL GABAH SPP', 'REAL_YTD', nom, qty);
+      }
+      if (group === 'UP' && komoditi === 'GABAH') {
+        addTotal('TOTAL GABAH UP', bucket, nom, qty);
+        addTotal('TOTAL GABAH UP', 'REAL_YTD', nom, qty);
+      }
+      if (group === 'UP' && komoditi === 'BERAS') {
+        addTotal('TOTAL BERAS UP', bucket, nom, qty);
+        addTotal('TOTAL BERAS UP', 'REAL_YTD', nom, qty);
+      }
+      
+      if (komoditi === 'BERAS') {
+        addTotal('JUMLAH BERAS', bucket, nom, qty);
+        addTotal('JUMLAH BERAS', 'REAL_YTD', nom, qty);
+      }
+      if (komoditi === 'GABAH') {
+        addTotal('JUMLAH GABAH', bucket, nom, qty);
+        addTotal('JUMLAH GABAH', 'REAL_YTD', nom, qty);
+      }
+
+    });
+
+    // Translate accumulated into finalData
+    Object.keys(accumData).forEach(group => {
+      Object.keys(accumData[group]).forEach(gudang => {
+        if (!finalData[group][gudang]) finalData[group][gudang] = {};
+        Object.keys(accumData[group][gudang]).forEach(komoditi => {
+          if (!finalData[group][gudang][komoditi]) finalData[group][gudang][komoditi] = {};
+          Object.keys(accumData[group][gudang][komoditi]).forEach(bucket => {
+            const { nom, qty } = accumData[group][gudang][komoditi][bucket];
+            finalData[group][gudang][komoditi][bucket] = qty > 0 ? (nom / qty) : null;
+          });
+        });
+      });
+    });
+
+    
+    const finalTotals: Record<string, Record<string, number | null>> = {};
+    Object.keys(accumTotals).forEach(key => {
+      finalTotals[key] = {};
+      Object.keys(accumTotals[key]).forEach(buck => {
+        const { nom, qty } = accumTotals[key][buck];
+        finalTotals[key][buck] = qty > 0 ? (nom / qty) : null;
+      });
+    });
+
+    const pastMonths = [];
+
+    for (let i = 0; i < latestMonth; i++) {
+      pastMonths.push(i);
+    }
+    const monthNames = ["JAN", "FEB", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPT", "OKT", "NOV", "DES"];
+
+    return { 
+      finalData,
+      finalTotals,
+      pastMonths,
+
+      latestMonth,
+      monthNames,
+      weeks
+    };
+  }, [data, columns, activeTab, subTabReport2]);

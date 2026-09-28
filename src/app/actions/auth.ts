@@ -28,6 +28,7 @@ export async function loginAction(name: string, password: string) {
         name: user.name,
         role: user.role,
         picName: user.picName,
+        jabatan: user.jabatan,
       },
     };
   } catch (error) {

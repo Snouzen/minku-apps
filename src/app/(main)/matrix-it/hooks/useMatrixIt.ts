@@ -10,6 +10,7 @@ import {
   updateTaskAction,
   deleteTaskAction
 } from "../../../actions/matrixIt";
+import { getCurrentUser } from "../../../lib/auth";
 
 export function useMatrixIt() {
   const [data, setData] = useState<any[]>([]);
@@ -96,7 +97,8 @@ export function useMatrixIt() {
         if (editMode && editingId) {
           await updateTaskAction(editingId, formData.namaTask);
         } else if (parentId) {
-          await createTaskAction(parentId, formData.namaTask);
+          const user = getCurrentUser();
+          await createTaskAction(parentId, formData.namaTask, user?.id);
         }
       }
       Swal.fire({ icon: "success", title: "Berhasil Disimpan", timer: 1500, showConfirmButton: false });

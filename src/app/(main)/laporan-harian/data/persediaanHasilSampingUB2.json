@@ -1,0 +1,232 @@
+{
+  "butirKuningRusak": [
+    {
+      "infra": "SPP BOJONEGORO",
+      "sku": "[C0300003A] BUTIR KUNING/RUSAK REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "2,406",
+      "nilai": "10,706,700",
+      "hpp": "4,450"
+    },
+    {
+      "infra": "SPP KARAWANG",
+      "sku": "[C0300002A] BUTIR KUNING/RUSAK REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "3,600",
+      "nilai": "15,120,000",
+      "hpp": "4,200"
+    },
+    {
+      "infra": "SPP KENDAL",
+      "sku": "[C0300003A] BUTIR KUNING/RUSAK REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "14,300",
+      "nilai": "63,635,000",
+      "hpp": "4,450"
+    },
+    {
+      "infra": "SPP LAMPUNG",
+      "sku": "[C0300002A] BUTIR KUNING/RUSAK REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "100",
+      "nilai": "420,000",
+      "hpp": "4,200"
+    },
+    {
+      "infra": "SPP SRAGEN",
+      "sku": "[C0300003A] BUTIR KUNING/RUSAK REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "10,355",
+      "nilai": "46,079,750",
+      "hpp": "4,450"
+    },
+    {
+      "infra": "SPP SUBANG",
+      "sku": "[C0300002A] BUTIR KUNING/RUSAK REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "2,550",
+      "nilai": "10,710,000",
+      "hpp": "4,200"
+    },
+    {
+      "infra": "SPP SUMBAWA",
+      "sku": "[C0300004A] BUTIR KUNING/RUSAK REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "850",
+      "nilai": "2,316,250",
+      "hpp": "2,725"
+    },
+    {
+      "infra": "SPB INDRAMAYU",
+      "sku": "[C0300002A] BUTIR KUNING/RUSAK REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "8,243",
+      "nilai": "34,620,600",
+      "hpp": "4,200"
+    },
+    {
+      "infra": "SPB LOMBOK TIMUR",
+      "sku": "[C0300003A] BUTIR KUNING/RUSAK REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "-",
+      "nilai": "-",
+      "hpp": "-"
+    },
+    {
+      "infra": "",
+      "sku": "[C0300004A] BUTIR KUNING/RUSAK REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "11,203",
+      "nilai": "30,528,175",
+      "hpp": "2,725"
+    },
+    {
+      "infra": "SPB MAKASSAR",
+      "sku": "[C0300004A] BUTIR KUNING/RUSAK REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "516",
+      "nilai": "1,406,100",
+      "hpp": "2,725"
+    },
+    {
+      "infra": "SPB SIDOARJO",
+      "sku": "[C0300003A] BUTIR KUNING/RUSAK REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "830",
+      "nilai": "3,693,500",
+      "hpp": "4,450"
+    },
+    {
+      "infra": "SPB SIDRAP",
+      "sku": "[C0300004A] BUTIR KUNING/RUSAK REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "4,778",
+      "nilai": "13,020,050",
+      "hpp": "2,725"
+    },
+    {
+      "infra": "SPB SUKOHARJO",
+      "sku": "[C0300003A] BUTIR KUNING/RUSAK REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "39,300",
+      "nilai": "174,885,000",
+      "hpp": "4,450"
+    },
+    {
+      "infra": "SPP MAGETAN",
+      "sku": "[C0300003A] BUTIR KUNING/RUSAK REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "350",
+      "nilai": "1,557,500",
+      "hpp": "4,450"
+    },
+    {
+      "infra": "TOTAL",
+      "sku": "",
+      "qty": "99,381",
+      "nilai": "408,698,625",
+      "hpp": "4,112",
+      "isTotal": true
+    }
+  ],
+  "menir": [
+    {
+      "infra": "SPP BOJONEGORO",
+      "sku": "[C0240003A] MENIR REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "10,178",
+      "nilai": "57,831,396",
+      "hpp": "5,682"
+    },
+    {
+      "infra": "SPP KARAWANG",
+      "sku": "[C0240002A] MENIR REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "12,100",
+      "nilai": "71,390,000",
+      "hpp": "5,900"
+    },
+    {
+      "infra": "SPP KENDAL",
+      "sku": "[C0240003A] MENIR REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "12,450",
+      "nilai": "70,740,900",
+      "hpp": "5,682"
+    },
+    {
+      "infra": "SPP LAMPUNG",
+      "sku": "[C0240002A] MENIR REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "300",
+      "nilai": "1,770,000",
+      "hpp": ""
+    },
+    {
+      "infra": "SPP MAGETAN",
+      "sku": "[C0240003A] MENIR REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "2,480",
+      "nilai": "14,091,360",
+      "hpp": ""
+    },
+    {
+      "infra": "SPP SRAGEN",
+      "sku": "[C0240003A] MENIR REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "2,854",
+      "nilai": "16,216,428",
+      "hpp": "5,682"
+    },
+    {
+      "infra": "SPP SUBANG",
+      "sku": "[C0240002A] MENIR REGIONAL I UBI POLOS CURAH UBI KOM DN",
+      "qty": "800",
+      "nilai": "4,720,000",
+      "hpp": "5,900"
+    },
+    {
+      "infra": "SPP SUMBAWA",
+      "sku": "[C0240004A] MENIR REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "2,500",
+      "nilai": "12,687,500",
+      "hpp": "5,075"
+    },
+    {
+      "infra": "SPB LOMBOK TIMUR",
+      "sku": "[C0240003A] MENIR REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "-",
+      "nilai": "-",
+      "hpp": "-"
+    },
+    {
+      "infra": "",
+      "sku": "[C0240004A] MENIR REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "4,864",
+      "nilai": "24,684,800",
+      "hpp": "5,075"
+    },
+    {
+      "infra": "SPB MAKASSAR",
+      "sku": "[C0240004A] MENIR REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "3,007",
+      "nilai": "15,260,525",
+      "hpp": "5,075"
+    },
+    {
+      "infra": "SPB SIDOARJO",
+      "sku": "[C0240003A] MENIR REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "2,800",
+      "nilai": "15,909,600",
+      "hpp": "5,682"
+    },
+    {
+      "infra": "SPB SIDRAP",
+      "sku": "[C0240004A] MENIR REGIONAL III UBI POLOS CURAH UBI KOM DN",
+      "qty": "10,145",
+      "nilai": "51,485,875",
+      "hpp": "5,075"
+    },
+    {
+      "infra": "SPB SUKOHARJO",
+      "sku": "[C0240003A] MENIR REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "6,300",
+      "nilai": "35,796,600",
+      "hpp": "5,682"
+    },
+    {
+      "infra": "UP MOJOLABAN",
+      "sku": "[C0240003A] MENIR REGIONAL II UBI POLOS CURAH UBI KOM DN",
+      "qty": "1,500",
+      "nilai": "8,523,000",
+      "hpp": "5,682"
+    },
+    {
+      "infra": "TOTAL",
+      "sku": "",
+      "qty": "72,278",
+      "nilai": "401,107,984",
+      "hpp": "5,550",
+      "isTotal": true
+    }
+  ]
+}

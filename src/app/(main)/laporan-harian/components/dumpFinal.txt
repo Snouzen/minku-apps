@@ -1,0 +1,892 @@
+"use client";
+
+import React, { useState, useRef, useMemo } from "react";
+import { UploadCloud, FileSpreadsheet, Trash2, ChevronRight, Download, Filter } from "lucide-react";
+import * as XLSX from "xlsx";
+import html2canvas from "html2canvas-pro";
+import pptxgen from "pptxgenjs";
+import Swal from "sweetalert2";
+import SmoothMultiAutocomplete from "../../../component/smoothMultiAutocomplete";
+import SlideProgressOperasional from "./SlideProgressOperasional";
+import SlideMonitoringUtilitas from "./SlideMonitoringUtilitas";
+import SlideMonitoringUtilitasRMUSPP from "./SlideMonitoringUtilitasRMUSPP";
+import SlideMonitoringUtilitasRMUSPB from "./SlideMonitoringUtilitasRMUSPB";
+import SlideRealisasiPSOMakloon from "./SlideRealisasiPSOMakloon";
+import SlideRealisasiPengadaanGabahBeras from "./SlideRealisasiPengadaanGabahBeras";
+import SlidePenyerapanGKP from "./SlidePenyerapanGKP";
+import SlideUpdatePersediaan from "./SlideUpdatePersediaan";
+import SlideRealisasiOperasionalRegional from "./SlideRealisasiOperasionalRegional";
+import SlideNilaiHPPGKG from "./SlideNilaiHPPGKG";
+import SlideNilaiHPPBeras from "./SlideNilaiHPPBeras";
+import SlideNilaiHPPBerasMedium from "./SlideNilaiHPPBerasMedium";
+import SlideNilaiHPPBerasPremium from "./SlideNilaiHPPBerasPremium";
+import SlideRealisasiPengadaanGabahBerasBawah from "./SlideRealisasiPengadaanGabahBerasBawah";
+import SlideRealisasiPengadaanGabahBerasBawahPart2 from "./SlideRealisasiPengadaanGabahBerasBawahPart2";
+import SlideRealisasiHargaGabahBerasAtas from "./SlideRealisasiHargaGabahBerasAtas";
+import SlideRealisasiHargaGabahBerasBawah from "./SlideRealisasiHargaGabahBerasBawah";
+import SlideRealisasiPenjualanAtas from "./SlideRealisasiPenjualanAtas";
+import SlideRealisasiPenjualanBawah from "./SlideRealisasiPenjualanBawah";
+import SlidePersediaanHasilSampingUB from "./SlidePersediaanHasilSampingUB";
+import SlidePersediaanHasilSampingUB2 from "./SlidePersediaanHasilSampingUB2";
+import SlideNilaiHPPKemasan from "./SlideNilaiHPPKemasan";
+import { HISTORICAL_2026_DATA, HISTORICAL_HARGA_PEMBELIAN_2026_DATA } from "./historicalData2026";
+
+const REGIONAL_MAPPING: Record<string, string> = {
+  "SPB JAKARTA": "I",
+  "SPB INDRAMAYU": "I",
+  "SPB SUKOHARJO": "I",
+  "SPB SIDOARJO": "I",
+  "SPB LOMBOK TIMUR": "III",
+  "SPB SIDRAP": "III",
+  "SPB MAKASSAR": "III",
+  "SPP SUBANG": "I",
+  "SPP KARAWANG": "I",
+  "SPP LAMPUNG": "I",
+  "SPP KENDAL": "I",
+  "SPP SRAGEN": "I",
+  "SPP MAGETAN": "I",
+  "SPP BOJONEGORO": "I",
+  "SPP JEMBER": "I",
+  "SPP BANYUWANGI": "I",
+  "SPP SUMBAWA": "III",
+  "UP BANTUL": "I",
+  "UP CANDIREJO": "I",
+  "UP MOJOLABAN": "I",
+  "UP LANCIRANG": "III",
+  "UP ANNABANUA": "III",
+  "UP ANABANUA": "III",
+  "CDC DOMPU": "II",
+  "CDC BOLMONG": "III",
+};
+
+const TARGET_2026_DATA: Record<string, Record<string, number>> = {
+  "SPB JAKARTA": { BERAS: 3403 },
+  "SPB INDRAMAYU": { BERAS: 3397 },
+  "SPB SUKOHARJO": { BERAS: 3400 },
+  "SPB SIDOARJO": { BERAS: 3400 },
+  "SPB LOMBOK TIMUR": { BERAS: 3400 },
+  "SPB SIDRAP": { BERAS: 3250 },
+  "SPB MAKASSAR": { BERAS: 3400 },
+  
+  "SPP SUBANG": { BERAS: 1100, GABAH: 9500 },
+  "SPP KARAWANG": { BERAS: 700, GABAH: 10500 },
+  "SPP LAMPUNG": { BERAS: 500, GABAH: 7500 },
+  "SPP KENDAL": { BERAS: 800, GABAH: 7000 },
+  "SPP SRAGEN": { BERAS: 1200, GABAH: 6200 },
+  "SPP MAGETAN": { BERAS: 720, GABAH: 7000 },
+  "SPP BOJONEGORO": { BERAS: 1000, GABAH: 6500 },
+  "SPP JEMBER": { BERAS: 1000, GABAH: 6500 },
+  "SPP BANYUWANGI": { BERAS: 900, GABAH: 6700 },
+  "SPP SUMBAWA": { BERAS: 370, GABAH: 7700 },
+  
+  "UP BANTUL": { BERAS: 770, GABAH: 870 },
+  "UP CANDIREJO": { BERAS: 1150, GABAH: 280 },
+  "UP MOJOLABAN": { BERAS: 970, GABAH: 480 },
+  "UP LANCIRANG": { BERAS: 1150, GABAH: 280 },
+  "UP ANNABANUA": { BERAS: 1150, GABAH: 280 },
+  "UP ANABANUA": { BERAS: 1150, GABAH: 280 },
+  
+  "CDC DOMPU": { JAGUNG: 1350 },
+  "CDC BOLMONG": { JAGUNG: 1350 },
+};
+
+export default function LaporanHarianClient() {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const exportToPPT = async () => {
+    try {
+      if (isExporting) return;
+      setIsExporting(true);
+      
+      const sliderContainer = document.getElementById('ppt-slider-container');
+      if (!sliderContainer) {
+        Swal.fire('Error', 'Container presentasi tidak ditemukan', 'error');
+        setIsExporting(false);
+        return;
+      }
+
+      // Show loading alert using SweetAlert2
+      Swal.fire({
+        title: 'Mempersiapkan Export...',
+        text: 'Sedang mengambil snapshot semua slide, mohon tunggu.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const originalCssText = sliderContainer.style.cssText;
+      const originalClassName = sliderContainer.className;
+      
+      // Temporarily change layout to flex-col to force all slides to render vertically.
+      sliderContainer.className = "flex flex-col gap-12 w-[1280px] pb-8";
+      sliderContainer.style.overflow = "visible";
+      sliderContainer.style.height = "auto";
+      sliderContainer.style.maxHeight = "none";
+      sliderContainer.style.position = "absolute";
+      sliderContainer.style.top = "0";
+      sliderContainer.style.left = "0";
+      sliderContainer.style.zIndex = "-9999";
+      
+      const parentNode = sliderContainer.parentNode;
+      const placeholder = document.createElement('div');
+      placeholder.id = 'ppt-placeholder';
+      placeholder.style.height = "720px";
+      placeholder.style.width = "100%";
+      parentNode.insertBefore(placeholder, sliderContainer);
+
+      // Wait a moment for DOM to reflow
+      await new Promise(r => setTimeout(r, 1500));
+
+      // Use a robust selector for all slides (w-[1280px] h-[720px])
+      const slideNodes = Array.from(sliderContainer.querySelectorAll('div[class*="w-[1280px]"][class*="h-[720px]"]'));
+
+      if (slideNodes.length === 0) {
+        throw new Error("Slide nodes not found");
+      }
+
+      const ppt = new pptxgen();
+      ppt.layout = 'LAYOUT_16x9'; 
+      
+      for (let i = 0; i < slideNodes.length; i++) {
+        const slideEl = slideNodes[i];
+        
+        Swal.update({
+          title: 'Exporting...',
+          text: `Memproses slide ${i + 1} dari ${slideNodes.length}`
+        });
+
+        const canvas = await html2canvas(slideEl, {
+          scale: 1.5,
+          useCORS: true,
+          logging: false,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        });
+        
+        const imgData = canvas.toDataURL('image/jpeg', 0.85);
+        
+        const slide = ppt.addSlide();
+        slide.addImage({ data: imgData, x: 0, y: 0, w: '100%', h: '100%' });
+      }
+
+      // Restore layout
+      parentNode.removeChild(placeholder);
+      sliderContainer.className = originalClassName;
+      sliderContainer.style.cssText = originalCssText;
+
+      Swal.update({
+        title: 'Menyimpan File...',
+        text: 'Sedang men-generate file .pptx'
+      });
+
+      const fileName = `Laporan_Harian_ERP_${new Date().toISOString().split('T')[0]}.pptx`;
+      await ppt.writeFile({ fileName });
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: `File ${fileName} telah diunduh.`,
+        timer: 3000
+      });
+
+    } catch (error) {
+      console.error(error);
+      
+      // Try to restore layout on error
+      const sliderContainer = document.getElementById('ppt-slider-container');
+      const placeholder = document.getElementById('ppt-placeholder');
+      if (placeholder && placeholder.parentNode) {
+        placeholder.parentNode.removeChild(placeholder);
+      }
+      if (sliderContainer) {
+        sliderContainer.className = "flex flex-row gap-8 w-full pb-8 overflow-x-auto snap-x snap-mandatory px-4 items-start";
+        sliderContainer.style.cssText = "scroll-behavior: smooth;";
+      }
+      
+      Swal.fire('Error', 'Gagal melakukan export PPT. Silakan coba lagi.', 'error');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const [data, setData] = useState<any[]>([]);
+  const [columns, setColumns] = useState<string[]>([]);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [activeTab, setActiveTab] = useState<string>("raw");
+  const [filterKomoditi, setFilterKomoditi] = useState<string>("");
+  const [showDaily, setShowDaily] = useState<boolean>(false);
+
+  const handleFileUpload = (file: File) => {
+    if (!file) return;
+
+    const validTypes = [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel"
+    ];
+    
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
+      Swal.fire("Format Tidak Sesuai", "Mohon upload file Excel (.xlsx atau .xls)", "error");
+      return;
+    }
+
+    setFileName(file.name);
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const arrayBuffer = e.target?.result;
+        const workbook = XLSX.read(arrayBuffer, { type: "array", cellDates: true });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        if (jsonData.length > 0) {
+          const headers = (jsonData[0] as string[]).map(h => h ? h.toString().trim() : "");
+          setColumns(headers);
+          
+          const rows = jsonData.slice(1).map((row: any) => {
+            const rowData: any = {};
+            headers.forEach((header, index) => {
+              rowData[header] = row[index];
+            });
+            return rowData;
+          });
+          
+          setData(rows);
+        } else {
+          Swal.fire("File Kosong", "File Excel yang diupload tidak memiliki data.", "warning");
+        }
+      } catch (error) {
+        console.error("Error parsing Excel file:", error);
+        Swal.fire("Gagal Membaca File", "Terjadi kesalahan saat membaca file Excel.", "error");
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  const clearData = () => {
+    setData([]);
+    setColumns([]);
+    setFileName(null);
+    setActiveTab("raw");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const parseDate = (val: any) => {
+    if (!val) return null;
+    // Already a Date object (from cellDates: true) — extract UTC components to avoid timezone shift
+    if (val instanceof Date && !isNaN(val.getTime())) {
+      return new Date(val.getUTCFullYear(), val.getUTCMonth(), val.getUTCDate());
+    }
+    if (typeof val === 'number') {
+      // Excel serial number → convert to UTC then create local date to avoid timezone shift
+      const utcDate = new Date(Math.round((val - 25569) * 86400 * 1000));
+      return new Date(utcDate.getUTCFullYear(), utcDate.getUTCMonth(), utcDate.getUTCDate());
+    }
+    if (typeof val === 'string') {
+      const d = new Date(val);
+      if (!isNaN(d.getTime())) return d;
+      // Fallback if needed for DD/MM/YYYY (only if it fails native parse)
+      const parts = val.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (parts) return new Date(parseInt(parts[3]), parseInt(parts[2]) - 1, parseInt(parts[1]));
+    }
+    return null;
+  };
+
+  const parseNumber = (val: any) => {
+    if (typeof val === 'number') return val;
+    if (typeof val !== 'string') return 0;
+    let clean = val.replace(/[^\d.,-]/g, '');
+    const lastComma = clean.lastIndexOf(',');
+    const lastDot = clean.lastIndexOf('.');
+    if (lastComma > lastDot) {
+      clean = clean.replace(/\./g, '').replace(',', '.');
+    } else if (lastDot > lastComma && lastComma !== -1) {
+      clean = clean.replace(/,/g, '');
+    } else if (lastComma !== -1 && lastDot === -1) {
+      if (clean.length - lastComma === 4) clean = clean.replace(/,/g, '');
+      else clean = clean.replace(',', '.');
+    }
+    return parseFloat(clean) || 0;
+  };
+
+  // Extract unique komoditi for filter
+  const komoditiOptions = useMemo(() => {
+    if (!data.length) return [];
+    // Assume column name might be 'komoditi', 'Komoditi', or 'Product Category'
+    const komoditiCol = columns.find(c => c.toLowerCase() === 'komoditi' || c.toLowerCase().includes('product category'));
+    if (!komoditiCol) return [];
+    
+    const unique = new Set(data.map(r => r[komoditiCol]).filter(Boolean));
+    return Array.from(unique) as string[];
+  }, [data, columns]);
+
+  // Pivot Logic for Tab 1: Realisasi Pengadaan
+  const reportRealisasiPengadaan = useMemo(() => {
+    if (!data.length || activeTab !== "report1") return null;
+
+    const gudangCol = columns.find(c => c.toLowerCase().includes('gudang') || c.toLowerCase().includes('company')) || 'Company';
+    const tglPoCol = columns.find(c => c.toLowerCase().includes('tanggal po') || c.toLowerCase().includes('order date')) || 'Order Date';
+    const kuantumCol = columns.find(c => c.toLowerCase().includes('kuantum realisasi') || c.toLowerCase() === 'qty (kg)') || 'Qty (Kg)';
+    const komoditiCol = columns.find(c => c.toLowerCase() === 'komoditi' || c.toLowerCase().includes('product category')) || 'Product Category';
+
+    const pivot: Record<string, Record<string, number>> = {};
+    const datesSet = new Set<string>();
+
+    const selectedKomoditi = filterKomoditi.split(",").map(s => s.trim()).filter(Boolean);
+
+    data.forEach(row => {
+      // Apply Komoditi filter
+      if (selectedKomoditi.length > 0 && !selectedKomoditi.includes(row[komoditiCol])) return;
+
+      const gudang = row[gudangCol] || 'Tanpa Gudang';
+      const val = parseNumber(row[kuantumCol]);
+      
+      const dateObj = parseDate(row[tglPoCol]);
+      let dateKey = "Unknown Date";
+      let monthKey = "Unknown Month";
+      if (dateObj) {
+        // Format YYYY-MM-DD for sorting
+        dateKey = dateObj.toISOString().split('T')[0];
+        monthKey = dateObj.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      }
+
+      datesSet.add(dateKey);
+
+      if (!pivot[gudang]) pivot[gudang] = { 'Total': 0 };
+      if (!pivot[gudang][dateKey]) pivot[gudang][dateKey] = 0;
+      if (!pivot[gudang][monthKey]) pivot[gudang][monthKey] = 0;
+      
+      pivot[gudang][dateKey] += val;
+      pivot[gudang][monthKey] += val; // Aggregate by month as well
+      pivot[gudang]['Total'] += val;
+    });
+
+    const dates = Array.from(datesSet).sort();
+    
+    // Group dates by month for header spanning
+    const monthGroups: { month: string, count: number, dates: string[] }[] = [];
+    dates.forEach(d => {
+      if (d === "Unknown Date") {
+        monthGroups.push({ month: d, count: 1, dates: [d] });
+        return;
+      }
+      const monthStr = new Date(d).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      const lastGroup = monthGroups[monthGroups.length - 1];
+      if (lastGroup && lastGroup.month === monthStr) {
+        lastGroup.count += 1;
+        lastGroup.dates.push(d);
+      } else {
+        monthGroups.push({ month: monthStr, count: 1, dates: [d] });
+      }
+    });
+
+    return { pivot, dates, monthGroups, gudangCol, tglPoCol, kuantumCol };
+  }, [data, columns, activeTab, filterKomoditi]);
+
+  const [subTabReport1, setSubTabReport1] = useState<"pivot" | "final" | "jagung" | "rp-ubi" | "pivot-custom">("pivot");
+  const [subTabReport2, setSubTabReport2] = useState<"master" | "final" | "jagung" | "rp-ubi" | "pivot-custom">("master");
+  
+  const finalReportHargaPembelian = useMemo(() => {
+    if (!data.length || activeTab !== 'report2') return null;
+
+    const gudangCol = columns.find(c => c.toLowerCase().includes('gudang') || c.toLowerCase().includes('company')) || 'Company';
+    const tglPoCol = columns.find(c => c.toLowerCase().includes('tanggal po') || c.toLowerCase().includes('order date')) || 'Order Date';
+    const kuantumCol = columns.find(c => c.toLowerCase().includes('kuantum realisasi') || c.toLowerCase() === 'qty (kg)') || 'Qty (Kg)';
+    const totalCol = columns.find(c => c.toLowerCase() === 'total') || 'Total';
+    const komoditiCol = columns.find(c => c.toLowerCase() === 'komoditi' || c.toLowerCase().includes('product category')) || 'Product Category';
+    const productCol = columns.find(c => c.toLowerCase() === 'product') || 'Product';
+
+    // 1. Find the latest month in the dataset
+    let maxDate = new Date(0);
+    data.forEach(row => {
+      const d = parseDate(row[tglPoCol]);
+      if (d && d > maxDate) maxDate = d;
+    });
+    
+    if (maxDate.getTime() === 0) return null; // No valid dates
+
+    const latestMonth = maxDate.getMonth(); // 0-11
+    const latestYear = maxDate.getFullYear();
+
+    const generateWeeks = (year: number, month: number) => {
+      const buckets = [];
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      let currentStart = 1;
+      while (currentStart <= lastDay) {
+        let currentEnd = currentStart;
+        let d = new Date(year, month, currentEnd);
+        while (d.getDay() !== 0 && currentEnd < lastDay) {
+          currentEnd++;
+          d = new Date(year, month, currentEnd);
+        }
+        if (currentStart === 1 && currentEnd <= 2 && currentEnd < lastDay) {
+          currentEnd++;
+          d = new Date(year, month, currentEnd);
+          while (d.getDay() !== 0 && currentEnd < lastDay) {
+            currentEnd++;
+            d = new Date(year, month, currentEnd);
+          }
+        }
+        buckets.push(currentStart === currentEnd ? `W_${currentStart}` : `W_${currentStart}-${currentEnd}`);
+        currentStart = currentEnd + 1;
+      }
+      return buckets;
+    };
+
+    const weeks = generateWeeks(latestYear, latestMonth);
+
+    // 2. Setup Data Structure for accumulation
+    // For Harga, we need sum(nom) / sum(qty). 
+    // We will store { nom: 0, qty: 0 } then map to average at the end.
+    
+    const accumData: Record<string, Record<string, Record<string, Record<string, { nom: number, qty: number }>>>> = {
+      'SPB': {}, 'SPP': {}, 'UP': {}, 'CDC': {}
+    };
+    
+    const accumTotals: Record<string, Record<string, { nom: number, qty: number }>> = {
+      'TOTAL BERAS SPB': {},
+      'TOTAL BERAS SPP': {},
+      'TOTAL GABAH SPP': {},
+      'TOTAL GABAH UP': {},
+      'TOTAL BERAS UP': {},
+      'JUMLAH BERAS': {},
+      'JUMLAH GABAH': {},
+      'TOTAL JAGUNG': {}
+    };
+
+    
+    const finalData: Record<string, Record<string, Record<string, Record<string, number | null>>>> = {
+      'SPB': {}, 'SPP': {}, 'UP': {}, 'CDC': {}
+    };
+
+    const pastMonthsSet = new Set<number>();
+
+    // HISTORICAL INJECTION
+    if (latestYear === 2026) {
+      Object.keys(HISTORICAL_HARGA_PEMBELIAN_2026_DATA).forEach(gudang => {
+        if (gudang === 'TOTALS') return;
+        
+        let group = "OTHER";
+        if (gudang.startsWith("SPB")) group = "SPB";
+        else if (gudang.startsWith("SPP")) group = "SPP";
+        else if (gudang.startsWith("UP")) group = "UP";
+        
+        if (group !== "OTHER") {
+          if (!finalData[group][gudang]) finalData[group][gudang] = {};
+          Object.keys(HISTORICAL_HARGA_PEMBELIAN_2026_DATA[gudang]).forEach(komoditi => {
+            if (!finalData[group][gudang][komoditi]) {
+              finalData[group][gudang][komoditi] = {};
+            }
+            Object.keys(HISTORICAL_HARGA_PEMBELIAN_2026_DATA[gudang][komoditi]).forEach(monthKey => {
+              const val = HISTORICAL_HARGA_PEMBELIAN_2026_DATA[gudang][komoditi][monthKey];
+              finalData[group][gudang][komoditi][monthKey] = val;
+              pastMonthsSet.add(parseInt(monthKey.replace("M_", "")));
+            });
+          });
+        }
+      });
+    }
+
+    data.forEach(row => {
+      const gudangRaw = (row[gudangCol] || '').toString().trim().toUpperCase();
+      let group = 'OTHER';
+      if (gudangRaw.startsWith('SPB')) group = 'SPB';
+      else if (gudangRaw.startsWith('SPP')) group = 'SPP';
+      else if (gudangRaw.startsWith('UP') || gudangRaw.includes('UNIT PENGOLAHAN')) group = 'UP';
+      else if (gudangRaw.startsWith('CDC')) group = 'CDC';
+
+      if (group === 'OTHER') return; 
+
+      const komoditiVal1 = (row[komoditiCol] || '').toString().trim().toLowerCase();
+      const komoditiVal2 = (row[productCol] || '').toString().trim().toLowerCase();
+      
+      let komoditi = 'LAINNYA';
+      if (komoditiVal1.includes('beras bahan baku') || komoditiVal2.includes('beras bahan baku') || komoditiVal1 === 'beras' || komoditiVal2 === 'beras') komoditi = 'BERAS';
+      if (komoditiVal1.includes('gkp') || komoditiVal2.includes('gkp') || komoditiVal1 === 'gabah' || komoditiVal2 === 'gabah') komoditi = 'GABAH';
+      if (komoditiVal1.includes('jagung') || komoditiVal2.includes('jagung')) komoditi = 'JAGUNG';
+
+      if (!['BERAS', 'GABAH', 'JAGUNG'].includes(komoditi)) return; 
+
+      const d = parseDate(row[tglPoCol]);
+      if (!d) return;
+
+      const m = d.getMonth();
+      const y = d.getFullYear();
+      const dateNum = d.getDate();
+      
+      let bucket = "";
+      if (y === latestYear && m === latestMonth) {
+        const match = weeks.find(b => {
+          const range = b.replace('W_', '').split('-');
+          if (range.length === 1) return dateNum === parseInt(range[0]);
+          return dateNum >= parseInt(range[0]) && dateNum <= parseInt(range[1]);
+        });
+        if (match) bucket = match;
+      } else {
+        return; // We only compute current month from ERP (past is historical)
+      }
+
+      const qty = parseNumber(row[kuantumCol]);
+      const nom = parseNumber(row[totalCol]);
+
+      if (!accumData[group][gudangRaw]) accumData[group][gudangRaw] = {};
+      if (!accumData[group][gudangRaw][komoditi]) accumData[group][gudangRaw][komoditi] = {};
+      if (!accumData[group][gudangRaw][komoditi][bucket]) accumData[group][gudangRaw][komoditi][bucket] = { nom: 0, qty: 0 };
+      if (!accumData[group][gudangRaw][komoditi]['REAL_YTD']) accumData[group][gudangRaw][komoditi]['REAL_YTD'] = { nom: 0, qty: 0 };
+
+      
+      accumData[group][gudangRaw][komoditi][bucket].nom += nom;
+      accumData[group][gudangRaw][komoditi][bucket].qty += qty;
+      accumData[group][gudangRaw][komoditi]['REAL_YTD'].nom += nom;
+      accumData[group][gudangRaw][komoditi]['REAL_YTD'].qty += qty;
+      
+      const addTotal = (key: string, buck: string, n: number, q: number) => {
+        if (!accumTotals[key][buck]) accumTotals[key][buck] = { nom: 0, qty: 0 };
+        accumTotals[key][buck].nom += n;
+        accumTotals[key][buck].qty += q;
+      };
+
+      if (group === 'SPB' && komoditi === 'BERAS') {
+        addTotal('TOTAL BERAS SPB', bucket, nom, qty);
+        addTotal('TOTAL BERAS SPB', 'REAL_YTD', nom, qty);
+      }
+      if (group === 'SPP' && komoditi === 'BERAS') {
+        addTotal('TOTAL BERAS SPP', bucket, nom, qty);
+        addTotal('TOTAL BERAS SPP', 'REAL_YTD', nom, qty);
+      }
+      if (group === 'SPP' && komoditi === 'GABAH') {
+        addTotal('TOTAL GABAH SPP', bucket, nom, qty);
+        addTotal('TOTAL GABAH SPP', 'REAL_YTD', nom, qty);
+      }
+      if (group === 'UP' && komoditi === 'GABAH') {
+        addTotal('TOTAL GABAH UP', bucket, nom, qty);
+        addTotal('TOTAL GABAH UP', 'REAL_YTD', nom, qty);
+      }
+      if (group === 'UP' && komoditi === 'BERAS') {
+        addTotal('TOTAL BERAS UP', bucket, nom, qty);
+        addTotal('TOTAL BERAS UP', 'REAL_YTD', nom, qty);
+      }
+      
+      if (komoditi === 'BERAS') {
+        addTotal('JUMLAH BERAS', bucket, nom, qty);
+        addTotal('JUMLAH BERAS', 'REAL_YTD', nom, qty);
+      }
+      if (komoditi === 'GABAH') {
+        addTotal('JUMLAH GABAH', bucket, nom, qty);
+        addTotal('JUMLAH GABAH', 'REAL_YTD', nom, qty);
+      }
+      if (komoditi === 'JAGUNG') {
+        addTotal('TOTAL JAGUNG', bucket, nom, qty);
+        addTotal('TOTAL JAGUNG', 'REAL_YTD', nom, qty);
+      }
+
+    });
+
+    // Translate accumulated into finalData
+    Object.keys(accumData).forEach(group => {
+      Object.keys(accumData[group]).forEach(gudang => {
+        if (!finalData[group][gudang]) finalData[group][gudang] = {};
+        Object.keys(accumData[group][gudang]).forEach(komoditi => {
+          if (!finalData[group][gudang][komoditi]) finalData[group][gudang][komoditi] = {};
+          Object.keys(accumData[group][gudang][komoditi]).forEach(bucket => {
+            const { nom, qty } = accumData[group][gudang][komoditi][bucket];
+            finalData[group][gudang][komoditi][bucket] = qty > 0 ? (nom / qty) : null;
+          });
+        });
+      });
+    });
+
+    
+    const finalTotals: Record<string, Record<string, number | null>> = {};
+    Object.keys(accumTotals).forEach(key => {
+      finalTotals[key] = {};
+      Object.keys(accumTotals[key]).forEach(buck => {
+        const { nom, qty } = accumTotals[key][buck];
+        finalTotals[key][buck] = qty > 0 ? (nom / qty) : null;
+      });
+    });
+
+    const pastMonths = [];
+
+    for (let i = 0; i < latestMonth; i++) {
+      pastMonths.push(i);
+    }
+    const monthNames = ["JAN", "FEB", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPT", "OKT", "NOV", "DES"];
+
+    return { 
+      finalData,
+      finalTotals,
+      pastMonths,
+
+      latestMonth,
+      monthNames,
+      weeks
+    };
+  }, [data, columns, activeTab, subTabReport2]);
+
+  const finalReportRealisasiPengadaan = useMemo(() => {
+    if (!data.length) return null;
+
+    const gudangCol = columns.find(c => c.toLowerCase().includes('gudang') || c.toLowerCase().includes('company')) || 'Company';
+    const tglPoCol = columns.find(c => c.toLowerCase().includes('tanggal po') || c.toLowerCase().includes('order date')) || 'Order Date';
+    const kuantumCol = columns.find(c => c.toLowerCase().includes('kuantum realisasi') || c.toLowerCase() === 'qty (kg)') || 'Qty (Kg)';
+    const komoditiCol = columns.find(c => c.toLowerCase() === 'komoditi' || c.toLowerCase().includes('product category')) || 'Product Category';
+    const productCol = columns.find(c => c.toLowerCase() === 'product') || 'Product';
+
+    // 1. Find the latest month in the dataset
+    let maxDate = new Date(0);
+    data.forEach(row => {
+      const d = parseDate(row[tglPoCol]);
+      if (d && d > maxDate) maxDate = d;
+    });
+    
+    if (maxDate.getTime() === 0) return null; // No valid dates
+
+    const latestMonth = maxDate.getMonth(); // 0-11
+    const latestYear = maxDate.getFullYear();
+
+    const generateWeeks = (year: number, month: number) => {
+      const buckets = [];
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      let currentStart = 1;
+      while (currentStart <= lastDay) {
+        let currentEnd = currentStart;
+        let d = new Date(year, month, currentEnd);
+        while (d.getDay() !== 0 && currentEnd < lastDay) {
+          currentEnd++;
+          d = new Date(year, month, currentEnd);
+        }
+        if (currentStart === 1 && currentEnd <= 2 && currentEnd < lastDay) {
+          currentEnd++;
+          d = new Date(year, month, currentEnd);
+          while (d.getDay() !== 0 && currentEnd < lastDay) {
+            currentEnd++;
+            d = new Date(year, month, currentEnd);
+          }
+        }
+        buckets.push(currentStart === currentEnd ? `W_${currentStart}` : `W_${currentStart}-${currentEnd}`);
+        currentStart = currentEnd + 1;
+      }
+      return buckets;
+    };
+
+    const weeks = generateWeeks(latestYear, latestMonth);
+
+    // 2. Setup Data Structure
+    const finalData: Record<string, Record<string, Record<string, Record<string, number>>>> = {
+      'SPB': {}, 'SPP': {}, 'UP': {}, 'CDC': {}, 'CDC': {}
+    };
+
+    // Keep track of which months exist before the latest month
+    const pastMonthsSet = new Set<number>();
+
+    // HISTORICAL INJECTION
+    if (latestYear === 2026) {
+      Object.keys(HISTORICAL_2026_DATA).forEach(gudang => {
+        let group = "OTHER";
+        if (gudang.startsWith("SPB")) group = "SPB";
+        else if (gudang.startsWith("SPP")) group = "SPP";
+        else if (gudang.startsWith("UP")) group = "UP";
+        else if (gudang.startsWith("CDC")) group = "CDC";
+        
+        if (group !== "OTHER") {
+          if (!finalData[group][gudang]) finalData[group][gudang] = {};
+          Object.keys(HISTORICAL_2026_DATA[gudang]).forEach(komoditi => {
+            if (!finalData[group][gudang][komoditi]) {
+              finalData[group][gudang][komoditi] = { 'REAL_YTD': 0 };
+            } else if (!finalData[group][gudang][komoditi]['REAL_YTD']) {
+              finalData[group][gudang][komoditi]['REAL_YTD'] = 0;
+            }
+            Object.keys(HISTORICAL_2026_DATA[gudang][komoditi]).forEach(monthKey => {
+              const val = HISTORICAL_2026_DATA[gudang][komoditi][monthKey];
+              finalData[group][gudang][komoditi][monthKey] = val;
+              finalData[group][gudang][komoditi]['REAL_YTD'] += val;
+              pastMonthsSet.add(parseInt(monthKey.replace("M_", "")));
+            });
+          });
+        }
+      });
+    }
+
+    data.forEach(row => {
+      const gudangRaw = (row[gudangCol] || '').toString().trim().toUpperCase();
+      let group = 'OTHER';
+      if (gudangRaw.startsWith('SPB')) group = 'SPB';
+      else if (gudangRaw.startsWith('SPP')) group = 'SPP';
+      else if (gudangRaw.startsWith('UP') || gudangRaw.includes('UNIT PENGOLAHAN')) group = 'UP';
+      else if (gudangRaw.startsWith('CDC')) group = 'CDC';
+
+      if (group === 'OTHER') return; // Skip unknown groups
+
+      const komoditiVal1 = (row[komoditiCol] || '').toString().trim().toUpperCase();
+      const komoditiVal2 = (row[productCol] || '').toString().trim().toUpperCase();
+      const komoditiRaw = `${komoditiVal1} ${komoditiVal2}`.trim();
+      
+      let komoditi = 'LAINNYA';
+      if (komoditiRaw.includes('BERAS BAHAN BAKU') || komoditiRaw === 'BERAS') komoditi = 'BERAS';
+      if (komoditiRaw.includes('GKP') || komoditiRaw === 'GABAH') komoditi = 'GABAH';
+      if (komoditiRaw.includes('JAGUNG')) komoditi = 'JAGUNG';
+
+      if (group === 'SPB' && komoditi !== 'BERAS') return; // SPB only Beras
+      if (group === 'CDC' && komoditi !== 'JAGUNG') return; // CDC only Jagung
+      if (group !== 'CDC' && !['BERAS', 'GABAH'].includes(komoditi)) return; // Others only Beras/Gabah
+
+      const d = parseDate(row[tglPoCol]);
+      if (!d) return;
+
+      const m = d.getMonth();
+      const y = d.getFullYear();
+      const dateNum = d.getDate();
+      
+      let bucket = "";
+      if (y < latestYear || (y === latestYear && m < latestMonth)) {
+        bucket = `M_${m}`;
+        pastMonthsSet.add(m);
+      } else if (y === latestYear && m === latestMonth) {
+        const match = weeks.find(b => {
+          const range = b.replace('W_', '').split('-');
+          if (range.length === 1) return dateNum === parseInt(range[0]);
+          return dateNum >= parseInt(range[0]) && dateNum <= parseInt(range[1]);
+        });
+        if (match) bucket = match;
+      } else {
+        return; // Future dates ignored
+      }
+
+      const val = parseNumber(row[kuantumCol]);
+
+      if (!finalData[group][gudangRaw]) finalData[group][gudangRaw] = {};
+      if (!finalData[group][gudangRaw][komoditi]) finalData[group][gudangRaw][komoditi] = {};
+      if (!finalData[group][gudangRaw][komoditi][bucket]) finalData[group][gudangRaw][komoditi][bucket] = 0;
+      if (!finalData[group][gudangRaw][komoditi]['REAL_YTD']) finalData[group][gudangRaw][komoditi]['REAL_YTD'] = 0;
+
+      finalData[group][gudangRaw][komoditi][bucket] += val;
+      finalData[group][gudangRaw][komoditi]['REAL_YTD'] += val;
+    });
+
+    // Ensure CDC exists with static data if empty
+    if (Object.keys(finalData['CDC']).length === 0) {
+      finalData['CDC'] = {
+        'CDC DOMPU': { 'JAGUNG': {} },
+        'CDC BOLMONG': { 'JAGUNG': {} }
+      };
+    }
+
+    const pastMonths = [];
+    for (let i = 0; i < latestMonth; i++) {
+      pastMonths.push(i);
+    }
+    const monthNames = ["JAN", "FEB", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPT", "OKT", "NOV", "DES"];
+
+    return { 
+      finalData, 
+      pastMonths,
+      latestMonth,
+      monthNames,
+      weeks
+    };
+  }, [data, columns, activeTab, subTabReport1]);
+
+  return (
+    <div className="space-y-6">
+      {!fileName ? (
+        <div 
+          className={`bg-white rounded-2xl border-2 border-dashed p-10 flex flex-col items-center justify-center transition-colors cursor-pointer ${
+            isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-400 hover:bg-gray-50'
+          }`}
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+          onDrop={(e) => {
+            e.preventDefault(); setIsDragging(false);
+            if (e.dataTransfer.files?.length) handleFileUpload(e.dataTransfer.files[0]);
+          }}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-4">
+            <UploadCloud size={32} />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Upload File Excel ERP</h3>
+          <p className="text-gray-500 text-sm text-center max-w-md">
+            Drag and drop file data mentah ERP (.xlsx, .xls) ke area ini.
+          </p>
+          <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx, .xls" onChange={(e) => e.target.files?.length && handleFileUpload(e.target.files[0])} />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Header Actions */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                <FileSpreadsheet size={24} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900 line-clamp-1">{fileName}</h3>
+                <p className="text-sm text-gray-500 mt-0.5"><span className="font-semibold text-gray-700">{data.length}</span> baris raw data di memori</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={clearData} className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-semibold transition-colors">
+                Ganti File
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white hover:bg-orange-600 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                <Download size={16} /> Export to PPT
+              </button>
+            </div>
+          </div>
+
+          {/* Tabs Navigation */}
+          <div className="bg-white rounded-xl border border-gray-100 p-1 flex overflow-x-auto shadow-sm">
+            {[
+              { id: "raw", label: "0. Raw Data" },
+              { id: "report1", label: "1. Realisasi Pengadaan (Tonase)" },
+              { id: "report2", label: "2. Harga Pembelian" },
+              { id: "report3", label: "3. Realisasi Pengadaan UB" },
+              { id: "report4", label: "4. Data Penyerapan" },
+              { id: "report5", label: "5. Data Persediaan" },
+              { id: "report6", label: "6. Realisasi Penjualan" },
+              { id: "preview-ppt", label: "Preview PPT" },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2.5 text-sm font-semibold rounded-lg whitespace-nowrap transition-colors ${
+                  activeTab === tab.id ? "bg-blue-50 text-blue-700" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+            {activeTab === "raw" && (
+              <>
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                  <h3 className="text-sm font-bold text-gray-900">Preview Raw Data (Max 100 baris)</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-gray-600">
+                    <thead className="text-xs uppercase bg-gray-50 text-gray-500 border-b border-gray-100">
+                      <tr>
+                        <th className="px-6 py-4 font-bold text-center w-16">No</th>
+                        {columns.map((col, idx) => <th key={idx} className="px-6 py-4 font-bold whitespace-nowrap">{col}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {data.slice(0, 100).map((row, rIdx) => (
+                        <tr key={rIdx} className="hover:bg-gray-50/50">
+                          <td className="px-6 py-3 text-center font-medium text-gray-400">{rIdx + 1}</td>
+                          {columns.map((col, cIdx) => (
+                            <td key={cIdx} className="px-6 py-3 whitespace-nowrap truncate max-w-xs">{row[col]?.toString() || "-"}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+ 

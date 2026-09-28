@@ -6,6 +6,8 @@ import {
   Database,
   ChevronRight,
   Server,
+  UserCog,
+  FileSpreadsheet,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -56,6 +58,12 @@ export default function Sidebar({
       active: pathname === "/matrix-it",
     },
     {
+      name: "Laporan Harian",
+      href: "/laporan-harian",
+      icon: <FileSpreadsheet size={20} />,
+      active: pathname === "/laporan-harian",
+    },
+    {
       name: "Master Data",
       icon: <Database size={20} />,
       active: pathname === "/unit-produksi" || pathname === "/vendor",
@@ -82,6 +90,12 @@ export default function Sidebar({
           } as const,
         ]
       : []),
+    {
+      name: "Pengaturan",
+      href: "/settings",
+      icon: <UserCog size={20} />,
+      active: pathname === "/settings",
+    },
   ];
 
   return (

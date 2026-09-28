@@ -1,0 +1,180 @@
+                              {subTabReport1 === "jagung" && finalReportRealisasiPengadaan && (
+                  <div className="overflow-auto max-h-[600px] bg-white">
+                    <table className="w-full text-xs text-right border-collapse">
+                      <thead className="bg-[#1D63A8] text-white sticky top-0 z-10 shadow-sm whitespace-nowrap text-center">
+                        <tr>
+                          <th colSpan={17} className="border border-white p-1 text-center font-bold">REALISASI PENGADAAN JAGUNG UBI</th>
+                        </tr>
+                        <tr>
+                          <th rowSpan={2} className="border border-white p-1.5 w-10 text-center">NO</th>
+                          <th rowSpan={2} className="border border-white p-1.5 w-10 text-center">RM</th>
+                          <th rowSpan={2} className="border border-white p-1.5 min-w-[150px] text-center">LOKASI</th>
+                          {finalReportRealisasiPengadaan.pastMonths.map((m: any) => (
+                            <th key={m} className="border border-white p-1.5 uppercase">{finalReportRealisasiPengadaan.monthNames[m]}</th>
+                          ))}
+                          <th colSpan={5} className="border border-white p-1.5">MINGGUAN</th>
+                          <th rowSpan={2} className="border border-white p-1.5">REAL S/D<br/>JULI</th>
+                          <th rowSpan={2} className="border border-white p-1.5">TARGET<br/>2026</th>
+                          <th rowSpan={2} className="border border-white p-1.5">VS TGT<br/>2026 (%)</th>
+                        </tr>
+                        <tr>
+                          {finalReportRealisasiPengadaan.pastMonths.map((m: any) => (
+                            <th key={	on-m\} className="border border-white p-1 font-normal">TON</th>
+                          ))}
+                          <th className="border border-white p-1 font-normal text-xs">1-5 JULI</th>
+                          <th className="border border-white p-1 font-normal text-xs">6-12 JULI</th>
+                          <th className="border border-white p-1 font-normal text-xs">13-19 JULI</th>
+                          <th className="border border-white p-1 font-normal text-xs">20-26 JULI</th>
+                          <th className="border border-white p-1 font-normal text-xs">27-31 JULI</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-[#DDEBF7]">
+                        {(() => {
+                          const cdcData = finalReportRealisasiPengadaan.finalData["CDC"] || {};
+                          let no = 1;
+                          let totalJagungYtd = 0;
+                          let totalTarget = 0;
+                          let totals = {
+                            months: {} as Record<string, number>,
+                            weeks: [0,0,0,0,0]
+                          };
+                          
+                          // Ensure we render Dompu and Bolmong even if empty
+                          const rows = ["CDC DOMPU", "CDC BOLMONG"].map((gudang) => {
+                            const dataGudang = cdcData[gudang] || {};
+                            const dataJagung = dataGudang["JAGUNG"] || {};
+                            
+                            const rm = REGIONAL_MAPPING[gudang] || "-";
+                            const ytd = dataJagung["REAL_YTD"] || 0;
+                            const target = TARGET_2026_DATA[gudang]?.["JAGUNG"] || 0;
+                            
+                            totalJagungYtd += ytd;
+                            totalTarget += target;
+                            
+                            return (
+                              <tr key={gudang} className="hover:bg-blue-100/50">
+                                <td className="border border-white p-1.5 text-center">{no++}</td>
+                                <td className="border border-white p-1.5 text-center">{rm}</td>
+                                <td className="border border-white p-1.5 text-left">{gudang}</td>
+                                {finalReportRealisasiPengadaan.pastMonths.map((m: any) => {
+                                  const val = dataJagung[M_\] || 0;
+                                  totals.months[M_\] = (totals.months[M_\] || 0) + val;
+                                  return <td key={m} className="border border-white p-1.5">{val ? val.toLocaleString('id-ID') : ''}</td>;
+                                })}
+                                {finalReportRealisasiPengadaan.weeks.map((w: string, wIdx: number) => {
+                                  const val = dataJagung[w] || 0;
+                                  totals.weeks[wIdx] += val;
+                                  return <td key={w} className="border border-white p-1.5">{val ? val.toLocaleString('id-ID') : ''}</td>;
+                                })}
+                                <td className="border border-white p-1.5 font-bold">{ytd ? ytd.toLocaleString('id-ID') : ''}</td>
+                                <td className="border border-white p-1.5">{target ? target.toLocaleString('id-ID') : ''}</td>
+                                <td className="border border-white p-1.5 font-bold">{target && target > 0 ? Math.round((ytd/target)*100) + '%' : ''}</td>
+                              </tr>
+                            );
+                          });
+                          
+                          return (
+                            <>
+                              {rows}
+                              <tr className="bg-[#DDEBF7] font-bold">
+                                <td colSpan={3} className="border border-white p-1.5 text-center">TOTAL JAGUNG</td>
+                                {finalReportRealisasiPengadaan.pastMonths.map((m: any) => (
+                                  <td key={m} className="border border-white p-1.5">{totals.months[M_\] ? totals.months[M_\].toLocaleString('id-ID') : ''}</td>
+                                ))}
+                                {totals.weeks.map((val, idx) => (
+                                  <td key={idx} className="border border-white p-1.5">{val ? val.toLocaleString('id-ID') : ''}</td>
+                                ))}
+                                <td className="border border-white p-1.5">{totalJagungYtd ? totalJagungYtd.toLocaleString('id-ID') : ''}</td>
+                                <td className="border border-white p-1.5">{totalTarget ? totalTarget.toLocaleString('id-ID') : ''}</td>
+                                <td className="border border-white p-1.5">{totalTarget && totalTarget > 0 ? Math.round((totalJagungYtd/totalTarget)*100) + '%' : ''}</td>
+                              </tr>
+                            </>
+                          );
+                        })()}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {subTabReport1 === "rp-ubi" && finalReportRealisasiPengadaan && (
+                  <div className="overflow-auto max-h-[600px] bg-white">
+                    <table className="w-full text-xs text-right border-collapse">
+                      <thead className="bg-[#1D63A8] text-white sticky top-0 z-10 shadow-sm whitespace-nowrap text-center">
+                        <tr>
+                          <th colSpan={16} className="border border-white p-1 text-center font-bold">REALISASI PENGADAAN UBI</th>
+                        </tr>
+                        <tr>
+                          <th rowSpan={2} className="border border-white p-1.5 w-10 text-center">NO</th>
+                          <th rowSpan={2} className="border border-white p-1.5 min-w-[150px] text-center">LOKASI</th>
+                          {finalReportRealisasiPengadaan.pastMonths.map((m: any) => (
+                            <th key={m} className="border border-white p-1.5 uppercase">{finalReportRealisasiPengadaan.monthNames[m]}</th>
+                          ))}
+                          <th colSpan={5} className="border border-white p-1.5">MINGGUAN</th>
+                          <th rowSpan={2} className="border border-white p-1.5">REAL S/D<br/>JULI</th>
+                          <th rowSpan={2} className="border border-white p-1.5">TARGET<br/>2026</th>
+                          <th rowSpan={2} className="border border-white p-1.5">VS TGT<br/>2026 (%)</th>
+                        </tr>
+                        <tr>
+                          {finalReportRealisasiPengadaan.pastMonths.map((m: any) => (
+                            <th key={	on-m\} className="border border-white p-1 font-normal">TON</th>
+                          ))}
+                          <th className="border border-white p-1 font-normal text-xs">1-5 JULI</th>
+                          <th className="border border-white p-1 font-normal text-xs">6-12 JULI</th>
+                          <th className="border border-white p-1 font-normal text-xs">13-19 JULI</th>
+                          <th className="border border-white p-1 font-normal text-xs">20-26 JULI</th>
+                          <th className="border border-white p-1 font-normal text-xs">27-31 JULI</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-[#DDEBF7]">
+                        {(() => {
+                          const komoditiList = ["GABAH", "BERAS", "JAGUNG"];
+                          
+                          // We need to calculate grand total across all locations for each commodity
+                          let grandTotals = {
+                            "GABAH": { months: {} as Record<string, number>, weeks: [0,0,0,0,0], ytd: 0, target: 0 },
+                            "BERAS": { months: {} as Record<string, number>, weeks: [0,0,0,0,0], ytd: 0, target: 0 },
+                            "JAGUNG": { months: {} as Record<string, number>, weeks: [0,0,0,0,0], ytd: 0, target: 0 },
+                          };
+                          
+                          Object.keys(finalReportRealisasiPengadaan.finalData).forEach(group => {
+                            Object.keys(finalReportRealisasiPengadaan.finalData[group]).forEach(gudang => {
+                              komoditiList.forEach(kom => {
+                                const kData = finalReportRealisasiPengadaan.finalData[group][gudang][kom] || {};
+                                
+                                finalReportRealisasiPengadaan.pastMonths.forEach((m: any) => {
+                                  grandTotals[kom as keyof typeof grandTotals].months[M_\] = (grandTotals[kom as keyof typeof grandTotals].months[M_\] || 0) + (kData[M_\] || 0);
+                                });
+                                
+                                finalReportRealisasiPengadaan.weeks.forEach((w: string, wIdx: number) => {
+                                  grandTotals[kom as keyof typeof grandTotals].weeks[wIdx] += (kData[w] || 0);
+                                });
+                                
+                                grandTotals[kom as keyof typeof grandTotals].ytd += (kData["REAL_YTD"] || 0);
+                                grandTotals[kom as keyof typeof grandTotals].target += (TARGET_2026_DATA[gudang]?.[kom] || 0);
+                              });
+                            });
+                          });
+                          
+                          return komoditiList.map((kom, idx) => {
+                            const data = grandTotals[kom as keyof typeof grandTotals];
+                            return (
+                              <tr key={kom} className="hover:bg-blue-100/50">
+                                <td className="border border-white p-1.5 text-center">{idx + 1}</td>
+                                <td className="border border-white p-1.5 text-left">{kom}</td>
+                                {finalReportRealisasiPengadaan.pastMonths.map((m: any) => (
+                                  <td key={m} className="border border-white p-1.5">{data.months[M_\] ? data.months[M_\].toLocaleString('id-ID') : '-'}</td>
+                                ))}
+                                {data.weeks.map((val, wIdx) => (
+                                  <td key={wIdx} className="border border-white p-1.5">{val ? val.toLocaleString('id-ID') : '-'}</td>
+                                ))}
+                                <td className="border border-white p-1.5 font-bold">{data.ytd ? data.ytd.toLocaleString('id-ID') : '-'}</td>
+                                <td className="border border-white p-1.5">{data.target ? data.target.toLocaleString('id-ID') : '-'}</td>
+                                <td className="border border-white p-1.5 font-bold">{data.target && data.target > 0 ? Math.round((data.ytd/data.target)*100) + '%' : '-'}</td>
+                              </tr>
+                            );
+                          });
+                        })()}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
