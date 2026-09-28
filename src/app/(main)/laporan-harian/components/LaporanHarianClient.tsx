@@ -103,6 +103,95 @@ export default function LaporanHarianClient() {
     setEnabledSlideIds([]);
   };
 
+  const exportClientSidePpt = async (activeIds: number[], fileName: string) => {
+    // Create an isolated off-screen sandbox with fixed 1280x720 canvas
+    const sandbox = document.createElement('div');
+    sandbox.style.position = 'fixed';
+    sandbox.style.left = '-9999px';
+    sandbox.style.top = '0';
+    sandbox.style.width = '1280px';
+    sandbox.style.height = '720px';
+    sandbox.style.overflow = 'hidden';
+    sandbox.style.zIndex = '-9999';
+    sandbox.style.backgroundColor = '#ffffff';
+    document.body.appendChild(sandbox);
+
+    try {
+      const ppt = new pptxgen();
+      ppt.layout = 'LAYOUT_16x9';
+
+      for (let i = 0; i < activeIds.length; i++) {
+        const id = activeIds[i];
+        const card = document.getElementById(`slide-card-${id}`);
+        const slideInner = card?.querySelector('div[class*="w-[1280px]"][class*="h-[720px]"]') as HTMLElement;
+        if (!slideInner) continue;
+
+        Swal.update({
+          title: 'Exporting PowerPoint...',
+          html: `<div class="text-xs text-gray-600 font-medium">Memproses slide <b>${i + 1}</b> dari <b>${activeIds.length}</b>...</div>`,
+        });
+
+        // Clone slide into sandbox
+        sandbox.innerHTML = slideInner.outerHTML;
+
+        // Ensure images inside sandbox have correct absolute src
+        const imgs = sandbox.querySelectorAll('img');
+        imgs.forEach(img => {
+          if (img.getAttribute('src')?.startsWith('/')) {
+            img.src = window.location.origin + img.getAttribute('src');
+          }
+        });
+
+        await new Promise(r => setTimeout(r, 60));
+
+        const targetEl = (sandbox.firstElementChild as HTMLElement) || sandbox;
+        const canvas = await html2canvas(targetEl, {
+          scale: 2, // 2x retina crisp resolution (2560x1440)
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: 1280,
+          height: 720,
+          windowWidth: 1280,
+          windowHeight: 720,
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        const pptSlide = ppt.addSlide();
+        pptSlide.addImage({
+          data: imgData,
+          x: 0,
+          y: 0,
+          w: '100%',
+          h: '100%',
+        });
+
+        canvas.width = 0;
+        canvas.height = 0;
+      }
+
+      Swal.update({
+        title: 'Menyimpan File...',
+        html: `<div class="text-xs text-gray-600 font-medium">Sedang men-download file presentasi .pptx...</div>`,
+      });
+
+      await ppt.writeFile({ fileName });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Completed',
+        text: 'Laporan telah di-export ke format PowerPoint.',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    } finally {
+      if (document.body.contains(sandbox)) {
+        document.body.removeChild(sandbox);
+      }
+    }
+  };
+
   const exportToPPT = async () => {
     try {
       if (isExporting) return;
@@ -147,6 +236,9 @@ export default function LaporanHarianClient() {
         throw new Error("Slide nodes not found");
       }
 
+      const todayStr = new Date().toISOString().split('T')[0];
+      const fileName = `Laporan_Harian_ERP_${todayStr}.pptx`;
+
       // Show simple loading alert
       Swal.fire({
         title: 'In Progress Download...',
@@ -161,42 +253,53 @@ export default function LaporanHarianClient() {
       const styleEls = document.querySelectorAll('style, link[rel="stylesheet"]');
       const styles = Array.from(styleEls).map(el => el.outerHTML).join('\n');
 
-      // Call the high-resolution Puppeteer export API route
-      const response = await fetch('/api/export-ppt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          slides: targetSlides,
-          styles,
-          origin: window.location.origin,
-        }),
-      });
+      let serverSuccess = false;
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || `Gagal melakukan export PPT (Status: ${response.status})`);
+      // Try server-side Puppeteer export first
+      try {
+        const response = await fetch('/api/export-ppt', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            slides: targetSlides,
+            styles,
+            origin: window.location.origin,
+          }),
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(downloadUrl);
+          document.body.removeChild(a);
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Completed',
+            text: 'Laporan telah di-export.',
+            timer: 2500,
+            showConfirmButton: false
+          });
+          serverSuccess = true;
+        } else {
+          const errorData = await response.json().catch(() => null);
+          console.warn("Server-side export unavailable, falling back to client-side:", errorData?.error);
+        }
+      } catch (serverErr) {
+        console.warn("Server-side export error, falling back to client-side:", serverErr);
       }
 
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      const fileName = `Laporan_Harian_ERP_${new Date().toISOString().split('T')[0]}.pptx`;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(downloadUrl);
-      document.body.removeChild(a);
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Completed',
-        text: 'Laporan telah di-export.',
-        timer: 2500,
-        showConfirmButton: false
-      });
+      // If server-side was unavailable (e.g. no Chromium on production Linux server), run client-side export
+      if (!serverSuccess) {
+        await exportClientSidePpt(activeIds, fileName);
+      }
 
     } catch (error: any) {
       console.error("Export PPT Error:", error);

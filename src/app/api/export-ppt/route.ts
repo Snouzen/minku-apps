@@ -22,7 +22,7 @@ interface ExportPptRequestBody {
 /**
  * Detects the Chromium or Google Chrome/Edge executable path across various environments.
  */
-function getBrowserExecutablePath(): string {
+function getBrowserExecutablePath(): string | null {
   // 1. Check explicit environment variables
   if (process.env.PUPPETEER_EXECUTABLE_PATH && fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)) {
     return process.env.PUPPETEER_EXECUTABLE_PATH;
@@ -61,6 +61,8 @@ function getBrowserExecutablePath(): string {
       "/usr/bin/chromium",
       "/usr/bin/chromium-browser",
       "/snap/bin/chromium",
+      "/opt/google/chrome/chrome",
+      "/opt/google/chrome/google-chrome",
     ];
     for (const candidate of candidates) {
       if (fs.existsSync(candidate)) {
@@ -83,9 +85,7 @@ function getBrowserExecutablePath(): string {
     }
   }
 
-  throw new Error(
-    "Browser Chromium/Chrome tidak ditemukan di server. Pastikan Google Chrome atau Microsoft Edge terpasang."
-  );
+  return null;
 }
 
 export async function POST(req: NextRequest) {
@@ -103,6 +103,15 @@ export async function POST(req: NextRequest) {
     }
 
     const executablePath = getBrowserExecutablePath();
+    if (!executablePath) {
+      return NextResponse.json(
+        {
+          error: "Browser Chromium/Chrome tidak ditemukan di server. Menggunakan client-side export.",
+          fallbackClientSide: true,
+        },
+        { status: 503 }
+      );
+    }
 
     // Launch Chromium instance
     browser = await puppeteer.launch({
