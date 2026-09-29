@@ -3,7 +3,7 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import { UploadCloud, FileSpreadsheet, Trash2, ChevronLeft, ChevronRight, ChevronDown, Download, Filter, ShoppingCart, Package, TrendingUp, Layers, CheckCircle2, RefreshCw, AlertCircle, Plus, FileUp, Search, Eye, Maximize2, X, Sliders, CheckSquare, Square, Check } from "lucide-react";
 import * as XLSX from "xlsx";
-import html2canvas from "html2canvas-pro";
+import { toJpeg } from "html-to-image";
 import pptxgen from "pptxgenjs";
 import Swal from "sweetalert2";
 import SmoothMultiAutocomplete from "../../../component/smoothMultiAutocomplete";
@@ -104,6 +104,7 @@ export default function LaporanHarianClient() {
   };
 
   const exportToPPT = async () => {
+    let staging: HTMLDivElement | null = null;
     try {
       if (isExporting) return;
 
@@ -141,16 +142,26 @@ export default function LaporanHarianClient() {
             <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
               <div id="ppt-progress-bar" class="bg-[#1D63A8] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
-            <div id="ppt-progress-sub" class="text-[11px] text-gray-500 font-medium truncate">Menyiapkan engine rendering Chromium...</div>
+            <div id="ppt-progress-sub" class="text-[11px] text-gray-500 font-medium truncate">Menyiapkan engine rendering beresolusi tinggi...</div>
           </div>
         `,
         allowOutsideClick: false,
         showConfirmButton: false,
       });
 
-      // Extract all page stylesheets and styles once
-      const styleEls = document.querySelectorAll('style, link[rel="stylesheet"]');
-      const styles = Array.from(styleEls).map(el => el.outerHTML).join('\n');
+      // Create an isolated fixed staging canvas at (0,0) in viewport so bounding rect and layout are 100% native
+      staging = document.createElement('div');
+      staging.id = 'export-staging-container';
+      staging.style.position = 'fixed';
+      staging.style.top = '0';
+      staging.style.left = '0';
+      staging.style.width = '1280px';
+      staging.style.height = '720px';
+      staging.style.zIndex = '1000'; // Under SweetAlert (z-index 1060)
+      staging.style.backgroundColor = '#ffffff';
+      staging.style.overflow = 'hidden';
+      staging.style.pointerEvents = 'none';
+      document.body.appendChild(staging);
 
       const ppt = new pptxgen();
       ppt.layout = 'LAYOUT_16x9';
@@ -183,47 +194,46 @@ export default function LaporanHarianClient() {
           continue;
         }
 
-        let imageDataUrl: string | null = null;
+        // Clone slide into staging element
+        staging.innerHTML = slideInner.outerHTML;
 
-        // 1. Try high-resolution Chromium serverless route (/api/export-slide)
-        try {
-          const response = await fetch('/api/export-slide', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              slideId: id,
-              title: slideTitle,
-              html: slideInner.outerHTML,
-              styles,
-            }),
-          });
-
-          if (response.ok) {
-            const blob = await response.blob();
-            imageDataUrl = await new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(blob);
-            });
-          } else {
-            console.warn(`Server render failed for slide ${id}, status: ${response.status}`);
+        // Ensure all local images have full absolute URLs
+        const imgs = staging.querySelectorAll('img');
+        imgs.forEach(img => {
+          const src = img.getAttribute('src');
+          if (src && src.startsWith('/')) {
+            img.src = window.location.origin + src;
           }
-        } catch (fetchErr) {
-          console.warn(`Network/server error for slide ${id}:`, fetchErr);
-        }
+        });
 
-        // 2. Fallback to direct client-side canvas capture if server render fails
-        if (!imageDataUrl) {
+        // Let the browser paint the slide into DOM
+        await new Promise(r => setTimeout(r, 60));
+
+        const targetEl = (staging.firstElementChild as HTMLElement) || staging;
+
+        let imageDataUrl: string | null = null;
+        try {
+          imageDataUrl = await toJpeg(targetEl, {
+            quality: 0.95,
+            pixelRatio: 2, // 2560x1440 Retina 2K resolution
+            width: 1280,
+            height: 720,
+            backgroundColor: '#ffffff',
+            skipFonts: true,
+            cacheBust: false,
+          });
+        } catch (err) {
+          console.warn(`toJpeg error on slide ${id}, retrying without cacheBust:`, err);
           try {
-            const canvas = await html2canvas(slideInner, {
-              scale: 2,
-              useCORS: true,
-              logging: false,
+            imageDataUrl = await toJpeg(targetEl, {
+              quality: 0.92,
+              pixelRatio: 2,
+              width: 1280,
+              height: 720,
               backgroundColor: '#ffffff',
             });
-            imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-          } catch (canvasErr) {
-            console.error(`Local fallback capture failed for slide ${id}:`, canvasErr);
+          } catch (retryErr) {
+            console.error(`Final render failure on slide ${id}:`, retryErr);
           }
         }
 
@@ -262,6 +272,9 @@ export default function LaporanHarianClient() {
       console.error("Export PPT Error:", error);
       Swal.fire('Error', error?.message || 'Gagal melakukan export PPT. Silakan coba lagi.', 'error');
     } finally {
+      if (staging && document.body.contains(staging)) {
+        document.body.removeChild(staging);
+      }
       setIsExporting(false);
     }
   };
