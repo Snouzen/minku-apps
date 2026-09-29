@@ -103,95 +103,6 @@ export default function LaporanHarianClient() {
     setEnabledSlideIds([]);
   };
 
-  const exportClientSidePpt = async (activeIds: number[], fileName: string) => {
-    // Create an isolated off-screen sandbox with fixed 1280x720 canvas
-    const sandbox = document.createElement('div');
-    sandbox.style.position = 'fixed';
-    sandbox.style.left = '-9999px';
-    sandbox.style.top = '0';
-    sandbox.style.width = '1280px';
-    sandbox.style.height = '720px';
-    sandbox.style.overflow = 'hidden';
-    sandbox.style.zIndex = '-9999';
-    sandbox.style.backgroundColor = '#ffffff';
-    document.body.appendChild(sandbox);
-
-    try {
-      const ppt = new pptxgen();
-      ppt.layout = 'LAYOUT_16x9';
-
-      for (let i = 0; i < activeIds.length; i++) {
-        const id = activeIds[i];
-        const card = document.getElementById(`slide-card-${id}`);
-        const slideInner = card?.querySelector('div[class*="w-[1280px]"][class*="h-[720px]"]') as HTMLElement;
-        if (!slideInner) continue;
-
-        Swal.update({
-          title: 'Exporting PowerPoint...',
-          html: `<div class="text-xs text-gray-600 font-medium">Memproses slide <b>${i + 1}</b> dari <b>${activeIds.length}</b>...</div>`,
-        });
-
-        // Clone slide into sandbox
-        sandbox.innerHTML = slideInner.outerHTML;
-
-        // Ensure images inside sandbox have correct absolute src
-        const imgs = sandbox.querySelectorAll('img');
-        imgs.forEach(img => {
-          if (img.getAttribute('src')?.startsWith('/')) {
-            img.src = window.location.origin + img.getAttribute('src');
-          }
-        });
-
-        await new Promise(r => setTimeout(r, 60));
-
-        const targetEl = (sandbox.firstElementChild as HTMLElement) || sandbox;
-        const canvas = await html2canvas(targetEl, {
-          scale: 2, // 2x retina crisp resolution (2560x1440)
-          useCORS: true,
-          allowTaint: true,
-          logging: false,
-          backgroundColor: '#ffffff',
-          width: 1280,
-          height: 720,
-          windowWidth: 1280,
-          windowHeight: 720,
-        });
-
-        const imgData = canvas.toDataURL('image/jpeg', 0.92);
-        const pptSlide = ppt.addSlide();
-        pptSlide.addImage({
-          data: imgData,
-          x: 0,
-          y: 0,
-          w: '100%',
-          h: '100%',
-        });
-
-        canvas.width = 0;
-        canvas.height = 0;
-      }
-
-      Swal.update({
-        title: 'Menyimpan File...',
-        html: `<div class="text-xs text-gray-600 font-medium">Sedang men-download file presentasi .pptx...</div>`,
-      });
-
-      await ppt.writeFile({ fileName });
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Completed',
-        text: 'Laporan telah di-export ke format PowerPoint.',
-        timer: 2500,
-        showConfirmButton: false
-      });
-    } finally {
-      if (document.body.contains(sandbox)) {
-        document.body.removeChild(sandbox);
-      }
-    }
-  };
-
   const exportToPPT = async () => {
     try {
       if (isExporting) return;
@@ -215,92 +126,138 @@ export default function LaporanHarianClient() {
         return;
       }
 
-      // Collect only enabled slide elements directly from DOM (no layout shift needed!)
-      const targetSlides: { id: number; title: string; html: string }[] = [];
-      for (const id of activeIds) {
-        const card = document.getElementById(`slide-card-${id}`);
-        if (card) {
-          const slideInner = card.querySelector('div[class*="w-[1280px]"][class*="h-[720px]"]') as HTMLElement;
-          if (slideInner) {
-            const meta = SLIDE_METADATA.find(m => m.id === id);
-            targetSlides.push({
-              id,
-              title: meta?.title || `Slide ${id}`,
-              html: slideInner.outerHTML
-            });
-          }
-        }
-      }
-
-      if (targetSlides.length === 0) {
-        throw new Error("Slide nodes not found");
-      }
-
       const todayStr = new Date().toISOString().split('T')[0];
       const fileName = `Laporan_Harian_ERP_${todayStr}.pptx`;
 
-      // Show simple loading alert
+      // Show beautiful progress modal
       Swal.fire({
-        title: 'In Progress Download...',
+        title: 'Mempersiapkan PowerPoint...',
+        html: `
+          <div class="space-y-3 py-2 text-left">
+            <div class="flex justify-between items-center text-xs font-semibold text-gray-700">
+              <span id="ppt-progress-label">Menyiapkan slide...</span>
+              <span id="ppt-progress-percent" class="text-[#1D63A8] font-bold">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+              <div id="ppt-progress-bar" class="bg-[#1D63A8] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div id="ppt-progress-sub" class="text-[11px] text-gray-500 font-medium truncate">Menyiapkan engine rendering Chromium...</div>
+          </div>
+        `,
         allowOutsideClick: false,
         showConfirmButton: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
       });
 
-      // Extract all page stylesheets and styles
+      // Extract all page stylesheets and styles once
       const styleEls = document.querySelectorAll('style, link[rel="stylesheet"]');
       const styles = Array.from(styleEls).map(el => el.outerHTML).join('\n');
 
-      let serverSuccess = false;
+      const ppt = new pptxgen();
+      ppt.layout = 'LAYOUT_16x9';
 
-      // Try server-side Puppeteer export first
-      try {
-        const response = await fetch('/api/export-ppt', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            slides: targetSlides,
-            styles,
-            origin: window.location.origin,
-          }),
-        });
+      const updateProgress = (completed: number, total: number, slideTitle: string) => {
+        const percent = Math.round((completed / total) * 100);
+        const bar = document.getElementById('ppt-progress-bar');
+        const textPercent = document.getElementById('ppt-progress-percent');
+        const label = document.getElementById('ppt-progress-label');
+        const sub = document.getElementById('ppt-progress-sub');
 
-        if (response.ok) {
-          const blob = await response.blob();
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = fileName;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(downloadUrl);
-          document.body.removeChild(a);
+        if (bar) bar.style.width = `${percent}%`;
+        if (textPercent) textPercent.innerText = `${percent}%`;
+        if (label) label.innerText = `Memproses slide ${completed} dari ${total}`;
+        if (sub) sub.innerText = `Memotret: ${slideTitle}`;
+      };
 
-          Swal.fire({
-            icon: 'success',
-            title: 'Completed',
-            text: 'Laporan telah di-export.',
-            timer: 2500,
-            showConfirmButton: false
-          });
-          serverSuccess = true;
-        } else {
-          const errorData = await response.json().catch(() => null);
-          console.warn("Server-side export unavailable, falling back to client-side:", errorData?.error);
+      for (let i = 0; i < activeIds.length; i++) {
+        const id = activeIds[i];
+        const meta = SLIDE_METADATA.find(m => m.id === id);
+        const slideTitle = meta?.title || `Slide ${id}`;
+
+        updateProgress(i + 1, activeIds.length, slideTitle);
+
+        const card = document.getElementById(`slide-card-${id}`);
+        const slideInner = card?.querySelector('div[class*="w-[1280px]"][class*="h-[720px]"]') as HTMLElement;
+
+        if (!slideInner) {
+          console.warn(`Slide ${id} element not found in DOM`);
+          continue;
         }
-      } catch (serverErr) {
-        console.warn("Server-side export error, falling back to client-side:", serverErr);
+
+        let imageDataUrl: string | null = null;
+
+        // 1. Try high-resolution Chromium serverless route (/api/export-slide)
+        try {
+          const response = await fetch('/api/export-slide', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              slideId: id,
+              title: slideTitle,
+              html: slideInner.outerHTML,
+              styles,
+            }),
+          });
+
+          if (response.ok) {
+            const blob = await response.blob();
+            imageDataUrl = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          } else {
+            console.warn(`Server render failed for slide ${id}, status: ${response.status}`);
+          }
+        } catch (fetchErr) {
+          console.warn(`Network/server error for slide ${id}:`, fetchErr);
+        }
+
+        // 2. Fallback to direct client-side canvas capture if server render fails
+        if (!imageDataUrl) {
+          try {
+            const canvas = await html2canvas(slideInner, {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#ffffff',
+            });
+            imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+          } catch (canvasErr) {
+            console.error(`Local fallback capture failed for slide ${id}:`, canvasErr);
+          }
+        }
+
+        if (imageDataUrl) {
+          const slide = ppt.addSlide();
+          slide.addImage({
+            data: imageDataUrl,
+            x: 0,
+            y: 0,
+            w: '100%',
+            h: '100%',
+          });
+        }
       }
 
-      // If server-side was unavailable (e.g. no Chromium on production Linux server), run client-side export
-      if (!serverSuccess) {
-        await exportClientSidePpt(activeIds, fileName);
-      }
+      // Finalize and download file
+      const label = document.getElementById('ppt-progress-label');
+      const sub = document.getElementById('ppt-progress-sub');
+      const bar = document.getElementById('ppt-progress-bar');
+      const textPercent = document.getElementById('ppt-progress-percent');
+      if (bar) bar.style.width = '100%';
+      if (textPercent) textPercent.innerText = '100%';
+      if (label) label.innerText = 'Menyimpan File...';
+      if (sub) sub.innerText = 'Mengemas presentasi PowerPoint (.pptx)...';
 
+      await ppt.writeFile({ fileName });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Export Selesai!',
+        text: `Semua ${activeIds.length} slide berhasil diekspor dengan kualitas tinggi.`,
+        timer: 2500,
+        showConfirmButton: false,
+      });
     } catch (error: any) {
       console.error("Export PPT Error:", error);
       Swal.fire('Error', error?.message || 'Gagal melakukan export PPT. Silakan coba lagi.', 'error');
