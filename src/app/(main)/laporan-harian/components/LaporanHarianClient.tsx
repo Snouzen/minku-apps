@@ -104,7 +104,6 @@ export default function LaporanHarianClient() {
   };
 
   const exportToPPT = async () => {
-    let staging: HTMLDivElement | null = null;
     try {
       if (isExporting) return;
 
@@ -142,26 +141,16 @@ export default function LaporanHarianClient() {
             <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
               <div id="ppt-progress-bar" class="bg-[#1D63A8] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
-            <div id="ppt-progress-sub" class="text-[11px] text-gray-500 font-medium truncate">Menyiapkan engine rendering beresolusi tinggi...</div>
+            <div id="ppt-progress-sub" class="text-[11px] text-gray-500 font-medium truncate">Menghubungkan ke engine rendering Chromium...</div>
           </div>
         `,
         allowOutsideClick: false,
         showConfirmButton: false,
       });
 
-      // Create an isolated fixed staging canvas at (0,0) in viewport so bounding rect and layout are 100% native
-      staging = document.createElement('div');
-      staging.id = 'export-staging-container';
-      staging.style.position = 'fixed';
-      staging.style.top = '0';
-      staging.style.left = '0';
-      staging.style.width = '1280px';
-      staging.style.height = '720px';
-      staging.style.zIndex = '1000'; // Under SweetAlert (z-index 1060)
-      staging.style.backgroundColor = '#ffffff';
-      staging.style.overflow = 'hidden';
-      staging.style.pointerEvents = 'none';
-      document.body.appendChild(staging);
+      // Extract all page stylesheets and styles once
+      const styleEls = document.querySelectorAll('style, link[rel="stylesheet"]');
+      const styles = Array.from(styleEls).map(el => el.outerHTML).join('\n');
 
       const ppt = new pptxgen();
       ppt.layout = 'LAYOUT_16x9';
@@ -194,46 +183,49 @@ export default function LaporanHarianClient() {
           continue;
         }
 
-        // Clone slide into staging element
-        staging.innerHTML = slideInner.outerHTML;
-
-        // Ensure all local images have full absolute URLs
-        const imgs = staging.querySelectorAll('img');
-        imgs.forEach(img => {
-          const src = img.getAttribute('src');
-          if (src && src.startsWith('/')) {
-            img.src = window.location.origin + src;
-          }
-        });
-
-        // Let the browser paint the slide into DOM
-        await new Promise(r => setTimeout(r, 60));
-
-        const targetEl = (staging.firstElementChild as HTMLElement) || staging;
-
         let imageDataUrl: string | null = null;
+
+        // 1. Call server API (/api/export-slide) powered by Browserless (Prod) or Local Chrome (Dev)
         try {
-          imageDataUrl = await toJpeg(targetEl, {
-            quality: 0.95,
-            pixelRatio: 2, // 2560x1440 Retina 2K resolution
-            width: 1280,
-            height: 720,
-            backgroundColor: '#ffffff',
-            skipFonts: true,
-            cacheBust: false,
+          const response = await fetch('/api/export-slide', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              slideId: id,
+              title: slideTitle,
+              html: slideInner.outerHTML,
+              styles,
+            }),
           });
-        } catch (err) {
-          console.warn(`toJpeg error on slide ${id}, retrying without cacheBust:`, err);
+
+          if (response.ok) {
+            const blob = await response.blob();
+            imageDataUrl = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          } else {
+            const errData = await response.json().catch(() => null);
+            console.warn(`Server render failed for slide ${id}:`, errData?.error || response.statusText);
+          }
+        } catch (fetchErr) {
+          console.warn(`Network error for slide ${id}:`, fetchErr);
+        }
+
+        // 2. Fallback to toJpeg if server API fails
+        if (!imageDataUrl) {
           try {
-            imageDataUrl = await toJpeg(targetEl, {
-              quality: 0.92,
+            imageDataUrl = await toJpeg(slideInner, {
+              quality: 0.95,
               pixelRatio: 2,
               width: 1280,
               height: 720,
               backgroundColor: '#ffffff',
+              skipFonts: true,
             });
-          } catch (retryErr) {
-            console.error(`Final render failure on slide ${id}:`, retryErr);
+          } catch (fallbackErr) {
+            console.error(`Fallback render failed for slide ${id}:`, fallbackErr);
           }
         }
 
@@ -272,9 +264,6 @@ export default function LaporanHarianClient() {
       console.error("Export PPT Error:", error);
       Swal.fire('Error', error?.message || 'Gagal melakukan export PPT. Silakan coba lagi.', 'error');
     } finally {
-      if (staging && document.body.contains(staging)) {
-        document.body.removeChild(staging);
-      }
       setIsExporting(false);
     }
   };

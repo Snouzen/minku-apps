@@ -81,13 +81,27 @@ function getLocalBrowserExecutablePath(): string | null {
 }
 
 /**
- * Launch Chromium either via local executable (in Dev) or via @sparticuz/chromium (in Vercel production).
+ * Connect to Browserless Cloud (Production/Dev with API key) or launch local Chrome.
  */
-async function launchChromium(): Promise<Browser> {
-  const localExecutable = getLocalBrowserExecutablePath();
+async function getBrowser(): Promise<{ browser: Browser; isRemote: boolean }> {
+  const apiKey = process.env.BROWSERLESS_API_KEY?.trim();
 
+  // 1. If BROWSERLESS_API_KEY is configured, connect to Browserless Cloud
+  if (apiKey) {
+    try {
+      const browser = await puppeteer.connect({
+        browserWSEndpoint: `wss://chrome.browserless.io?token=${apiKey}`,
+      });
+      return { browser, isRemote: true };
+    } catch (connErr) {
+      console.warn("Koneksi Browserless gagal, beralih ke local browser:", connErr);
+    }
+  }
+
+  // 2. If no API key or connection fails, use local Chrome / Edge (Dev mode)
+  const localExecutable = getLocalBrowserExecutablePath();
   if (localExecutable) {
-    return puppeteer.launch({
+    const browser = await puppeteer.launch({
       executablePath: localExecutable,
       headless: true,
       args: [
@@ -99,27 +113,10 @@ async function launchChromium(): Promise<Browser> {
         "--hide-scrollbars",
       ],
     });
+    return { browser, isRemote: false };
   }
 
-  // Serverless Linux (Vercel Serverless Function)
-  const chromium = (await import("@sparticuz/chromium")).default;
-  const executablePath = await chromium.executablePath();
-
-  return puppeteer.launch({
-    args: [
-      ...chromium.args,
-      "--font-render-hinting=none",
-      "--hide-scrollbars",
-      "--disable-gpu",
-    ],
-    defaultViewport: {
-      width: 1280,
-      height: 720,
-      deviceScaleFactor: 2,
-    },
-    executablePath,
-    headless: true,
-  });
+  throw new Error("Browser tidak ditemukan: Harap pasang Google Chrome di lokal atau pastikan BROWSERLESS_API_KEY sudah terisi dengan benar.");
 }
 
 /**
@@ -130,7 +127,6 @@ function inlinePublicImages(html: string): string {
 
   return html.replace(/src=["'](\/[^"']+)["']/g, (match, relPath) => {
     try {
-      // Remove query string if any
       const cleanRel = relPath.split("?")[0];
       const filePath = path.join(publicDir, cleanRel.startsWith("/") ? cleanRel.slice(1) : cleanRel);
 
@@ -195,7 +191,9 @@ export async function POST(req: NextRequest) {
 </body>
 </html>`;
 
-    browser = await launchChromium();
+    const { browser: activeBrowser, isRemote } = await getBrowser();
+    browser = activeBrowser;
+
     const page = await browser.newPage();
 
     // Set viewport: 1280x720 with deviceScaleFactor: 2 for Retina 2K resolution (2560x1440)
@@ -211,7 +209,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Small delay to ensure any chart animations or layout paints complete
-    await new Promise((resolve) => setTimeout(resolve, 120));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     const screenshot = await page.screenshot({
       type: "jpeg",
@@ -225,7 +223,11 @@ export async function POST(req: NextRequest) {
     });
 
     await page.close().catch(() => {});
-    await browser.close().catch(() => {});
+    if (isRemote) {
+      await browser.close().catch(() => {});
+    } else {
+      await browser.close().catch(() => {});
+    }
     browser = null;
 
     return new NextResponse(screenshot as unknown as BodyInit, {
