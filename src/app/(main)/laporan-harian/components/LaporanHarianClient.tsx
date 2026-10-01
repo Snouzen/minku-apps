@@ -2438,10 +2438,14 @@ export default function LaporanHarianClient() {
     const latestYear = maxDate.getFullYear();
     const latestDay = maxDate.getDate();
     const activeMonthName = monthNames[latestMonthIdx];
-
-    const latestDayStr = `${latestDay} ${activeMonthName} ${latestYear}`;
+    const latestDayPad = String(latestDay).padStart(2, '0');
+    const latestDayStr = `${latestDayPad} ${activeMonthName} ${latestYear}`;
     const prevDate = new Date(latestYear, latestMonthIdx, latestDay - 1);
-    const prevDayStr = `s.d ${prevDate.getDate()} ${monthNames[prevDate.getMonth()]} ${prevDate.getFullYear()}`;
+    const prevDayPad = String(prevDate.getDate()).padStart(2, '0');
+    const prevMonthName = monthNames[prevDate.getMonth()];
+    const prevYear = prevDate.getFullYear();
+    const prevDayStr = `s.d ${prevDate.getDate()} ${prevMonthName} ${prevYear}`;
+    const prevDayOnlyStr = `${prevDayPad} ${prevMonthName} ${prevYear}`;
 
     // Infrastruktur list in exact ordered sequence 1-24
     const infrastructures = [
@@ -2667,6 +2671,7 @@ export default function LaporanHarianClient() {
       grandTotals,
       latestDayStr,
       prevDayStr,
+      prevDayOnlyStr,
       activeMonthName
     };
   }, [data, columns]);
@@ -6861,13 +6866,35 @@ const finalReportHargaPembelian = useMemo(() => {
             )}
 
             {activeTab === 'preview-ppt' && (() => {
+              const latestDayStr = finalReportPengadaanUB?.latestDayStr;
+              const prevDayOnlyStr = finalReportPengadaanUB?.prevDayOnlyStr;
+
               const rawSlides = [
-                { title: "Progress Operasional", component: <SlideProgressOperasional finalReportRealisasiPengadaan={finalReportRealisasiPengadaan} finalReportHargaPembelian={finalReportHargaPembelian} finalReportRealisasiPenjualan={salesData.length > 0 ? finalReportRealisasiPenjualan : null} stokHariIni={stokHariIni} /> },
+                { 
+                  title: "Progress Operasional", 
+                  component: (
+                    <SlideProgressOperasional 
+                      finalReportRealisasiPengadaan={finalReportRealisasiPengadaan} 
+                      finalReportHargaPembelian={finalReportHargaPembelian} 
+                      finalReportRealisasiPenjualan={salesData.length > 0 ? finalReportRealisasiPenjualan : null} 
+                      stokHariIni={stokHariIni} 
+                      latestDayStr={latestDayStr}
+                    />
+                  ) 
+                },
                 { title: "Monitoring Utilitas RMU & CDC", component: <SlideMonitoringUtilitas /> },
                 { title: "Monitoring Utilitas RMU SPP", component: <SlideMonitoringUtilitasRMUSPP /> },
                 { title: "Monitoring Utilitas RMU SPB", component: <SlideMonitoringUtilitasRMUSPB /> },
                 { title: "Realisasi PSO & Makloon", component: <SlideRealisasiPSOMakloon /> },
-                { title: "Kuantum Penjualan UB Industri", component: <SlideKuantumPenjualanUB /> },
+                { 
+                  title: "Kuantum Penjualan UB Industri", 
+                  component: (
+                    <SlideKuantumPenjualanUB 
+                      dateStr={latestDayStr}
+                      updatePersediaanDateStr={prevDayOnlyStr}
+                    />
+                  ) 
+                },
                 { title: "Realisasi Pengadaan Gabah & Beras (Nasional)", component: <SlideRealisasiPengadaanGabahBeras finalReportPengadaanUB={finalReportPengadaanUB} /> },
                 { title: "Realisasi Rekapitulasi Pengadaan Gabah dan Beras", component: <SlideRealisasiPengadaanGabahBerasBawah finalReportRealisasiPengadaan={finalReportRealisasiPengadaan} /> },
                 { title: "Realisasi Rekapitulasi Pengadaan Gabah dan Beras (UP & CDC)", component: <SlideRealisasiPengadaanGabahBerasBawahPart2 finalReportRealisasiPengadaan={finalReportRealisasiPengadaan} /> },
@@ -6881,7 +6908,7 @@ const finalReportHargaPembelian = useMemo(() => {
                       inventoryData={inventoryData}
                       inventoryColumns={inventoryColumns}
                       inventoryFileName={inventoryFileName}
-                      latestDayStr={finalReportPengadaanUB?.latestDayStr}
+                      latestDayStr={latestDayStr}
                     />
                   ) 
                 },

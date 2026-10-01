@@ -52,10 +52,34 @@ interface SlideKuantumPenjualanUBProps {
 
 export default function SlideKuantumPenjualanUB({
   customData,
-  dateStr = '08 September 2026',
-  updatePersediaanDateStr = '07 September 2026'
+  dateStr,
+  updatePersediaanDateStr,
 }: SlideKuantumPenjualanUBProps) {
   const rows = customData && customData.length > 0 ? customData : BASELINE_KUANTUM_PENJUALAN;
+
+  const displayDateStr = dateStr || '08 September 2026';
+
+  const displayUpdatePersediaanDateStr = React.useMemo(() => {
+    if (updatePersediaanDateStr) return updatePersediaanDateStr;
+    if (dateStr) {
+      const parts = dateStr.trim().split(/\s+/);
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const monthName = parts[1];
+        const year = parseInt(parts[2], 10);
+        const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const mIdx = monthNames.findIndex(m => m.toLowerCase() === monthName.toLowerCase());
+        if (!isNaN(day) && mIdx !== -1 && !isNaN(year)) {
+          const prevD = new Date(year, mIdx, day - 1);
+          const pDayPad = String(prevD.getDate()).padStart(2, '0');
+          const pMonth = monthNames[prevD.getMonth()];
+          const pYear = prevD.getFullYear();
+          return `${pDayPad} ${pMonth} ${pYear}`;
+        }
+      }
+    }
+    return '07 September 2026';
+  }, [dateStr, updatePersediaanDateStr]);
 
   const totalBeras = rows.reduce((acc, r) => acc + (r.beras || 0), 0);
   const totalGabah = rows.reduce((acc, r) => acc + (r.gabah || 0), 0);
@@ -84,7 +108,7 @@ export default function SlideKuantumPenjualanUB({
             KUANTUM PENJUALAN UB INDUSTRI
           </h1>
           <h2 className="text-[17px] font-bold text-[#2e75b6] mt-0.5">
-            {dateStr}
+            {displayDateStr}
           </h2>
         </div>
 
@@ -186,7 +210,7 @@ export default function SlideKuantumPenjualanUB({
         {/* Footnotes */}
         <div className="text-[9.5px] italic font-bold text-gray-800 leading-tight">
           <p>*Data diperoleh dari laporan tarikan system ERP</p>
-          <p>** Update Persediaan per Tanggal {updatePersediaanDateStr}</p>
+          <p>** Update Persediaan per Tanggal {displayUpdatePersediaanDateStr}</p>
         </div>
 
         {/* Decorative Wave & Slogan: Passion In Every Grain */}

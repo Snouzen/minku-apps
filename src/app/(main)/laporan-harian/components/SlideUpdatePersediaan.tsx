@@ -510,7 +510,7 @@ export default function SlideUpdatePersediaan({
             {/* Footers */}
             <tr className="bg-[#d9e6f3] text-black font-bold">
               <td colSpan={2} className="border border-white px-[3px] py-[1.2px]"></td>
-              <td className="border border-white px-[3px] py-[1.2px]">TOTAL RTR</td>
+              <td className="border border-white px-[3px] py-[1.2px]">TOTAL SPB</td>
               <td className="border border-white px-[3px] py-[1.2px] text-right">{renderCell(spbTotals.gabah)}</td>
               <td className="border border-white px-[3px] py-[1.2px] text-right">{renderCell(spbTotals.beras)}</td>
               <td className="border border-white px-[3px] py-[1.2px] text-right">{renderCell(spbTotals.kemasan)}</td>

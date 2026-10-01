@@ -359,41 +359,41 @@ export default function SlideNilaiHPPBerasJadi({
   const { tableFontSize, headerFontSize, rowPadding, headerPadding } = useMemo(() => {
     if (rowCount <= 15) {
       return {
-        tableFontSize: 'text-[11.5px]',
-        headerFontSize: 'text-[12px]',
-        rowPadding: 'py-[3px] px-[3.5px]',
-        headerPadding: 'py-[2px] px-[3.5px]'
+        tableFontSize: 'text-[10.5px]',
+        headerFontSize: 'text-[11px]',
+        rowPadding: 'py-[2.5px] px-[3.5px]',
+        headerPadding: 'py-[1.5px] px-[3.5px]'
       };
     }
     if (rowCount <= 25) {
       return {
-        tableFontSize: 'text-[10.5px]',
-        headerFontSize: 'text-[11px]',
-        rowPadding: 'py-[2px] px-[3px]',
-        headerPadding: 'py-[1.5px] px-[3px]'
+        tableFontSize: 'text-[9.5px]',
+        headerFontSize: 'text-[10px]',
+        rowPadding: 'py-[1.5px] px-[3px]',
+        headerPadding: 'py-[1px] px-[3px]'
       };
     }
     if (rowCount <= 35) {
       return {
-        tableFontSize: 'text-[9.5px]',
-        headerFontSize: 'text-[10px]',
-        rowPadding: 'py-[1px] px-[2.5px]',
-        headerPadding: 'py-[1px] px-[2.5px]'
+        tableFontSize: 'text-[8.5px]',
+        headerFontSize: 'text-[9px]',
+        rowPadding: 'py-[0.8px] px-[2.5px]',
+        headerPadding: 'py-[0.8px] px-[2.5px]'
       };
     }
     if (rowCount <= 45) {
       return {
-        tableFontSize: 'text-[8.5px]',
-        headerFontSize: 'text-[9px]',
-        rowPadding: 'py-[0.4px] px-[2px]',
-        headerPadding: 'py-[0.8px] px-[2px]'
+        tableFontSize: 'text-[7.5px]',
+        headerFontSize: 'text-[8px]',
+        rowPadding: 'py-[0.3px] px-[2px]',
+        headerPadding: 'py-[0.6px] px-[2px]'
       };
     }
     return {
-      tableFontSize: 'text-[7.5px]',
-      headerFontSize: 'text-[8px]',
+      tableFontSize: 'text-[6.5px]',
+      headerFontSize: 'text-[7px]',
       rowPadding: 'py-[0.2px] px-[2px]',
-      headerPadding: 'py-[0.5px] px-[2px]'
+      headerPadding: 'py-[0.4px] px-[2px]'
     };
   }, [rowCount]);
 
@@ -433,7 +433,7 @@ export default function SlideNilaiHPPBerasJadi({
 
       <div className="flex-1 w-[96%] mx-auto flex flex-col justify-center mt-1 mb-1">
         <div className="flex justify-between items-center mb-0.5">
-          <h3 className="text-[14px] font-bold text-black uppercase">
+          <h3 className="text-[13px] font-bold text-black uppercase">
             BERAS JADI
           </h3>
         </div>

@@ -9,11 +9,13 @@ export default function SlideProgressOperasional({
   finalReportHargaPembelian,
   finalReportRealisasiPenjualan,
   stokHariIni,
+  latestDayStr,
 }: {
   finalReportRealisasiPengadaan?: any;
   finalReportHargaPembelian?: any;
   finalReportRealisasiPenjualan?: any;
   stokHariIni?: { gabahTon: number; berasTon: number; jagungTon: number } | null;
+  latestDayStr?: string;
 }) {
   const gabahTotal = stokHariIni ? stokHariIni.gabahTon : 8596;
   const berasTotal = stokHariIni ? stokHariIni.berasTon : 4447;
@@ -29,7 +31,9 @@ export default function SlideProgressOperasional({
   const activeMonthName = 
     finalReportRealisasiPengadaan?.fullMonthNames?.[finalReportRealisasiPengadaan.latestMonth] ||
     finalReportRealisasiPenjualan?.fullMonthNames?.[finalReportRealisasiPenjualan.latestMonth];
-  const dateSubtitle = activeMonthName ? `${activeMonthName} 2026` : '31 Juli 2026';
+  const dateSubtitle = latestDayStr 
+    ? latestDayStr.toUpperCase() 
+    : (activeMonthName ? `${activeMonthName} 2026` : '31 JULI 2026');
 
   const defaultDataPenjualan = [
     { name: 'JAN', val: 77539, PRODUK: 77539, JASA: 0 },
