@@ -24,6 +24,23 @@ export default function SettingsPage() {
     confirmPassword: ""
   });
 
+  const fetchProfile = async (id: number) => {
+    setLoading(true);
+    const res = await getUserProfileAction(id);
+    if (res.success && res.data) {
+      setFormData({
+        name: res.data.name || "",
+        picName: res.data.picName || "",
+        jabatan: res.data.jabatan || "",
+        password: "",
+        confirmPassword: ""
+      });
+    } else {
+      console.error("Failed to fetch profile:", res.error);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     const user = getCurrentUser();
     if (user) {
@@ -43,23 +60,6 @@ export default function SettingsPage() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const fetchProfile = async (id: number) => {
-    setLoading(true);
-    const res = await getUserProfileAction(id);
-    if (res.success && res.data) {
-      setFormData({
-        name: res.data.name || "",
-        picName: res.data.picName || "",
-        jabatan: res.data.jabatan || "",
-        password: "",
-        confirmPassword: ""
-      });
-    } else {
-      console.error("Failed to fetch profile:", res.error);
-    }
-    setLoading(false);
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

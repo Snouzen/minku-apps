@@ -1,0 +1,71 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const ts = require('typescript');
+const path = require('node:path');
+// Compile only for this test process; no emitted files or app dependency changes.
+require.extensions['.ts'] = (module, filename) => {
+  const compiled = ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } });
+  module._compile(compiled.outputText, filename);
+};
+const { classifyMaklon, isMaklonFile, summarizeMaklon, maklonNumber } = require('../src/app/(main)/laporan-harian/components/maklon.ts');
+const row = (values = {}) => ({ Company: 'SPP JEMBER', Sol: 'Jasa Maklon', 'Customer Reference': '', 'Unit Price': 150, 'So Quantity': 100, Total: 99999, 'Value Penjualan': 15000, 'So Date': new Date('2026-10-07T00:00:00Z'), ...values });
+assert.equal(classifyMaklon(row({ kegiatan: 'drying', Sol: 'Mixing' })).activity, 'drying');
+assert.equal(classifyMaklon(row({ kegiatan: 'drying' }), 'Reproses').activity, 'Reproses');
+assert.equal(classifyMaklon(row({ Sol: 'Mixing' })).activity, 'Mixing');
+assert.equal(classifyMaklon(row({ Sol: 'Rebagging dan Reproses' })).activity, 'Perlu ditinjau');
+assert.equal(classifyMaklon(row({ 'Customer Reference': 'Mixing' })).activity, 'Rebagging');
+assert.equal(classifyMaklon(row({ 'Customer Reference': 'Mixing' })).checkReference, true);
+assert.equal(classifyMaklon(row({ 'Unit Price': 158, 'Customer Reference': 'Rebagging dan Reproses' })).activity, 'Perlu ditinjau');
+assert.equal(classifyMaklon(row({ 'Unit Price': 158, 'Customer Reference': 'DRYING' })).activity, 'Drying');
+assert.equal(classifyMaklon(row({ 'Unit Price': 158 })).activity, 'Perlu ditinjau');
+for (const spelling of ['REBAG', 'Rebag', 'rebagging', 'Rebagging']) assert.equal(classifyMaklon(row({ Sol: spelling })).activity, 'Rebagging');
+assert.equal(classifyMaklon(row({ Sol: 'Mixing', 'Customer Reference': 'Rebagging dan Reproses' })).activity, 'Mixing');
+assert.equal(maklonNumber('150,00'), 150);
+assert.equal(maklonNumber('20.996.279,28'), 20996279.28);
+assert.equal(isMaklonFile(['Sol', 'Unit Price', 'So Quantity'], [row()]), true);
+assert.equal(isMaklonFile(['Sol', 'Unit Price', 'So Quantity'], [row({ Sol: 'Penjualan beras', Product: 'Beras' })]), false);
+assert.equal(isMaklonFile(['Sol', 'Unit Price', 'So Quantity'], [row(), row({ Sol: 'Penjualan beras', Product: 'Beras' })]), false);
+const sample = [row({ 'Unit Price': 158 }), row({ kegiatan: 'mixing', 'So Quantity': 200, 'Value Penjualan': 30000 })];
+const before = JSON.stringify(sample);
+const summary = summarizeMaklon(sample, { 0: 'Drying' });
+assert.equal(summary.total.quantities.Drying, 100);
+assert.equal(summary.total.quantities.Mixing, 1400);
+assert.equal(Math.round(summary.total.value * 100), 381567326054);
+assert.equal(summary.total.values.Drying, 15000);
+assert.equal(summary.total.values.Mixing, 405600);
+assert.equal(summarizeMaklon(sample, {}).total.reviewValue, 15000);
+assert.equal(summarizeMaklon([row({ 'Value Penjualan': undefined })], {}).total.value, 3815628260.54);
+assert.equal(summarizeMaklon([row({ 'Value Penjualan': -100 })], {}).total.values.Rebagging, 727228400);
+assert.equal(summary.reviewCount, 0);
+assert.equal(summarizeMaklon(sample, {}).reviewCount, 1);
+assert.equal(JSON.stringify(sample), before);
+const baseline = summarizeMaklon([], {});
+assert.equal(baseline.rows.length, 24);
+assert.equal(Math.round(baseline.total.value * 100), 381562826054);
+assert.deepEqual(baseline.total.values, { 'Olah GKP–Beras HGL': 2336477670, 'Pengeringan Jagung': 97808540.54, Rebagging: 727228500, Reproses: 653737950, Drying: 0, Mixing: 375600 });
+assert.equal(baseline.rows.find(r => r.company === 'CDC DOMPU').values['Pengeringan Jagung'], 18560810.81);
+assert.equal(baseline.rows.find(r => r.company === 'SPP BANYUWANGI').values.Reproses, 437601150);
+assert.deepEqual(baseline.total.quantities, { 'Olah GKP–Beras HGL': 3622446, 'Pengeringan Jagung': 305620, Rebagging: 4758190, Reproses: 2319870, Drying: 0, Mixing: 1200 });
+const overlap = summarizeMaklon([row({ 'So Date': new Date('2026-07-31T00:00:00Z') }), row({ 'So Date': 'not a date' }), row({ 'So Date': new Date('2027-08-01T00:00:00Z') })], {});
+assert.equal(overlap.excludedCount, 3);
+assert.deepEqual(overlap.total, baseline.total);
+assert.equal(summarizeMaklon([row({ Company: 'SPJ Dompu' })], {}).rows.find(r => r.company === 'CDC DOMPU').quantities.Rebagging, 30100);
+assert.deepEqual(summarizeMaklon([], {}).total, baseline.total, 'Repeated computation must not mutate historical values');
+
+// Optional user-provided fixture is read only and is never committed into the repo.
+if (process.argv[2]) {
+  const XLSX = require('xlsx');
+  const workbook = XLSX.readFile(path.resolve(process.argv[2]), { cellDates: true });
+  const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+  assert.equal(rows.length, 88);
+  assert.equal(isMaklonFile(Object.keys(rows[0]), rows), true);
+  for (const item of rows) assert.equal(classifyMaklon(item).activity, item.kegiatan);
+  const blank = rows.map(item => ({ ...item, kegiatan: '' }));
+  const reviewRows = blank.flatMap((item, i) => classifyMaklon(item).activity === 'Perlu ditinjau' ? [i + 2] : []);
+  assert.deepEqual(reviewRows, [63, 64, 83]);
+  for (let i = 0; i < rows.length; i++) if (!reviewRows.includes(i + 2)) assert.equal(classifyMaklon(blank[i]).activity.toLowerCase(), rows[i].kegiatan.toLowerCase());
+  const actual = summarizeMaklon(rows, {});
+  assert.equal(Math.round(actual.total.value * 100), Math.round((baseline.total.value + rows.reduce((sum, item) => sum + item['Value Penjualan'], 0)) * 100));
+  console.log('Fixture: 88 preserved; 85 inferred matches; 3 review rows; raw nominal reconciled.');
+}
+console.log('Maklon classification, routing, isolation and aggregation tests passed.');

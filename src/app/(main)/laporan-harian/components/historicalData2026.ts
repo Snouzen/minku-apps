@@ -1,3 +1,56 @@
+// Maklon quantities supplied by the user, cumulative through 31 July 2026.
+// Column order: Olah GKP-Beras HGL, Reproses, Mixing, Rebagging, Pengeringan Jagung.
+// Historical invoice values are maintained separately below.
+export const HISTORICAL_MAKLON_JULI_2026: Record<string, readonly [number, number, number, number, number]> = {
+  'SPB JAKARTA': [0, 640000, 0, 0, 0],
+  'SPB INDRAMAYU': [0, 0, 0, 0, 0],
+  'SPB SUKOHARJO': [0, 0, 0, 330000, 0],
+  'SPB SIDOARJO': [0, 133020, 0, 300000, 0],
+  'SPB MAKASSAR': [0, 12000, 0, 0, 0],
+  'SPB SIDRAP': [0, 0, 0, 0, 0],
+  'SPB LOMBOK TIMUR': [0, 0, 0, 453150, 0],
+  'SPP LAMPUNG': [0, 0, 0, 0, 0],
+  'SPP KARAWANG': [491987, 0, 0, 0, 0],
+  'SPP SUBANG': [503641, 200000, 0, 0, 0],
+  'SPP SRAGEN': [0, 0, 0, 0, 0],
+  'SPP KENDAL': [0, 0, 0, 0, 0],
+  'SPP BOJONEGORO': [269890, 0, 0, 400000, 0],
+  'SPP MAGETAN': [22474, 0, 0, 900000, 0],
+  'SPP JEMBER': [1439900, 0, 0, 0, 0],
+  'SPP BANYUWANGI': [0, 1334850, 0, 1000000, 0],
+  'SPP SUMBAWA': [861082, 0, 0, 0, 0],
+  'UP MOJOLABAN': [0, 0, 0, 380000, 0],
+  'UP BANTUL': [0, 0, 0, 365040, 0],
+  'UP CANDIREJO': [33472, 0, 1200, 600000, 0],
+  'UP ANABANUA': [0, 0, 0, 0, 0],
+  'UP LANCIRANG': [0, 0, 0, 0, 0],
+  'CDC BOLMONG': [0, 0, 0, 0, 250680],
+  'CDC DOMPU': [0, 0, 0, 30000, 54940],
+};
+
+// Maklon invoice nominal excluding VAT, January–July 2026, supplied by user.
+// Same activity order as the quantity baseline; absent cells/locations are zero.
+// Source UP Bolaang Mongondow / UP Dompu correspond to CDC BOLMONG / CDC DOMPU.
+export const HISTORICAL_MAKLON_NILAI_JULI_2026: Record<string, readonly [number, number, number, number, number]> = {
+  'CDC BOLMONG': [0, 0, 0, 0, 79247729.73],
+  'CDC DOMPU': [0, 0, 0, 4500000, 18560810.81],
+  'SPP BANYUWANGI': [0, 437601150, 0, 150000000, 0],
+  'SPP BOJONEGORO': [174079050, 0, 0, 60000000, 0],
+  'SPP JEMBER': [928735500, 0, 0, 0, 0],
+  'SPP KARAWANG': [317331615, 0, 0, 0, 0],
+  'SPP MAGETAN': [14495730, 0, 0, 148500000, 0],
+  'SPP SUBANG': [324848445, 31600000, 0, 0, 0],
+  'SPP SUMBAWA': [555397890, 0, 0, 0, 0],
+  'SPB JAKARTA': [0, 149480000, 0, 0, 0],
+  'SPB LOMBOK TIMUR': [0, 0, 0, 67972500, 0],
+  'SPB MAKASSAR': [0, 3132000, 0, 0, 0],
+  'SPB SIDOARJO': [0, 31924800, 0, 45000000, 0],
+  'SPB SUKOHARJO': [0, 0, 0, 49500000, 0],
+  'UP BANTUL': [0, 0, 0, 54756000, 0],
+  'UP CANDIREJO': [21589440, 0, 375600, 90000000, 0],
+  'UP MOJOLABAN': [0, 0, 0, 57000000, 0],
+};
+
 export const HISTORICAL_2026_DATA: Record<string, Record<string, Record<string, number>>> = {
   "SPB JAKARTA": {
     "BERAS": { "M_0": 125000, "M_1": 182000, "M_2": 67000, "M_3": 360000, "M_4": 402000, "M_5": 222000, "M_6": 238000 }

@@ -12,6 +12,8 @@ import SlideMonitoringUtilitas from "./SlideMonitoringUtilitas";
 import SlideMonitoringUtilitasRMUSPP from "./SlideMonitoringUtilitasRMUSPP";
 import SlideMonitoringUtilitasRMUSPB from "./SlideMonitoringUtilitasRMUSPB";
 import SlideRealisasiPSOMakloon from "./SlideRealisasiPSOMakloon";
+import MaklonPanel, { MaklonSlot } from './MaklonPanel';
+import { isMaklonFile, MaklonRow, summarizeMaklon } from './maklon';
 import SlideKuantumPenjualanUB from "./SlideKuantumPenjualanUB";
 import SlideRealisasiPengadaanGabahBeras from "./SlideRealisasiPengadaanGabahBeras";
 import SlidePenyerapanGKP from "./SlidePenyerapanGKP";
@@ -36,7 +38,7 @@ const RAW_SLIDE_METADATA = [
   { title: "Monitoring Utilitas RMU & CDC", category: "Utilitas" },
   { title: "Monitoring Utilitas RMU SPP", category: "Utilitas" },
   { title: "Monitoring Utilitas RMU SPB", category: "Utilitas" },
-  { title: "Realisasi PSO & Makloon", category: "Utilitas" },
+  { title: "Realisasi Maklon UB Industri", category: "Maklon" },
   { title: "Kuantum Penjualan UB Industri", category: "Penjualan" },
   { title: "Realisasi Pengadaan Gabah & Beras (Nasional)", category: "Pengadaan" },
   { title: "Realisasi Rekapitulasi Pengadaan Gabah dan Beras", category: "Pengadaan" },
@@ -282,6 +284,17 @@ export default function LaporanHarianClient() {
 
   // --- Slot 3: Data Penjualan (SO / Sales) ---
   const [salesData, setSalesData] = useState<any[]>([]);
+  const [maklonData, setMaklonData] = useState<MaklonRow[]>([]);
+  const [maklonColumns, setMaklonColumns] = useState<string[]>([]);
+  const [maklonFileName, setMaklonFileName] = useState<string | null>(null);
+  const [maklonOverrides, setMaklonOverrides] = useState<Record<number, string>>({});
+  const maklonSummary = useMemo(() => summarizeMaklon(maklonData, maklonOverrides), [maklonData, maklonOverrides]);
+  const clearMaklon = () => { setMaklonData([]); setMaklonColumns([]); setMaklonFileName(null); setMaklonOverrides({}); };
+  const editMaklonActivity = (index: number, value: string | undefined) => setMaklonOverrides(previous => {
+    const next = { ...previous };
+    if (value === undefined) delete next[index]; else next[index] = value;
+    return next;
+  });
   const [salesColumns, setSalesColumns] = useState<string[]>([]);
   const [salesFileName, setSalesFileName] = useState<string | null>(null);
   const fileInputPenjualanRef = useRef<HTMLInputElement>(null);
@@ -396,7 +409,7 @@ export default function LaporanHarianClient() {
     return "pengadaan";
   };
 
-  const processSingleFile = (file: File, targetSlot?: "pengadaan" | "persediaan" | "penjualan"): Promise<{ slot: "pengadaan" | "persediaan" | "penjualan"; fileName: string; rowCount: number } | null> => {
+  const processSingleFile = (file: File, targetSlot?: "pengadaan" | "persediaan" | "penjualan" | "maklon"): Promise<{ slot: "pengadaan" | "persediaan" | "penjualan" | "maklon"; fileName: string; rowCount: number } | null> => {
     return new Promise((resolve) => {
       if (!file) {
         resolve(null);
@@ -424,8 +437,20 @@ export default function LaporanHarianClient() {
             return;
           }
 
-          const slot = targetSlot || classifyExcel(headers);
-          if (slot === "persediaan") {
+          const slot = targetSlot || (isMaklonFile(headers, rows) ? 'maklon' : classifyExcel(headers));
+          if (slot === 'maklon') {
+            const required = ['Company', 'So Quantity', 'Total', 'Unit Price', 'Sol', 'Customer Reference', 'So Date'];
+            const missing = required.filter(name => !headers.some(h => h.trim().toLowerCase() === name.toLowerCase()));
+            if (missing.length) {
+              Swal.fire('Kolom Maklon belum lengkap', `Kolom yang diperlukan: ${missing.join(', ')}`, 'error');
+              resolve(null);
+              return;
+            }
+            setMaklonData(rows);
+            setMaklonColumns(headers);
+            setMaklonFileName(file.name);
+            setMaklonOverrides({});
+          } else if (slot === "persediaan") {
             setInventoryFileName(file.name);
             setInventoryColumns(headers);
             setInventoryData(rows);
@@ -461,7 +486,7 @@ export default function LaporanHarianClient() {
 
     if (results.length > 0) {
       const summaryMsg = results.map(r => {
-        const slotName = r.slot === "pengadaan" ? "Data Pengadaan (PO)" : r.slot === "persediaan" ? "Data Persediaan (Stok)" : "Data Penjualan (SO)";
+        const slotName = r.slot === 'maklon' ? 'Data Maklon' : r.slot === "pengadaan" ? "Data Pengadaan (PO)" : r.slot === "persediaan" ? "Data Persediaan (Stok)" : "Data Penjualan (SO)";
         return `<b>${slotName}</b>: ${r.fileName} (${r.rowCount.toLocaleString('id-ID')} baris)`;
       }).join("<br/>");
 
@@ -500,7 +525,7 @@ export default function LaporanHarianClient() {
   const clearAllFiles = () => {
     Swal.fire({
       title: "Reset Semua Data?",
-      text: "Semua file yang telah diupload (Pengadaan, Persediaan, Penjualan) akan dibersihkan dari memori.",
+      text: "Semua file yang telah diupload (Pengadaan, Persediaan, Penjualan, Maklon) beserta edit kegiatan akan dibersihkan dari memori.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -512,6 +537,7 @@ export default function LaporanHarianClient() {
         clearPengadaan();
         clearPersediaan();
         clearPenjualan();
+        clearMaklon();
         setActiveTab("raw");
         Swal.fire("Data Direset", "Semua dataset telah dibersihkan.", "info");
       }
@@ -1436,8 +1462,8 @@ export default function LaporanHarianClient() {
     let gabahKg = 0;
     let berasKg = 0;
     let jagungKg = 0;
-    let gabahExplicitKg = 0;
-    let berasExplicitKg = 0;
+    const gabahExplicitKg = 0;
+    const berasExplicitKg = 0;
 
     inventoryData.forEach(row => {
       const rawCompany = row[companyCol]?.toString() || '';
@@ -2523,9 +2549,9 @@ export default function LaporanHarianClient() {
       }
     });
 
-    let grandTargetGabah = 77290;
-    let grandTargetBeras = 37130;
-    let grandTargetJagung = 2700;
+    const grandTargetGabah = 77290;
+    const grandTargetBeras = 37130;
+    const grandTargetJagung = 2700;
 
     let grandPrevGabahTon = 0;
     let grandPrevBerasTon = 0;
@@ -3315,7 +3341,8 @@ const finalReportHargaPembelian = useMemo(() => {
     };
   }, [data, columns]);
 
-  const hasAnyData = !!(fileName || inventoryFileName || salesFileName);
+  const hasAnyData = !!(fileName || inventoryFileName || salesFileName || maklonFileName);
+  const maklonSlot = <MaklonSlot expanded={!hasAnyData} fileName={maklonFileName} count={maklonData.length} onUpload={file => { void processSingleFile(file, 'maklon'); }} onClear={clearMaklon} />;
 
   return (
     <div className="space-y-6">
@@ -3326,7 +3353,8 @@ const finalReportHargaPembelian = useMemo(() => {
       <input type="file" ref={multiFileInputRef} className="hidden" accept=".xlsx, .xls" multiple onChange={(e) => e.target.files && handleMultipleFilesUpload(e.target.files)} />
 
       {!hasAnyData ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+          {maklonSlot}
           {/* Slot 1: Pengadaan */}
           <div 
             className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col justify-between hover:shadow-md transition-all cursor-pointer group hover:border-[#1D63A8]"
@@ -3421,8 +3449,8 @@ const finalReportHargaPembelian = useMemo(() => {
                   <Layers size={18} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900">ERP Data Center (3 Hub Varian)</h3>
-                  <p className="text-xs text-gray-500">Kelola 3 varian sumber data Excel yang dimuat di browser.</p>
+                  <h3 className="text-sm font-bold text-gray-900">ERP Data Center (4 Hub Varian)</h3>
+                  <p className="text-xs text-gray-500">Kelola 4 varian sumber data Excel yang dimuat di browser.</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -3443,7 +3471,8 @@ const finalReportHargaPembelian = useMemo(() => {
             </div>
 
             {/* 3-Slot Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              {maklonSlot}
               {/* Slot 1: Pengadaan */}
               <div 
                 className={`p-3.5 rounded-xl border transition-all ${
@@ -3645,6 +3674,7 @@ const finalReportHargaPembelian = useMemo(() => {
               { id: "report4", label: "4. Data Penyerapan" },
               { id: "report5", label: "5. Data Persediaan" },
               { id: "report6", label: "6. Realisasi Penjualan" },
+              { id: "maklon", label: "7. Data Maklon" },
               { id: "preview-ppt", label: "Preview PPT" },
             ].map(tab => (
               <button
@@ -3661,6 +3691,7 @@ const finalReportHargaPembelian = useMemo(() => {
 
           {/* Tab Content */}
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+            {activeTab === 'maklon' && <MaklonPanel key={maklonFileName} rows={maklonData} columns={maklonColumns} overrides={maklonOverrides} onEdit={editMaklonActivity} summary={maklonSummary} />}
             {activeTab === "raw" && (
               <>
                 <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gray-50/50">
@@ -6885,7 +6916,7 @@ const finalReportHargaPembelian = useMemo(() => {
                 { title: "Monitoring Utilitas RMU & CDC", component: <SlideMonitoringUtilitas /> },
                 { title: "Monitoring Utilitas RMU SPP", component: <SlideMonitoringUtilitasRMUSPP /> },
                 { title: "Monitoring Utilitas RMU SPB", component: <SlideMonitoringUtilitasRMUSPB /> },
-                { title: "Realisasi PSO & Makloon", component: <SlideRealisasiPSOMakloon /> },
+                { title: "Realisasi Maklon UB Industri", component: <SlideRealisasiPSOMakloon maklonSummary={maklonSummary} /> },
                 { 
                   title: "Kuantum Penjualan UB Industri", 
                   component: (

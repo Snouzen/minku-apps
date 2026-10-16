@@ -33,6 +33,23 @@ const BASELINE_DATA: TableRowItem[] = [
   { loc: 'UP MOJOLABAN', sku: '[B0010025A] BERAS MEDIUM MEDIUM 20% MAKLON 50 KG UBI KOM DN', qty: '20,000', val: '260,000,000', hpp: '13,000' },
 ];
 
+function CurrencyCell({ val }: { val: string }) {
+  if (val === '-') {
+    return (
+      <div className="flex justify-between w-full">
+        <span>Rp</span>
+        <span>-</span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex justify-between w-full">
+      <span>Rp</span>
+      <span>{val}</span>
+    </div>
+  );
+}
+
 export default function SlideNilaiHPPBerasJadiMaklon({
   pageIndex = 0,
   totalPages = 1,
@@ -372,23 +389,6 @@ export default function SlideNilaiHPPBerasJadiMaklon({
       headerPadding: 'py-[0.5px] px-[2px]'
     };
   }, [rowCount]);
-
-  const CurrencyCell = ({ val }: { val: string }) => {
-    if (val === '-') {
-      return (
-        <div className="flex justify-between w-full">
-          <span>Rp</span>
-          <span>-</span>
-        </div>
-      );
-    }
-    return (
-      <div className="flex justify-between w-full">
-        <span>Rp</span>
-        <span>{val}</span>
-      </div>
-    );
-  };
 
   return (
     <div className="w-[1280px] h-[720px] bg-white border border-gray-300 shadow-xl relative overflow-hidden flex flex-col px-4 py-2 font-sans text-gray-800">

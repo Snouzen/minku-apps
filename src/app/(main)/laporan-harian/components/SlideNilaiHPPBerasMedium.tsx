@@ -59,6 +59,24 @@ const BASELINE_GROUPS: CompanyGroup[] = [
   },
 ];
 
+function CurrencyCell({ val }: { val: number | string | null | undefined }) {
+  if (val === '-' || val === 0 || val === null || val === undefined) {
+    return (
+      <div className="flex justify-between w-full">
+        <span>Rp</span>
+        <span>-</span>
+      </div>
+    );
+  }
+  const displayVal = typeof val === 'number' ? Math.round(val).toLocaleString('id-ID') : val;
+  return (
+    <div className="flex justify-between w-full">
+      <span>Rp</span>
+      <span>{displayVal}</span>
+    </div>
+  );
+}
+
 export default function SlideNilaiHPPBerasMedium({
   inventoryData,
   inventoryColumns,
@@ -368,24 +386,6 @@ export default function SlideNilaiHPPBerasMedium({
       headerPadding: 'py-1 px-2'
     };
   }, [totalRowCount]);
-
-  const CurrencyCell = ({ val }: { val: number | string | null | undefined }) => {
-    if (val === '-' || val === 0 || val === null || val === undefined) {
-      return (
-        <div className="flex justify-between w-full">
-          <span>Rp</span>
-          <span>-</span>
-        </div>
-      );
-    }
-    const displayVal = typeof val === 'number' ? Math.round(val).toLocaleString('id-ID') : val;
-    return (
-      <div className="flex justify-between w-full">
-        <span>Rp</span>
-        <span>{displayVal}</span>
-      </div>
-    );
-  };
 
   return (
     <div className="w-[1280px] h-[720px] bg-white border border-gray-300 shadow-xl relative overflow-hidden flex flex-col justify-between px-8 py-5 font-sans text-gray-800">

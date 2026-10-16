@@ -52,6 +52,23 @@ const BASELINE_DATA: TableRowItem[] = [
   { loc: 'UP MOJOLABAN', sku: '[A0020004A] BERAS PREMIUM PREMIUM 15% POLOS 50 KG UBI KOM DN', qty: '30,400', val: '413,072,513', hpp: '13,588' },
 ];
 
+function CurrencyCell({ val }: { val: string }) {
+  if (val === '-') {
+    return (
+      <div className="flex justify-between w-full">
+        <span>Rp</span>
+        <span>-</span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex justify-between w-full">
+      <span>Rp</span>
+      <span>{val}</span>
+    </div>
+  );
+}
+
 export default function SlideNilaiHPPBerasJadi({
   pageIndex = 0,
   totalPages = 2,
@@ -396,23 +413,6 @@ export default function SlideNilaiHPPBerasJadi({
       headerPadding: 'py-[0.4px] px-[2px]'
     };
   }, [rowCount]);
-
-  const CurrencyCell = ({ val }: { val: string }) => {
-    if (val === '-') {
-      return (
-        <div className="flex justify-between w-full">
-          <span>Rp</span>
-          <span>-</span>
-        </div>
-      );
-    }
-    return (
-      <div className="flex justify-between w-full">
-        <span>Rp</span>
-        <span>{val}</span>
-      </div>
-    );
-  };
 
   return (
     <div className="w-[1280px] h-[720px] bg-white border border-gray-300 shadow-xl relative overflow-hidden flex flex-col px-4 py-2 font-sans text-gray-800">

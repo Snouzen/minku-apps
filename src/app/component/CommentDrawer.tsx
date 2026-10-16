@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { X, Send, MessageSquare, Trash2, Reply } from "lucide-react";
 import { getSubTaskCommentsAction, postSubTaskCommentAction, deleteSubTaskCommentAction } from "../actions/matrixIt";
 import { getCurrentUser, CurrentUser } from "../lib/auth";
@@ -27,26 +27,26 @@ export default function CommentDrawer({ isOpen, onClose, subTaskId, section, sec
     setUser(getCurrentUser());
   }, []);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchComments();
-    }
-  }, [isOpen, subTaskId, section]);
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [comments]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     setLoading(true);
     const res = await getSubTaskCommentsAction(subTaskId, section);
     if (res.success && res.data) {
       setComments(res.data);
     }
     setLoading(false);
-  };
+  }, [subTaskId, section]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchComments();
+    }
+  }, [isOpen, fetchComments]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [comments]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,7 +170,7 @@ export default function CommentDrawer({ isOpen, onClose, subTaskId, section, sec
                 <div className="flex items-center justify-between bg-blue-50 px-3 py-2 rounded-lg border border-blue-100 text-sm">
                   <div className="text-gray-600 truncate flex items-center gap-1.5">
                     <Reply size={14} className="text-blue-500" />
-                    Membalas <b>{replyingTo.user?.name}</b>: "{replyingTo.content}"
+                    Membalas <b>{replyingTo.user?.name}</b>: &quot;{replyingTo.content}&quot;
                   </div>
                   <button type="button" onClick={() => setReplyingTo(null)} className="text-gray-400 hover:text-red-500">
                     <X size={14} />

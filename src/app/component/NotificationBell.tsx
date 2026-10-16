@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import { Bell, Check } from "lucide-react";
 import { getCurrentUser } from "../lib/auth";
 import { getNotificationsAction, getUnreadNotificationCountAction, markNotificationReadAction, markAllNotificationsReadAction } from "../actions/notification";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function NotificationBell() {
@@ -49,7 +48,7 @@ export default function NotificationBell() {
     }
     setOpen(false);
     if (notif.linkUrl) {
-      window.location.href = notif.linkUrl;
+      router.push(notif.linkUrl);
     }
   };
 

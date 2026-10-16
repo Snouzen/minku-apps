@@ -30,6 +30,8 @@ export default function Sidebar({
     if (pathname === "/unit-produksi" || pathname === "/vendor") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpenDropdown("Master Data");
+    } else if (pathname === "/laporan-harian" || pathname === "/bahan-ragab") {
+      setOpenDropdown("Laporan");
     }
   }, [pathname]);
 
@@ -58,10 +60,21 @@ export default function Sidebar({
       active: pathname === "/matrix-it",
     },
     {
-      name: "Laporan Harian",
-      href: "/laporan-harian",
+      name: "Laporan",
       icon: <FileSpreadsheet size={20} />,
-      active: pathname === "/laporan-harian",
+      active: pathname === "/laporan-harian" || pathname === "/bahan-ragab",
+      subMenus: [
+        {
+          name: "Laporan Harian",
+          href: "/laporan-harian",
+          active: pathname === "/laporan-harian",
+        },
+        {
+          name: "Bahan Ragab",
+          href: "/bahan-ragab",
+          active: pathname === "/bahan-ragab",
+        },
+      ],
     },
     {
       name: "Master Data",
