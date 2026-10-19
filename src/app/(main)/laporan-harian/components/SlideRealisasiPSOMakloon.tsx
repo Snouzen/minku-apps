@@ -20,7 +20,6 @@ export default function SlideRealisasiPSOMakloon({ maklonSummary }: { maklonSumm
       {/* Single full-width Final Report table, including its dynamic SO date. */}
       <div className="w-full mt-3">
         <MaklonFinalTable summary={maklonSummary} compact />
-        <p className="mt-2 text-[10px] text-black italic">* Kuantum kumulatif Januari–Juli 2026 + data ERP Agustus–aktual. Kuantum upload mengikuti So Quantity.</p>
       </div>
       <SlideFooterBrandWave />
     </div>

@@ -12,6 +12,10 @@ function name(company: string) {
 // One presentation component for the Final Report tab and PPT Slide 5.
 export default function MaklonFinalTable({ summary, compact = false }: { summary: MaklonSummary; compact?: boolean }) {
   const format = (value: number, decimals = 0) => value === 0 ? '-' : value.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: 2 });
+  // Explicit compact spacing survives standalone export and image capture.
+  const noteStyle: React.CSSProperties | undefined = compact
+    ? { display: 'block', position: 'static', fontSize: 9, lineHeight: '13px', margin: 0, paddingTop: 6 }
+    : undefined;
   const rank = (company: string) => { const index = ORDER.indexOf(company); return index < 0 ? 999 : index; };
   const rows = [...summary.rows].sort((a, b) => rank(a.company) - rank(b.company) || a.company.localeCompare(b.company));
   return <div className="text-black">
@@ -28,8 +32,8 @@ export default function MaklonFinalTable({ summary, compact = false }: { summary
       </tr>)}</tbody>
       <tfoot className={compact ? 'font-bold text-black' : 'bg-blue-100 font-bold text-black'} style={compact ? { backgroundColor: '#00B0E0' } : undefined}><tr><td colSpan={2} className="border-l border-r border-b border-black p-1 text-center">Total</td>{COLUMNS.map(activity => <React.Fragment key={activity}><td className="border-r border-b border-black p-1 text-right whitespace-nowrap">{format(summary.total.quantities[activity])}</td><td className="border-r border-b border-black p-1 text-right whitespace-nowrap">{format(summary.total.values[activity])}</td></React.Fragment>)}</tr></tfoot>
     </table>
-    <p className={compact ? "mt-1 text-[8px] text-black" : "mt-2 text-sm text-black"}>Kuantitas dan nilai kumulatif: baseline Januari–Juli + upload Agustus–aktual (So Quantity dan Value Penjualan). Nilai baseline: nominal invoice belum termasuk PPN.</p>
-    {summary.reviewCount > 0 && <p className={compact ? 'mt-1 text-[8px] text-amber-900' : 'mt-2 text-sm text-amber-900'}>{summary.reviewCount} baris perlu ditinjau ({format(summary.total.reviewQty)} So Quantity; nilai Rp {format(summary.total.reviewValue)}), belum masuk enam kolom kegiatan. Koreksi di Raw Data.</p>}
-    {summary.excludedCount > 0 && <p className={compact ? 'mt-1 text-[8px] text-amber-900' : 'mt-2 text-sm text-amber-900'}>{summary.excludedCount} baris di luar periode / tanggal tidak valid tidak masuk rekap.</p>}
+    <p style={noteStyle} className={compact ? "mt-1 text-[8px] text-black" : "mt-2 text-sm text-black"}>Kuantitas dan nilai kumulatif: baseline Januari–Juli + upload Agustus–aktual (So Quantity dan Value Penjualan). Nilai baseline: nominal invoice belum termasuk PPN.</p>
+    {summary.reviewCount > 0 && <p style={noteStyle} className={compact ? 'mt-1 text-[8px] text-amber-900' : 'mt-2 text-sm text-amber-900'}>{summary.reviewCount} baris perlu ditinjau ({format(summary.total.reviewQty)} So Quantity; nilai Rp {format(summary.total.reviewValue)}), belum masuk enam kolom kegiatan. Koreksi di Raw Data.</p>}
+    {summary.excludedCount > 0 && <p style={noteStyle} className={compact ? 'mt-1 text-[8px] text-amber-900' : 'mt-2 text-sm text-amber-900'}>{summary.excludedCount} baris di luar periode / tanggal tidak valid tidak masuk rekap.</p>}
   </div>;
 }
