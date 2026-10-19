@@ -52,7 +52,22 @@ const Panel = require(base + 'MaklonPanel.tsx').default;
     assert.equal(finalTable.first, 'SPB Jakarta');
     assert.equal(finalTable.last, 'SPJ Dompu');
     assert.deepEqual(finalTable.totals.filter((_, i) => i === 0 || i % 2 === 1), ['Total', '95,126', '751,200', '15,352,970', '4,670,570', '3,622,446', '305,620']);
-    if (process.argv[3]) await page.screenshot({ path: process.argv[3] });
+    if (process.argv[3]) {
+      await page.screenshot({ path: process.argv[3] });
+      await page.addScriptTag({ path: path.resolve('node_modules/html-to-image/dist/html-to-image.js') });
+      const exported = await page.evaluate(() => window.htmlToImage.toJpeg(document.querySelector('div.w-\\[1280px\\]'), { quality: 0.95, pixelRatio: 2, width: 1280, height: 720, backgroundColor: '#ffffff', skipFonts: true }));
+      fs.writeFileSync(process.argv[3] + '.export.jpg', Buffer.from(exported.split(',')[1], 'base64'));
+    }
+    // Both conditional notices must stay separate below the table in exported SVG.
+    await page.setContent(html(renderToStaticMarkup(React.createElement(Slide, { maklonSummary: { ...summary, reviewCount: 3, excludedCount: 2 } }))));
+    const notesLayout = await page.evaluate(() => {
+      const table = document.querySelector('table').getBoundingClientRect();
+      const notes = document.querySelector('[data-maklon-notes]').getBoundingClientRect();
+      const lines = [...document.querySelectorAll('[data-maklon-notes] text')].map(el => el.getBoundingClientRect());
+      return { gap: notes.top - table.bottom, bottom: notes.bottom, separate: lines.every((line, i) => i === 0 || line.top > lines[i - 1].bottom), count: lines.length };
+    });
+    assert.ok(notesLayout.gap >= 9 && notesLayout.bottom < 650 && notesLayout.separate);
+    assert.equal(notesLayout.count, 3);
     await page.setContent(html(renderToStaticMarkup(React.createElement(Panel, { rows, columns, overrides: {}, onEdit() {}, summary }))));
     assert.deepEqual(await page.evaluate(() => [...document.querySelectorAll('thead th')].map(el => el.textContent)), columns, 'Raw headers must exactly follow Excel');
     const editable = await page.evaluate(() => ({ selects: document.querySelectorAll('tbody select').length, inputs: document.querySelectorAll('tbody input, tbody textarea, tbody [contenteditable]').length, labels: [...document.querySelectorAll('tbody select')].every(el => el.getAttribute('aria-label').startsWith('Kegiatan baris ')) }));
